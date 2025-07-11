@@ -1,0 +1,23 @@
+#!/bin/sh
+FLAGS='-I./expressions -I./compiler -I./dataset -I./vm -I./tests -g --std=c++20'
+
+hipcc -c main.cc $FLAGS
+hipcc -c expressions/expression.cc $FLAGS
+hipcc -c expressions/binary.cc $FLAGS
+hipcc -c compiler/bytecode.cc $FLAGS
+hipcc -c compiler/compiler.cc $FLAGS
+hipcc -c dataset/dataset.cc $FLAGS
+hipcc -c vm/vm.hip $FLAGS
+hipcc -c tests/testdata.cc $FLAGS
+
+hipcc main.o \
+      expression.o \
+      binary.o \
+      bytecode.o \
+      compiler.o \
+      dataset.o \
+      vm.o \
+      testdata.o \
+      -o quicksr.exe
+
+rm *.o
