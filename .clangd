@@ -11,4 +11,5 @@ CompileFlags:
     - "-D__HIP_PLATFORM_AMD__"
     - "-nogpulib"
     - "--std=c++20"
+    - "-Wno-format-security"
 
