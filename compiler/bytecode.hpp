@@ -6,8 +6,6 @@
 
 #include <ostream>
 
-constexpr int max_program_size = 1024;
-
 enum Opcode {
     PUSH_IMMEDIATE,
     PUSH_VARIABLE,
@@ -19,7 +17,8 @@ enum Opcode {
     SIN,
     COS,
     EXP,
-    NOP
+    NOP,
+    LOSS
 };
 
 struct Instruction {
@@ -55,11 +54,11 @@ struct Program {
     /// Instructions
     Instruction *bytecode;
 
-    /// Number of instructions
+    /// Total number of instructions
     int length;
-
+    
     /** @brief Creates empty program on GPU memory */
-    Program();
+    Program(int length);
 
     /** @brief Deletes program from GPU memory */
     ~Program();

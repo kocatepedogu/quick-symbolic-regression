@@ -6,9 +6,9 @@
 #include <hip/hip_runtime.h>
 #include "../util.hpp"
 
-Program::Program() : length(0) {
-    HIP_CALL(hipMallocManaged(&bytecode, sizeof *bytecode * max_program_size));
-    for (int i = 0; i < max_program_size; ++i) {
+Program::Program(int length) : length(length) {
+    HIP_CALL(hipMallocManaged(&bytecode, sizeof *bytecode * length));
+    for (int i = 0; i < length; ++i) {
         bytecode[i] = Instruction();
     }
 }
@@ -51,6 +51,9 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
             break;
         case NOP:
             os << "nop";
+            break;
+        case LOSS:
+            os << "loss";
             break;
     }
 

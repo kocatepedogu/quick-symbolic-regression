@@ -7,12 +7,14 @@
 #include "../util.hpp"
 
 constexpr bool vm_debug_messages = true;
+constexpr int vm_debug_tid = 2;
+
 constexpr int max_stack_depth = 1024;
 
 template <typename... T>
 __device__ static inline void vm_debug_print(T ...args) {
     if constexpr (vm_debug_messages) {
-        if (blockDim.x * blockIdx.x + threadIdx.x == 1) {
+        if (blockDim.x * blockIdx.x + threadIdx.x == vm_debug_tid) {
             printf(args...);
             printf("\n");
         }
@@ -98,11 +100,22 @@ void forward_propagate_kernel(const Instruction* bytecode, int bytecode_length,
                 case NOP:
                     vm_debug_print("nop");
                     break;
+
+                /* Loss function evaluation */
+                case LOSS:
+                    vm_debug_print("loss");
+
+                    // Save result
+                    y_predicted_d[tid] = stack_d[0][tid];
+
+                    // Print an additional newline
+                    vm_debug_print("");
+
+                    return;
             }
         }
 
-        // Save result
-        y_predicted_d[tid] = stack_d[0][tid];
+        assert(false && "Compiled program finished without encountering loss function.");
     }
 }
 

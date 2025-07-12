@@ -13,7 +13,7 @@
 #include <cmath>
 
 int main(void) {
-    float **X, *y;
+    /*float **X, *y;
 
     // Generate ground truth data
     generate_test_data(X, y, [](float x) { 
@@ -33,6 +33,34 @@ int main(void) {
     Program p = compile(f);
 
     // Print bytecode instructions
+    std::cout << p << std::endl;
+
+    // Run program
+    forward_propagate(p, dataset);
+
+    // Free data
+    delete_test_data(X, y);*/
+
+    float **X, *y;
+
+    // Generate ground truth data
+    generate_test_data(X, y, [](float x) { 
+        return x*x + x; 
+    });
+
+    // Generate ground truth dataset
+    Dataset dataset(X, y, 10, 1);
+
+    // Input feature
+    Expression x = Var(0);
+
+    // Symbolic expression
+    Expression f = x*x + x;
+
+    // Convert symbolic expression to bytecode program
+    Program p = compile(f);
+
+    // Print program
     std::cout << p << std::endl;
 
     // Run program
