@@ -25,7 +25,7 @@ static void compile(const Expression& e, Program& program) noexcept {
         case SUBTRACTION:
             compile(e.operands[0], program);
             compile(e.operands[1], program);
-            program.bytecode[program.length++] = Instruction(ADD);
+            program.bytecode[program.length++] = Instruction(SUB);
             break;
         case MULTIPLICATION:
             compile(e.operands[0], program);
