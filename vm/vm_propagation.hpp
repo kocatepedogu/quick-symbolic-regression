@@ -29,7 +29,6 @@ template <PropagationType proptype> __device__
 static inline void propagate_immediate(int tid, const float& value, const StackState& s) {
     if constexpr (proptype == FORWARD) {
         const float operand1 = value;
-        vm_debug_print("push %f", operand1);
         s.stack_d[s.stack_pointer++][tid] = operand1;
     }
 }
