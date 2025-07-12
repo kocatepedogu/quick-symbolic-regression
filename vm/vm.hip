@@ -4,27 +4,20 @@
 #include <hip/hip_runtime.h>
 
 #include "vm.hpp"
-#include "../util.hpp"
+#include "vm_functions.hpp"
+#include "vm_gradients.hpp"
+#include "vm_debug.hpp"
+#include "vm_propagation.hpp"
 
-constexpr bool vm_debug_messages = true;
-constexpr int vm_debug_tid = 2;
+#include "../util.hpp"
 
 constexpr int max_stack_depth = 1024;
 
-template <typename... T>
-__device__ static inline void vm_debug_print(T ...args) {
-    if constexpr (vm_debug_messages) {
-        if (blockDim.x * blockIdx.x + threadIdx.x == vm_debug_tid) {
-            printf(args...);
-            printf("\n");
-        }
-    }
-}
-
-__global__
-void forward_propagate_kernel(const Instruction* bytecode, int bytecode_length,
-                              int m, const float *const *X_d, float *y_predicted_d,
-                              float **stack_d, float **stack_intermediate_d) {
+template <PropagationType propType> __global__
+void propagate_kernel(const Instruction* bytecode, int bytecode_length,
+                      int m, const float *const *X_d, float *y_predicted_d,
+                      float **stack_d, float **stack_intermediate_d) 
+{
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     const int stride = gridDim.x * blockDim.x;
 
@@ -32,24 +25,24 @@ void forward_propagate_kernel(const Instruction* bytecode, int bytecode_length,
         int stack_pointer = 0;
         int stack_intermediate_pointer = 0;
 
-        float operand1 = 0;
-        float operand2 = 0; 
+        const StackState s(
+            stack_d,
+            stack_intermediate_d,
+            stack_pointer,
+            stack_intermediate_pointer
+        );
 
         for (int program_counter = 0; program_counter < bytecode_length; ++program_counter) {
             Instruction instruction = bytecode[program_counter];
             switch (instruction.opcode) {
                 /* Operations with immediate operands */
                 case PUSH_IMMEDIATE:
-                    operand1 = instruction.value;
-                    vm_debug_print("push %f", operand1);
-                    stack_d[stack_pointer++][tid] = operand1;
+                    propagate_immediate<propType>(tid, instruction.value, s);
                     break;
 
                 /* Operations with index operands */
                 case PUSH_VARIABLE:
-                    operand1 = X_d[instruction.argindex][tid];
-                    vm_debug_print("push %f", operand1);
-                    stack_d[stack_pointer++][tid] = operand1;
+                    propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
                     break;
                 case PUSH_PARAMETER:
                     break;
@@ -57,69 +50,33 @@ void forward_propagate_kernel(const Instruction* bytecode, int bytecode_length,
                 /* Binary Operations */
                 case ADD:
                     vm_debug_print("add");
-
-                    operand1 = stack_d[--stack_pointer][tid];
-                    operand2 = stack_d[--stack_pointer][tid];
-                    stack_d[stack_pointer++][tid] = operand2 + operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand2;
-
+                    propagate_binary<propType>(tid, forward_add, grad_add, s);
                     break;
                 case SUB:
                     vm_debug_print("sub");
-
-                    operand1 = stack_d[--stack_pointer][tid];
-                    operand2 = stack_d[--stack_pointer][tid];
-                    stack_d[stack_pointer++][tid] = operand2 - operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand2;
-
+                    propagate_binary<propType>(tid, forward_sub, grad_sub, s);
                     break;
                 case MUL:
                     vm_debug_print("mul");
-
-                    operand1 = stack_d[--stack_pointer][tid];
-                    operand2 = stack_d[--stack_pointer][tid];
-                    stack_d[stack_pointer++][tid] = operand2 * operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand2;
-
+                    propagate_binary<propType>(tid, forward_mul, grad_mul, s);
                     break;
                 case DIV:
                     vm_debug_print("div");
-
-                    operand1 = stack_d[--stack_pointer][tid];
-                    operand2 = stack_d[--stack_pointer][tid];
-                    stack_d[stack_pointer++][tid] = operand2 / operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand1;
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand2;
-
+                    propagate_binary<propType>(tid, forward_div, grad_div, s);
                     break;
 
                 /* Unary Operations */
                 case SIN:
                     vm_debug_print("sin");
-
-                    operand1 = stack_d[--stack_pointer][tid];
-                    stack_d[stack_pointer++][tid] = sin(operand1);
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand1;
-
+                    propagate_unary<propType>(tid, forward_sin, grad_sin, s);
                     break;
                 case COS:
                     vm_debug_print("cos");
-
-                    operand1 = stack_d[--stack_pointer][tid];
-                    stack_d[stack_pointer++][tid] = cos(operand1);
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand1;
-
+                    propagate_unary<propType>(tid, forward_cos, grad_cos, s);
                     break;
                 case EXP:
                     vm_debug_print("exp");
-
-                    operand1 = stack_d[--stack_pointer][tid];
-                    stack_d[stack_pointer++][tid] = exp(operand1);
-                    stack_intermediate_d[stack_intermediate_pointer++][tid] = operand1;
-
+                    propagate_unary<propType>(tid, forward_exp, grad_exp, s);
                     break;
 
                 /* No operation */
@@ -198,7 +155,7 @@ void forward_propagate(const Program& program, const Dataset& dataset) {
     }
 
     // Forward propagate
-    hipLaunchKernelGGL(forward_propagate_kernel, gridDim, blockDim, 0, 0,
+    hipLaunchKernelGGL(propagate_kernel<FORWARD>, gridDim, blockDim, 0, 0,
                        program.bytecode, 
                        program.length, 
                        dataset.m, 
