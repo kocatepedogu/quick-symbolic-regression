@@ -4,7 +4,6 @@
 #include "compiler.hpp"
 #include "bytecode.hpp"
 
-#include <iostream>
 
 // Intermediate compiler state
 struct CompilerState {

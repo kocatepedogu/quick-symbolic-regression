@@ -1,36 +1,36 @@
 #include <hip/hip_runtime.h>
 
 __device__
-static inline float forward_add(float a, float b) {
-    return a + b;
+static inline float forward_add(const float *const& x) {
+    return x[0] + x[1];
 }
 
 __device__
-static inline float forward_sub(float a, float b) {
-    return a - b;
+static inline float forward_sub(const float *const& x) {
+    return x[0] - x[1];
 }
 
 __device__
-static inline float forward_mul(float a, float b) {
-    return a * b;
+static inline float forward_mul(const float *const& x) {
+    return x[0] * x[1];
 }
 
 __device__
-static inline float forward_div(float a, float b) {
-    return a / b;
+static inline float forward_div(const float *const& x) {
+    return x[0] / x[1];
 }
 
 __device__
-static inline float forward_sin(float a) {
-    return sin(a);
+static inline float forward_sin(const float *const& x) {
+    return sin(x[0]);
 }
 
 __device__
-static inline float forward_cos(float a) {
-    return cos(a);
+static inline float forward_cos(const float *const& x) {
+    return cos(x[0]);
 }
 
 __device__
-static inline float forward_exp(float a) {
-    return exp(a);
+static inline float forward_exp(const float *const& x) {
+    return exp(x[0]);
 }

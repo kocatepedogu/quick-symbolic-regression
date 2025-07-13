@@ -46,33 +46,33 @@ void vm_control(const int tid,
             /* Binary Operations */
             case ADD:
                 vm_debug_print(tid, "add");
-                propagate_binary<propType>(tid, forward_add, grad_add, s, instruction);
+                propagate<propType, 2>(tid, forward_add, grad_add, s, instruction);
                 break;
             case SUB:
                 vm_debug_print(tid, "sub");
-                propagate_binary<propType>(tid, forward_sub, grad_sub, s, instruction);
+                propagate<propType, 2>(tid, forward_sub, grad_sub, s, instruction);
                 break;
             case MUL:
                 vm_debug_print(tid, "mul");
-                propagate_binary<propType>(tid, forward_mul, grad_mul, s, instruction);
+                propagate<propType, 2>(tid, forward_mul, grad_mul, s, instruction);
                 break;
             case DIV:
                 vm_debug_print(tid, "div");
-                propagate_binary<propType>(tid, forward_div, grad_div, s, instruction);
+                propagate<propType, 2>(tid, forward_div, grad_div, s, instruction);
                 break;
 
             /* Unary Operations */
             case SIN:
                 vm_debug_print(tid, "sin");
-                propagate_unary<propType>(tid, forward_sin, grad_sin, s, instruction);
+                propagate<propType, 1>(tid, forward_sin, grad_sin, s, instruction);
                 break;
             case COS:
                 vm_debug_print(tid, "cos");
-                propagate_unary<propType>(tid, forward_cos, grad_cos, s, instruction);
+                propagate<propType, 1>(tid, forward_cos, grad_cos, s, instruction);
                 break;
             case EXP:
                 vm_debug_print(tid, "exp");
-                propagate_unary<propType>(tid, forward_exp, grad_exp, s, instruction);
+                propagate<propType, 1>(tid, forward_exp, grad_exp, s, instruction);
                 break;
 
             /* No operation */

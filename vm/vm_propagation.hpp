@@ -19,20 +19,24 @@ static inline void propagate_immediate(int tid, const float& value, const StackS
     }
 }
 
-
-template <PropagationType proptype, typename F, typename G> __device__ 
-static inline void propagate_binary(int tid, F operation, G gradient, const StackState& s, const Instruction& inst) {
+template <PropagationType proptype, int opcount, typename F, typename G> __device__ 
+static inline void propagate(int tid, F operation, G gradient, const StackState& s, const Instruction& inst) {
     if constexpr (proptype == FORWARD) {
         // Pop operands from the stack
-        const float operand1 = s.stack_d[--s.stack_pointer][tid];
-        const float operand2 = s.stack_d[--s.stack_pointer][tid];
+        float operands[opcount];
+        #pragma unroll
+        for (int k = opcount - 1; k >= 0; k--) {
+            operands[k] = s.stack_d[--s.stack_pointer][tid];
+        }
 
         // Apply operation and push the result to the stack
-        s.stack_d[s.stack_pointer++][tid] = operation(operand2, operand1);
+        s.stack_d[s.stack_pointer++][tid] = operation(operands);
 
-        // Save consumed operands as intermediate values for backpropagation
-        s.intermediate_d[s.intermediate_pointer++][tid] = operand2;
-        s.intermediate_d[s.intermediate_pointer++][tid] = operand1;
+        // Save consumed operand as intermediate value for backpropagation
+        #pragma unroll
+        for (int k = 0; k < opcount; ++k) {
+            s.intermediate_d[s.intermediate_pointer++][tid] = operands[k];
+        }
     }
 
     if constexpr (proptype == BACK) {
@@ -41,60 +45,32 @@ static inline void propagate_binary(int tid, F operation, G gradient, const Stac
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
         // Pop intermediate calculation results from forward propagation from intermediate_d
-        const float intermediate1 = s.intermediate_d[inst.intermediate_index + 0][tid];
-        const float intermediate2 = s.intermediate_d[inst.intermediate_index + 1][tid];
-        vm_debug_print(tid, "  intermediate1=%f", intermediate1);
-        vm_debug_print(tid, "  intermediate2=%f", intermediate2);
+        float intermediates[opcount];
+        #pragma unroll
+        for (int k = opcount - 1; k >= 0; k--) {
+            const float intermediate = s.intermediate_d[inst.intermediate_index + k][tid];
+            intermediates[k] = intermediate;
+            vm_debug_print(tid, "  intermediates[%d]=%f", k, intermediate);
+        }
 
         // Calculate local gradients
-        float grad1;
-        float grad2;
-        gradient(intermediate1, intermediate2, grad1, grad2);
-        vm_debug_print(tid, "  grad1=%f", grad1);
-        vm_debug_print(tid, "  grad2=%f", grad2);
+        float local_grad[opcount];
+        gradient(intermediates, local_grad);
+        #pragma unroll
+        for (int k = opcount - 1; k >= 0; k--) {
+            vm_debug_print(tid, "  local_grad[%d]=%f", k, local_grad[k]);
+        }
 
         // Calculate outgoing gradients
-        grad1 *= incoming_grad;
-        grad2 *= incoming_grad;
+        #pragma unroll
+        for (int k = opcount - 1; k >= 0; k--) {
+            local_grad[k] *= incoming_grad;
+        }
 
         // Push outgoing gradients to the stack
-        s.stack_d[s.stack_pointer++][tid] = grad2;
-        s.stack_d[s.stack_pointer++][tid] = grad1;
-    }
-}
-
-
-template <PropagationType proptype, typename F, typename G> __device__ 
-static inline void propagate_unary(int tid, F operation, G gradient, const StackState& s, const Instruction& inst) {
-    if constexpr (proptype == FORWARD) {
-        // Pop operand from the stack
-        const float operand1 = s.stack_d[--s.stack_pointer][tid];
-
-        // Apply operation and push the result to the stack
-        s.stack_d[s.stack_pointer++][tid] = operation(operand1);
-
-        // Save consumed operand as intermediate value for backpropagation
-        s.intermediate_d[s.intermediate_pointer++][tid] = operand1;
-    }
-
-    if constexpr (proptype == BACK) {
-        // Pop incoming gradient from the stack
-        const float incoming_grad = s.stack_d[--s.stack_pointer][tid];
-        vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
-
-        // Pop intermediate calculation result from forward propagation from intermediate_d
-        const float intermediate1 = s.intermediate_d[inst.intermediate_index][tid];
-        vm_debug_print(tid, "  intermediate1=%f", intermediate1);
-
-        // Calculate local gradients
-        float grad1;
-        gradient(intermediate1, grad1);
-        vm_debug_print(tid, "  grad1=%f", grad1);
-
-        // Calculate outgoing gradients
-        grad1 *= incoming_grad;
-
-        // Push outgoing gradients to the stack
-        s.stack_d[s.stack_pointer++][tid] = grad1;
+        #pragma unroll
+        for (int k = opcount - 1; k >= 0; k--) {
+            s.stack_d[s.stack_pointer++][tid] = local_grad[k];
+        }
     }
 }

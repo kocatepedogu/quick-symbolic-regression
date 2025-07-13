@@ -1,40 +1,40 @@
 #include <hip/hip_runtime.h>
 
 __device__
-static inline void grad_add(const float& i1, const float& i2, float& o1, float& o2) {
-    o1 = 1;
-    o2 = 1;
+static inline void grad_add(const float *const& i, float *const& o) {
+    o[0] = 1;
+    o[1] = 1;
 }
 
 __device__
-static inline void grad_sub(const float& i1, const float& i2, float& o1, float& o2) {
-    o1 = 1;
-    o2 = -1;
+static inline void grad_sub(const float *const& i, float *const& o) {
+    o[0] = 1;
+    o[1] = -1;
 }
 
 __device__
-static inline void grad_mul(const float& i1, const float& i2, float& o1, float& o2) {
-    o1 = i2;
-    o2 = i1;
+static inline void grad_mul(const float *const& i, float *const& o) {
+    o[0] = i[1];
+    o[1] = i[0];
 }
 
 __device__
-static inline void grad_div(const float& i1, const float& i2, float& o1, float& o2) {
-    o1 = 1/i2;
-    o2 = -i1/(i2*i2);
+static inline void grad_div(const float *const& i, float *const& o) {
+    o[0] = 1/i[1];
+    o[1] = -i[0]/(i[1]*i[1]);
 }
 
 __device__
-static inline void grad_sin(const float& i1, float& o1) {
-    o1 = cos(i1);
+static inline void grad_sin(const float *const& i, float *const& o) {
+    o[0] = cos(i[0]);
 }
 
 __device__
-static inline void grad_cos(const float& i1, float& o1) {
-    o1 = -sin(i1);
+static inline void grad_cos(const float *const& i, float *const& o) {
+    o[0] = -sin(i[0]);
 }
 
 __device__
-static inline void grad_exp(const float& i1, float& o1) {
-    o1 = exp(i1);
+static inline void grad_exp(const float *const& i, float *const& o) {
+    o[0] = exp(i[0]);
 }
