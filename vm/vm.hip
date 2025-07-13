@@ -23,15 +23,20 @@ void reset_gradients(float *const *const weights_grad_d, int nweights, int m) {
 }
 
 __global__
-void sum_gradients(const float *const *const block_sums, float *weights_d, int nweights, int nblocks) {
+void update_weights(const float *const *const weights_grad_reduced_sum_d, 
+                    float *const weights_d, 
+                    const int num_weights, 
+                    const int num_reduction_blocks, 
+                    const float learning_rate) 
+{
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid == 0) {
-        for (int i = 0; i < nweights; ++i) {
-            float totalSum = 0.0f;
-            for (int j = 0; j < nblocks; ++j) {
-                totalSum += block_sums[i][j];
+        for (int i = 0; i < num_weights; ++i) {
+            float weights_grad_total_sum = 0.0f;
+            for (int j = 0; j < num_reduction_blocks; ++j) {
+                weights_grad_total_sum += weights_grad_reduced_sum_d[i][j];
             }
-            weights_d[i] -= 0.0001 * totalSum;
+            weights_d[i] -= learning_rate * weights_grad_total_sum;
         }
     }
 }
@@ -79,13 +84,13 @@ void vm(const Instruction* bytecode,
 VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
     dataset(dataset), nweights(nweights)
 {
-    HIP_CALL(hipGetDevice(&deviceId));
-    HIP_CALL(hipGetDeviceProperties(&props, deviceId));
+    HIP_CALL(hipGetDevice(&device_id));
+    HIP_CALL(hipGetDeviceProperties(&props, device_id));
 
     /* 
      * Decide number of blocks and threads for computation
      * - The total number of threads must be greater than or equal to 
-     *   the number of data points.
+     *   the number of data points (batch size = m).
      * - Each block will have the maximum number of threads supported by
      *   the device (probably 1024).
      * - Excess threads are later masked inside kernel with if (tid < m).
@@ -150,54 +155,44 @@ VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
     }
 
     // Allocate memory for block sums
-    HIP_CALL(hipMallocManaged(&block_sums, nweights * sizeof *block_sums));
+    HIP_CALL(hipMallocManaged(&weights_grad_reduced_sum_d, 
+        nweights * sizeof *weights_grad_reduced_sum_d));
     for (int i = 0; i < nweights; ++i) {
-        HIP_CALL(hipMallocManaged(&block_sums[i], reduction_blocks_per_grid * sizeof **block_sums));
+        HIP_CALL(hipMallocManaged(&weights_grad_reduced_sum_d[i], 
+            reduction_blocks_per_grid * sizeof **weights_grad_reduced_sum_d));
     }
 }
 
-void VirtualMachine::fit(const Program& program) {
-    for (int i = 0; i < 3000; ++i) {
-        // Initialize weight gradients with zero
+void VirtualMachine::fit(const Program& program, float learning_rate) {
+    for (int i = 0; i < 500; ++i) {
+        // Initialize weight gradients to zero
         hipLaunchKernelGGL(
             reset_gradients,gridDim, blockDim, 0, 0,
             weights_grad_d, nweights, dataset.m);
 
-        // Run forward propagation and backpropagation
+        // Run forward propagation and backpropagation to compute
+        // weight gradients for each weight and for each data point
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, 0,
-            program.bytecode, 
-            program.length, 
-            dataset.m, 
-            dataset.X_d, 
-            dataset.y_d,
-            stack_d,
-            intermediate_d,
-            weights_d,
-            weights_grad_d);
+            program.bytecode, program.length, 
+            dataset.m, dataset.X_d, dataset.y_d,
+            stack_d, intermediate_d,
+            weights_d, weights_grad_d);
 
-        // Launch a separate reduction kernel for every weight
+        // For every weight, sum gradient contributions from all data points using reduction
+        // The result is a separate array of block sums weights_grad_reduced_sum_d[i] for every weight i.
         for (int i = 0; i < nweights; ++i) {
             hipLaunchKernelGGL(
-                reduce_sum, 
-                reduction_grid_dim, 
-                reduction_block_dim, 
-                0, 0, 
-                weights_grad_d[i], 
-                block_sums[i], 
-                dataset.m);
+                reduce_sum, reduction_grid_dim, reduction_block_dim, 0, 0, 
+                weights_grad_d[i], weights_grad_reduced_sum_d[i], dataset.m);
         }
 
-        // Compute final sum on host
+        // To find the total gradient for a particular weight i, sequentially sum the elements 
+        // of weights_grad_reduced_sum_d[i]. Then use gradient descent rule to update the weight.
+        // Repeat for every weight i.
         hipLaunchKernelGGL(
-            sum_gradients,
-            dim3(1),
-            dim3(1),
-            0, 0,
-            block_sums,
-            weights_d,
-            nweights,
-            reduction_grid_dim.x);
+            update_weights, dim3(1), dim3(1), 0, 0,
+            weights_grad_reduced_sum_d, weights_d, nweights, reduction_grid_dim.x, learning_rate);
     }
 
     HIP_CALL(hipDeviceSynchronize());
@@ -211,9 +206,9 @@ void VirtualMachine::fit(const Program& program) {
 VirtualMachine::~VirtualMachine() {
     // Deallocate array for block sums
     for (int i = 0; i < nweights; ++i) {
-        HIP_CALL(hipFree(block_sums[i]));
+        HIP_CALL(hipFree(weights_grad_reduced_sum_d[i]));
     }
-    HIP_CALL(hipFree(block_sums));
+    HIP_CALL(hipFree(weights_grad_reduced_sum_d));
 
     // Deallocate array weights_grad_d.
     for (int i = 0; i < nweights; ++i) {

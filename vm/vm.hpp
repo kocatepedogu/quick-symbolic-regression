@@ -11,9 +11,9 @@
 
 class VirtualMachine {
 public:
-    VirtualMachine(const Dataset& dataset, int nweigths);
+    VirtualMachine(const Dataset& dataset, int nweights);
 
-    void fit(const Program& program);
+    void fit(const Program& program, float learning_rate = 1e-4);
 
     ~VirtualMachine();
 
@@ -21,7 +21,7 @@ private:
     const Dataset& dataset;
     const int nweights;
 
-    int deviceId;
+    int device_id;
     hipDeviceProp_t props;
 
     dim3 gridDim;
@@ -31,9 +31,9 @@ private:
 
     float **stack_d;
     float **intermediate_d;
-    float *weights_d;
+    float  *weights_d;
     float **weights_grad_d;
-    float **block_sums;
+    float **weights_grad_reduced_sum_d;
 };
 
 #endif
