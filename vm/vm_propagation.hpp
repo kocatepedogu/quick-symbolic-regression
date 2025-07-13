@@ -6,16 +6,44 @@
 
 
 template <PropagationType proptype> __device__
-static inline void propagate_immediate(int tid, const float& value, const StackState& s) {
+static inline void propagate_immediate(int tid, const float& immediate, const StackState& s) {
     if constexpr (proptype == FORWARD) {
-        const float operand1 = value;
-        s.stack_d[s.stack_pointer++][tid] = operand1;
+        s.stack_d[s.stack_pointer++][tid] = immediate;
     }
 
     if constexpr (proptype == BACK) {
-        // Pop incoming gradient from the stack
+        // Pop gradient from stack, discard the value.
+        --s.stack_pointer;
+    }
+}
+
+template <PropagationType proptype> __device__
+static inline void propagate_variable(int tid, const int& variable_index, const StackState& s, 
+                                      const float *const *const X_d) {
+    if constexpr (proptype == FORWARD) {
+        s.stack_d[s.stack_pointer++][tid] = X_d[variable_index][tid];
+    }
+
+    if constexpr (proptype == BACK) {
+        // Pop gradient from stack, discard the value.
+        --s.stack_pointer;
+    }
+}
+
+template <PropagationType proptype> __device__
+static inline void propagate_parameter(int tid, const int& param_index, const StackState& s,
+                                       float *const weights, float *const *const weights_grad_d) {
+    if constexpr (proptype == FORWARD) {
+        s.stack_d[s.stack_pointer++][tid] = weights[param_index];
+    }
+
+    if constexpr (proptype == BACK) {
+        // Pop gradient from stack
         const float incoming_grad = s.stack_d[--s.stack_pointer][tid];
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
+
+        // Add gradient to the total gradient of the associated trainable parameter
+        weights_grad_d[param_index][tid] += incoming_grad;
     }
 }
 

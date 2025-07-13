@@ -8,10 +8,60 @@
 #include "vm_gradients.hpp"
 #include "vm_debug.hpp"
 #include "vm_propagation.hpp"
+#include "vm_helper.hpp"
 
 #include "../util.hpp"
 
 constexpr int max_stack_depth = 1024;
+
+void gradient_descent(float *const *const weights_grad_d, float *weights_d, int m, int nweights) {
+    /* 
+     * The individual gradients from each data point will be summed using reduction.
+     * There is a separate sum for every trainable weight.
+     */
+
+    // Threads per block for reduce sum
+    int threadsPerBlock = reduction_threads_per_block;
+
+    // Number of blocks for reduce sum
+    // Each block will produce a separate block sum. These block sums are then
+    // sequentially summed again to produce the final sum for each weight.
+    int blocksPerGrid = (m + threadsPerBlock - 1) / threadsPerBlock;
+
+    // Allocate memory for block sums
+    float **block_sums;
+    HIP_CALL(hipMallocManaged(&block_sums, nweights * sizeof *block_sums));
+    for (int i = 0; i < nweights; ++i) {
+        HIP_CALL(hipMallocManaged(&block_sums[i], blocksPerGrid * sizeof **block_sums));
+    }
+    
+    // Launch a separate reduction kernel for every weight
+    for (int i = 0; i < nweights; ++i) {
+        hipLaunchKernelGGL(reduce_sum, 
+                        dim3(blocksPerGrid), 
+                        dim3(threadsPerBlock), 
+                        0, 0, 
+                        weights_grad_d[i], block_sums[i], m);
+    }
+
+    // Wait for all reductions to finish
+    HIP_CALL(hipDeviceSynchronize());
+    
+    // Compute final sum on host
+    for (int i = 0; i < nweights; ++i) {
+        float totalSum = 0.0f;
+        for (int j = 0; j < blocksPerGrid; ++j) {
+            totalSum += block_sums[i][j];
+        }
+        weights_d[i] -= 0.0001 * totalSum;
+    }
+
+    // Free memory for block sums
+    for (int i = 0; i < nweights; ++i) {
+        HIP_CALL(hipFree(block_sums[i]));
+    }
+    HIP_CALL(hipFree(block_sums));
+}
 
 template <PropagationType propType> __device__
 void vm_control(const int tid, 
@@ -21,7 +71,9 @@ void vm_control(const int tid,
                 const float *const *const X_d, 
                 const float *const y_d,
                 const StackState& s, 
-                int& program_counter)
+                int& program_counter,
+                float *const weights_d,
+                float *const *const weights_grad_d)
 {
     bool exit = false;
 
@@ -37,10 +89,13 @@ void vm_control(const int tid,
             /* Operations with index operands */
             case PUSH_VARIABLE:
                 vm_debug_print(tid, "var %d", instruction.argindex);
-                propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
+                propagate_variable<propType>(tid, instruction.argindex, s, 
+                    X_d);
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(tid, "param %d", instruction.argindex);
+                propagate_parameter<propType>(tid, instruction.argindex, s, 
+                    weights_d, weights_grad_d);
                 break;
 
             /* Binary Operations */
@@ -91,7 +146,7 @@ void vm_control(const int tid,
                 const float y_predicted = stack_value;
                 const float y_target = y_d[tid];
 
-                stack_value = y_target - y_predicted;
+                stack_value = y_predicted - y_target;
 
                 // Forward propagation has finished.
 
@@ -117,7 +172,9 @@ void vm(const Instruction* bytecode,
         const float *const y_d, 
         const float *const loss_d,
         float *const *const stack_d, 
-        float *const *const intermediate_d)
+        float *const *const intermediate_d,
+        float *const weights_d,
+        float *const *const weights_grad_d)
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     const int stride = gridDim.x * blockDim.x;
@@ -137,18 +194,18 @@ void vm(const Instruction* bytecode,
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter);
+        vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter);
+        vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
     }
 }
 
-void forward_propagate(const Program& program, const Dataset& dataset) {
+void fit(const Program& program, const Dataset& dataset, int nweights) {
     /* 
      * Decide number of blocks and threads 
      * - The total number of threads must be greater than or equal to 
@@ -200,16 +257,58 @@ void forward_propagate(const Program& program, const Dataset& dataset) {
         HIP_CALL(hipMallocManaged(&intermediate_d[i], sizeof **intermediate_d * dataset.m));
     }
 
-    // Forward propagate
-    hipLaunchKernelGGL(vm, gridDim, blockDim, 0, 0,
-                       program.bytecode, 
-                       program.length, 
-                       dataset.m, 
-                       dataset.X_d, 
-                       dataset.y_d,
-                       loss_d, 
-                       stack_d,
-                       intermediate_d);
+    /* Allocate array weights_d for storing weights */
+    float *weights_d;
+    HIP_CALL(hipMallocManaged(&weights_d, sizeof *weights_d * nweights));
 
-    HIP_CALL(hipDeviceSynchronize());
+    /* Initialize weights with random values between -1.0 and 1.0 */
+    for (int i = 0; i < nweights; ++i) {
+        weights_d[i] = 2.0 * rand() / (float)RAND_MAX - 1.0;
+    }
+
+    /*
+     * Allocate array weights_grad_d.
+     * - For each weight, there is an array of gradients, whose elements are gradients 
+     *   computed from different data points.
+     * - weights_grad_d is an array of arrays with dimensions [nweights][num_threads]
+     */
+    float **weights_grad_d;
+    HIP_CALL(hipMallocManaged(&weights_grad_d, sizeof *weights_grad_d * nweights));
+    for (int i = 0; i < nweights; ++i) {
+        HIP_CALL(hipMallocManaged(&weights_grad_d[i], sizeof **weights_grad_d * dataset.m));
+    }
+
+    std::cout << "Start" << std::endl;
+    
+    for (int i = 0; i < 3000; ++i) {
+        /* Initialize weight gradients with zero */
+        for (int i = 0; i < nweights; ++i) {
+            for (int j = 0; j < dataset.m; ++j) {
+                weights_grad_d[i][j] = 0.0;
+            }
+        }
+
+        // Run forward propagation and backpropagation
+        hipLaunchKernelGGL(vm, gridDim, blockDim, 0, 0,
+                        program.bytecode, 
+                        program.length, 
+                        dataset.m, 
+                        dataset.X_d, 
+                        dataset.y_d,
+                        loss_d, 
+                        stack_d,
+                        intermediate_d,
+                        weights_d,
+                        weights_grad_d);
+
+        HIP_CALL(hipDeviceSynchronize());
+
+        // Apply gradient descent weight updates
+        gradient_descent(weights_grad_d, weights_d, dataset.m, nweights);
+    }
+
+    // Print calculated weights
+    for (int i = 0; i < nweights; ++i) {
+        std::cout << weights_d[i] << std::endl;
+    }
 }

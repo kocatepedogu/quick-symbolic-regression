@@ -8,6 +8,7 @@ hipcc -c compiler/bytecode.cc $FLAGS
 hipcc -c compiler/compiler.cc $FLAGS
 hipcc -c dataset/dataset.cc $FLAGS
 hipcc -c vm/vm.hip $FLAGS
+hipcc -c vm/vm_helper.hip $FLAGS
 hipcc -c tests/testdata.cc $FLAGS
 
 hipcc main.o \
@@ -17,6 +18,7 @@ hipcc main.o \
       compiler.o \
       dataset.o \
       vm.o \
+      vm_helper.o \
       testdata.o \
       -o quicksr.exe
 

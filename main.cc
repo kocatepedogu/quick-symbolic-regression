@@ -13,39 +13,11 @@
 #include <cmath>
 
 int main(void) {
-    /*float **X, *y;
-
-    // Generate ground truth data
-    generate_test_data(X, y, [](float x) { 
-        return 2.5382 * cos(x)*x + x*x - 0.5; 
-    });
-
-    // Generate ground truth dataset
-    Dataset dataset(X, y, 100, 1);
-
-    // Input feature
-    Expression x = Var(0);
-
-    // Symbolic expression
-    Expression f = 2.5382 * Cos(x)*x + x*x - 0.5;
-
-    // Convert symbolic expression to bytecode program
-    Program p = compile(f);
-
-    // Print bytecode instructions
-    std::cout << p << std::endl;
-
-    // Run program
-    forward_propagate(p, dataset);
-
-    // Free data
-    delete_test_data(X, y);*/
-
     float **X, *y;
 
     // Generate ground truth data
     generate_test_data(X, y, [](float x) { 
-        return x*x - 3*x + 1; 
+        return 2.5382 * cos(x)*x + x*x - 0.5; 
     });
 
     // Generate ground truth dataset
@@ -54,17 +26,21 @@ int main(void) {
     // Input feature
     Expression x = Var(0);
 
+    // Trainable parameters
+    Expression w0 = Parameter(0);
+    Expression w1 = Parameter(1);
+
     // Symbolic expression
-    Expression f = x*x - 3*x;
+    Expression f = w0 * Cos(x)*x + x*x - w1;
 
     // Convert symbolic expression to bytecode program
     Program p = compile(f);
 
-    // Print program
+    // Print bytecode instructions
     std::cout << p << std::endl;
 
     // Run program
-    forward_propagate(p, dataset);
+    fit(p, dataset, 2);
 
     // Free data
     delete_test_data(X, y);

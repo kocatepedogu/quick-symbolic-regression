@@ -5,7 +5,7 @@
 #include "vm_types.hpp"
 
 /// Whether to print debug messages or not
-constexpr bool vm_debug_messages = true;
+constexpr bool vm_debug_messages = false;
 
 /// Which thread is going to print debug messages
 constexpr int vm_debug_tid = 2;

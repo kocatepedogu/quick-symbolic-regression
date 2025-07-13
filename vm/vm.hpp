@@ -7,6 +7,6 @@
 #include "../compiler/bytecode.hpp"
 #include "../dataset/dataset.hpp"
 
-void forward_propagate(const Program& program, const Dataset& dataset);
+void fit(const Program& program, const Dataset& dataset, int nweights);
 
 #endif
