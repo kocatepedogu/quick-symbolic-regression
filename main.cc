@@ -21,7 +21,7 @@ int main(void) {
     });
 
     // Generate ground truth dataset
-    Dataset dataset(X, y, 10, 1);
+    Dataset dataset(X, y, 1000, 1);
 
     // Input feature
     Expression x = Var(0);
@@ -39,8 +39,11 @@ int main(void) {
     // Print bytecode instructions
     std::cout << p << std::endl;
 
+    // Create virtual machine
+    VirtualMachine vm(dataset, 2);
+
     // Run program
-    fit(p, dataset, 2);
+    vm.fit(p);
 
     // Free data
     delete_test_data(X, y);

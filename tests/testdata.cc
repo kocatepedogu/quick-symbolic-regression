@@ -4,7 +4,7 @@
 #include "testdata.hpp"
 
 // Number of data points
-constexpr int test_data_length = 10;
+constexpr int test_data_length = 1000;
 
 void generate_test_data(float **&X, float *&y, std::function<float(float&)> ground_truth) {
     // Allocate two dimensional feature matrix

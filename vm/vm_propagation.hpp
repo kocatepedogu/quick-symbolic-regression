@@ -1,3 +1,6 @@
+#ifndef VM_PROPAGATION_HPP
+#define VM_PROPAGATION_HPP
+
 #include <hip/hip_runtime.h>
 #include "vm_debug.hpp"
 #include "vm_types.hpp"
@@ -102,3 +105,5 @@ static inline void propagate(int tid, F operation, G gradient, const StackState&
         }
     }
 }
+
+#endif

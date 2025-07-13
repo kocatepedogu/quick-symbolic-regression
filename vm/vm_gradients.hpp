@@ -1,3 +1,6 @@
+#ifndef VM_GRADIENTS_HPP
+#define VM_GRADIENTS_HPP
+
 #include <hip/hip_runtime.h>
 
 __device__
@@ -38,3 +41,5 @@ __device__
 static inline void grad_exp(const float *const& i, float *const& o) {
     o[0] = exp(i[0]);
 }
+
+#endif

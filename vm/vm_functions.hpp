@@ -1,3 +1,6 @@
+#ifndef VM_FUNCTIONS_HPP
+#define VM_FUNCTIONS_HPP
+
 #include <hip/hip_runtime.h>
 
 __device__
@@ -34,3 +37,5 @@ __device__
 static inline float forward_exp(const float *const& x) {
     return exp(x[0]);
 }
+
+#endif
