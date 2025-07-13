@@ -4,6 +4,8 @@
 #include "bytecode.hpp"
 
 #include <hip/hip_runtime.h>
+#include <iomanip>
+
 #include "../util.hpp"
 
 Program::Program(int length) : length(length) {
@@ -18,15 +20,19 @@ Program::~Program() {
 }
 
 std::ostream& operator << (std::ostream& os, const Instruction& instruction) noexcept {
+    if (instruction.intermediate_index >= 0) {
+        os << "grad_";
+    }
+
     switch (instruction.opcode) {
         case PUSH_IMMEDIATE:
-            os << "push " << instruction.value;
+            os << "imm " << instruction.value;
             break;
         case PUSH_VARIABLE:
-            os << "push variable " << instruction.argindex;
+            os << "var " << instruction.argindex;
             break;
         case PUSH_PARAMETER:
-            os << "push parameter " << instruction.argindex;
+            os << "param " << instruction.argindex;
             break;
         case ADD:
             os << "add";
@@ -57,11 +63,19 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
             break;
     }
 
+    if (instruction.intermediate_index >= 0) {
+        os << " [" << instruction.intermediate_index << "]";
+    }
+
     return os;
 }
 
 std::ostream& operator << (std::ostream& os, const Program& program) noexcept {
+    int max_line_number_digits = ceil(log10(program.length));
+
+    os << "Program instructions: " << std::endl;
     for (int i = 0; i < program.length; ++i) {
+        os << std::setw(max_line_number_digits) << std::right << std::setfill(' ') << i << " ";
         os << program.bytecode[i] << std::endl;
     }
 

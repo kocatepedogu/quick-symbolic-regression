@@ -4,6 +4,8 @@
 #include "compiler.hpp"
 #include "bytecode.hpp"
 
+#include <iostream>
+
 // Intermediate compiler state
 struct CompilerState {
     /// At which location forward propagation instructions begin
@@ -17,6 +19,10 @@ struct CompilerState {
 
     /// Number of backpropagation instructions
     int backward_length;
+
+    /// The expected intermediate stack pointer value just after the 
+    /// currently processed forward propagation instruction is executed.
+    int expected_sp;
 };
 
 
@@ -28,7 +34,8 @@ static void compile(const Expression& e, Program& p, CompilerState& s) noexcept;
 template <int opcount, typename ...T>
 static void compile(const Expression& e, Program&p, CompilerState& s, T... args) {
     // In backpropagation, operation comes first, operands come afterwards
-    p.bytecode[s.backward_offset + s.backward_length++] = Instruction(args...);
+    auto& backprop_inst = p.bytecode[s.backward_offset + s.backward_length++];
+    backprop_inst = Instruction(args...);
 
     // Operands
     #pragma unroll
@@ -37,7 +44,15 @@ static void compile(const Expression& e, Program&p, CompilerState& s, T... args)
     }
     
     // In forward propagation, operands come first, followed by operation
-    p.bytecode[s.forward_offset + s.forward_length++] = Instruction(args...);
+    auto& forwprop_inst = p.bytecode[s.forward_offset + s.forward_length++];
+    forwprop_inst = Instruction(args...);
+
+    // Calculate at which point the stack intermediate pointer will be before and after this 
+    // forward propagation instruction is executed. Save the expected value before the execution
+    // into the memindex field of associated backpropagation instruction.
+
+    backprop_inst.intermediate_index = s.expected_sp;
+    s.expected_sp += opcount;
 }
 
 
@@ -89,6 +104,7 @@ static void compile(const Expression& e, Program& p) noexcept {
     s.backward_offset = e.num_of_nodes + 1;
     s.forward_length = 0;
     s.backward_length = 0;
+    s.expected_sp = 0;
 
     // Compile both forward propagation and backpropagation
 

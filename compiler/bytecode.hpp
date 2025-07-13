@@ -32,21 +32,25 @@ struct Instruction {
         int argindex;
     };
 
+    // For backpropagation, at which intermediate array location the inputs to
+    // this operation are stored. In forward propagation, this is set to negative one.
+    int intermediate_index;
+
     /** @brief No operation */
     constexpr Instruction() :
-        opcode(NOP) {}
+        opcode(NOP), intermediate_index(-1) {}
 
     /** @brief Instructions with immediate operand */
     constexpr Instruction(Opcode opcode, float value) :
-        opcode(opcode), value(value) {}
+        opcode(opcode), value(value), intermediate_index(-1) {}
 
     /** @brief Instructions with index operand */
     constexpr Instruction(Opcode opcode, int argindex) :
-        opcode(opcode), argindex(argindex) {}
+        opcode(opcode), argindex(argindex), intermediate_index(-1) {}
 
     /** @brief Instructions whose operands are entirely stored on the stack */
     constexpr Instruction(Opcode opcode) :
-        opcode(opcode) {}
+        opcode(opcode), intermediate_index(-1) {}
 };
 
 

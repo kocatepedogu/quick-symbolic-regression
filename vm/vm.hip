@@ -14,116 +14,137 @@
 constexpr int max_stack_depth = 1024;
 
 template <PropagationType propType> __device__
-void vm_control(const int tid, const Instruction* bytecode, int bytecode_length,
-                int m, const float *const *X_d, const float *y_d, float *loss_d,
-                const StackState& s, int& program_counter) 
+void vm_control(const int tid, 
+                const Instruction* bytecode, 
+                const int bytecode_length,
+                const int m, 
+                const float *const *const X_d, 
+                const float *const y_d,
+                const StackState& s, 
+                int& program_counter)
 {
-    for (; program_counter < bytecode_length; ++program_counter) {
+    bool exit = false;
+
+    for (; !exit && program_counter < bytecode_length; ++program_counter) {
         Instruction instruction = bytecode[program_counter];
         switch (instruction.opcode) {
             /* Operations with immediate operands */
             case PUSH_IMMEDIATE:
-                vm_debug_print("push immediate %f", instruction.value);
+                vm_debug_print(tid, "imm %f", instruction.value);
                 propagate_immediate<propType>(tid, instruction.value, s);
                 break;
 
             /* Operations with index operands */
             case PUSH_VARIABLE:
-                vm_debug_print("push variable %d", instruction.argindex);
+                vm_debug_print(tid, "var %d", instruction.argindex);
                 propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
                 break;
             case PUSH_PARAMETER:
-                vm_debug_print("push parameter %d", instruction.argindex);
+                vm_debug_print(tid, "param %d", instruction.argindex);
                 break;
 
             /* Binary Operations */
             case ADD:
-                vm_debug_print("add");
-                propagate_binary<propType>(tid, forward_add, grad_add, s);
+                vm_debug_print(tid, "add");
+                propagate_binary<propType>(tid, forward_add, grad_add, s, instruction);
                 break;
             case SUB:
-                vm_debug_print("sub");
-                propagate_binary<propType>(tid, forward_sub, grad_sub, s);
+                vm_debug_print(tid, "sub");
+                propagate_binary<propType>(tid, forward_sub, grad_sub, s, instruction);
                 break;
             case MUL:
-                vm_debug_print("mul");
-                propagate_binary<propType>(tid, forward_mul, grad_mul, s);
+                vm_debug_print(tid, "mul");
+                propagate_binary<propType>(tid, forward_mul, grad_mul, s, instruction);
                 break;
             case DIV:
-                vm_debug_print("div");
-                propagate_binary<propType>(tid, forward_div, grad_div, s);
+                vm_debug_print(tid, "div");
+                propagate_binary<propType>(tid, forward_div, grad_div, s, instruction);
                 break;
 
             /* Unary Operations */
             case SIN:
-                vm_debug_print("sin");
-                propagate_unary<propType>(tid, forward_sin, grad_sin, s);
+                vm_debug_print(tid, "sin");
+                propagate_unary<propType>(tid, forward_sin, grad_sin, s, instruction);
                 break;
             case COS:
-                vm_debug_print("cos");
-                propagate_unary<propType>(tid, forward_cos, grad_cos, s);
+                vm_debug_print(tid, "cos");
+                propagate_unary<propType>(tid, forward_cos, grad_cos, s, instruction);
                 break;
             case EXP:
-                vm_debug_print("exp");
-                propagate_unary<propType>(tid, forward_exp, grad_exp, s);
+                vm_debug_print(tid, "exp");
+                propagate_unary<propType>(tid, forward_exp, grad_exp, s, instruction);
                 break;
 
             /* No operation */
             case NOP:
-                vm_debug_print("nop");
+                vm_debug_print(tid, "nop");
                 break;
 
             /* Loss function evaluation */
             case LOSS:
-                vm_debug_print("loss");
+                vm_debug_print(tid, "loss");
 
-                // Save loss
-                const float y_predicted = s.stack_d[0][tid];
+                // Calculate loss and replace the value on the stack with the loss
+
+                float& stack_value = s.stack_d[0][tid];
+
+                const float y_predicted = stack_value;
                 const float y_target = y_d[tid];
-                loss_d[tid] = 1; //y_target - y_predicted;
 
-                // Print an additional newline
-                vm_debug_print("");
+                stack_value = y_target - y_predicted;
 
-                return;
+                // Forward propagation has finished.
+
+                exit = true;
+                break;
         }
+
+        vm_debug_print_stack(tid, s);
     }
 
     if constexpr (propType == FORWARD) {
-        assert(false && "Compiled program finished without encountering loss function.");
+        if (!exit) {
+            assert(false && "Compiled program finished without encountering loss function.");
+        }
     }
 }
 
 __global__
-void vm(const Instruction* bytecode, int bytecode_length,
-        int m, const float *const *X_d, const float *y_d, float *loss_d,
-        float **stack_d, float **stack_intermediate_d) 
+void vm(const Instruction* bytecode, 
+        const int bytecode_length,
+        const int m, 
+        const float *const *const X_d, 
+        const float *const y_d, 
+        const float *const loss_d,
+        float *const *const stack_d, 
+        float *const *const intermediate_d)
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     const int stride = gridDim.x * blockDim.x;
 
     for (int i = tid; i < m; i += stride) {
         int stack_pointer = 0;
-        int stack_intermediate_pointer = 0;
+        int intermediate_pointer = 0;
 
         const StackState s(
             stack_d,
-            stack_intermediate_d,
+            intermediate_d,
             stack_pointer,
-            stack_intermediate_pointer
+            intermediate_pointer
         );
 
         int program_counter = 0;
 
         // Forward propagate and evaluate loss
-        vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, loss_d, s, program_counter);
+        vm_debug_print(tid, "Forward propagation");
+        vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter);
 
-        // Reset stack, push loss to the stack as the first element
-        stack_pointer = 1;
-        stack_d[0][tid] = loss_d[tid];
+        // Print an empty line in between forward propagation output and backpropagation output
+        vm_debug_print(tid, "");
 
         // Backpropagate
-        vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, loss_d, s, ++program_counter);
+        vm_debug_print(tid, "Backpropagation");
+        vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter);
     }
 }
 
@@ -169,14 +190,14 @@ void forward_propagate(const Program& program, const Dataset& dataset) {
     }
 
     /*
-     * Allocate array stack_intermediate_d to store intermediate calculation 
+     * Allocate array intermediate_d to store intermediate calculation 
      * results for later use in backpropagation. The dimensions of 
-     * stack_intermediate_d is the same as stack_d.
+     * intermediate_d is the same as stack_d.
      */
-    float **stack_intermediate_d;
-    HIP_CALL(hipMallocManaged(&stack_intermediate_d, sizeof *stack_intermediate_d * max_stack_depth));
+    float **intermediate_d;
+    HIP_CALL(hipMallocManaged(&intermediate_d, sizeof *intermediate_d * max_stack_depth));
     for (int i = 0; i < max_stack_depth; ++i) {
-        HIP_CALL(hipMallocManaged(&stack_intermediate_d[i], sizeof **stack_intermediate_d * dataset.m));
+        HIP_CALL(hipMallocManaged(&intermediate_d[i], sizeof **intermediate_d * dataset.m));
     }
 
     // Forward propagate
@@ -188,17 +209,7 @@ void forward_propagate(const Program& program, const Dataset& dataset) {
                        dataset.y_d,
                        loss_d, 
                        stack_d,
-                       stack_intermediate_d);
+                       intermediate_d);
 
     HIP_CALL(hipDeviceSynchronize());
-
-    // Print loss for each data point
-    for (int i = 0; i < dataset.m; ++i) {
-        std::cout << "Loss " << i << " " << loss_d[i] << std::endl;
-    } std::cout << std::endl;
-
-    // Print intermediate calculation results for thread 2
-    for (int i = 0; i < 20; ++i) {
-        std::cout << stack_intermediate_d[i][2] << std::endl;
-    }
 }

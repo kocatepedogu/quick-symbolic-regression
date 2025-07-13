@@ -45,7 +45,7 @@ int main(void) {
 
     // Generate ground truth data
     generate_test_data(X, y, [](float x) { 
-        return x*x + sin(x); 
+        return x*x - 3*x + 1; 
     });
 
     // Generate ground truth dataset
@@ -55,7 +55,7 @@ int main(void) {
     Expression x = Var(0);
 
     // Symbolic expression
-    Expression f = x*x + Sin(x);
+    Expression f = x*x - 3*x;
 
     // Convert symbolic expression to bytecode program
     Program p = compile(f);
