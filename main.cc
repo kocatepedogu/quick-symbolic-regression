@@ -7,6 +7,7 @@
 #include "unary.hpp"
 #include "compiler.hpp"
 #include "dataset.hpp"
+#include "util.hpp"
 #include "vm.hpp"
 
 #include <iostream>
@@ -21,7 +22,7 @@ int main(void) {
     });
 
     // Generate ground truth dataset
-    Dataset dataset(X, y, 1000, 1);
+    Dataset dataset(X, y, 10000, 1);
 
     // Input feature
     Expression x = Var(0);
@@ -39,11 +40,30 @@ int main(void) {
     // Print bytecode instructions
     std::cout << p << std::endl;
 
-    // Create virtual machine
-    VirtualMachine vm(dataset, 2);
+    // Number of streams
+    constexpr int nstreams = 2;
 
-    // Run program
-    vm.fit(p);
+    // Parallel region
+    #pragma omp parallel num_threads(nstreams)
+    {
+        // Stream of the thread
+        hipStream_t stream;
+        HIP_CALL(hipStreamCreate(&stream));
+
+        // Virtual machine of the thread
+        VirtualMachine *vm = new VirtualMachine(dataset, stream, 2);
+
+        // Fit
+        for (int j = 0; j < 1000 / nstreams; ++j) {
+            vm->fit(p);
+        }
+
+        // Delete machine
+        delete vm;
+
+        // Delete stream
+        HIP_CALL(hipStreamDestroy(stream));
+    }
 
     // Free data
     delete_test_data(X, y);

@@ -81,8 +81,8 @@ void vm(const Instruction* bytecode,
     }
 }
 
-VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
-    dataset(dataset), nweights(nweights)
+VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights) :
+    dataset(dataset), stream(stream), nweights(nweights)
 {
     HIP_CALL(hipGetDevice(&device_id));
     HIP_CALL(hipGetDeviceProperties(&props, device_id));
@@ -167,13 +167,13 @@ void VirtualMachine::fit(const Program& program, float learning_rate) {
     for (int i = 0; i < 500; ++i) {
         // Initialize weight gradients to zero
         hipLaunchKernelGGL(
-            reset_gradients,gridDim, blockDim, 0, 0,
+            reset_gradients,gridDim, blockDim, 0, stream,
             weights_grad_d, nweights, dataset.m);
 
         // Run forward propagation and backpropagation to compute
         // weight gradients for each weight and for each data point
         hipLaunchKernelGGL(
-            vm, gridDim, blockDim, 0, 0,
+            vm, gridDim, blockDim, 0, stream,
             program.bytecode, program.length, 
             dataset.m, dataset.X_d, dataset.y_d,
             stack_d, intermediate_d,
@@ -183,7 +183,7 @@ void VirtualMachine::fit(const Program& program, float learning_rate) {
         // The result is a separate array of block sums weights_grad_reduced_sum_d[i] for every weight i.
         for (int i = 0; i < nweights; ++i) {
             hipLaunchKernelGGL(
-                reduce_sum, reduction_grid_dim, reduction_block_dim, 0, 0, 
+                reduce_sum, reduction_grid_dim, reduction_block_dim, 0, stream, 
                 weights_grad_d[i], weights_grad_reduced_sum_d[i], dataset.m);
         }
 
@@ -191,11 +191,11 @@ void VirtualMachine::fit(const Program& program, float learning_rate) {
         // of weights_grad_reduced_sum_d[i]. Then use gradient descent rule to update the weight.
         // Repeat for every weight i.
         hipLaunchKernelGGL(
-            update_weights, dim3(1), dim3(1), 0, 0,
+            update_weights, dim3(1), dim3(1), 0, stream,
             weights_grad_reduced_sum_d, weights_d, nweights, reduction_grid_dim.x, learning_rate);
     }
 
-    HIP_CALL(hipDeviceSynchronize());
+    HIP_CALL(hipStreamSynchronize(stream));
 
     // Print calculated weights
     for (int i = 0; i < nweights; ++i) {

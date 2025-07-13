@@ -94,7 +94,7 @@ void vm_control(const int tid,
                 const float y_predicted = stack_value;
                 const float y_target = y_d[tid];
 
-                stack_value = y_predicted - y_target;
+                stack_value = (y_predicted - y_target) / m;
 
                 // Forward propagation has finished.
 

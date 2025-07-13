@@ -1,5 +1,11 @@
 #!/bin/sh
-FLAGS='-I./expressions -I./compiler -I./dataset -I./vm -I./tests -Wno-format-security -g --std=c++20'
+FLAGS="-I./expressions"
+FLAGS="$FLAGS -I./compiler"
+FLAGS="$FLAGS -I./dataset"
+FLAGS="$FLAGS -I./vm"
+FLAGS="$FLAGS -I./tests"
+FLAGS="$FLAGS -Wno-format-security"
+FLAGS="$FLAGS -g --std=c++20 -fopenmp -O3"
 
 hipcc -c main.cc $FLAGS
 hipcc -c expressions/expression.cc $FLAGS
@@ -20,6 +26,6 @@ hipcc main.o \
       vm.o \
       vm_helper.o \
       testdata.o \
-      -o quicksr.exe
+      -o quicksr.exe $FLAGS
 
 rm *.o

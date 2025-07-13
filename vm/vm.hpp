@@ -11,7 +11,7 @@
 
 class VirtualMachine {
 public:
-    VirtualMachine(const Dataset& dataset, int nweights);
+    VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights);
 
     void fit(const Program& program, float learning_rate = 1e-4);
 
@@ -22,7 +22,9 @@ private:
     const int nweights;
 
     int device_id;
+
     hipDeviceProp_t props;
+    hipStream_t& stream;
 
     dim3 gridDim;
     dim3 blockDim;
