@@ -23,6 +23,20 @@ void reset_gradients(float *const *const weights_grad_d, int nweights, int m) {
 }
 
 __global__
+void sum_gradients(const float *const *const block_sums, float *weights_d, int nweights, int nblocks) {
+    const int tid = blockDim.x * blockIdx.x + threadIdx.x;
+    if (tid == 0) {
+        for (int i = 0; i < nweights; ++i) {
+            float totalSum = 0.0f;
+            for (int j = 0; j < nblocks; ++j) {
+                totalSum += block_sums[i][j];
+            }
+            weights_d[i] -= 0.0001 * totalSum;
+        }
+    }
+}
+
+__global__
 void vm(const Instruction* bytecode, 
         const int bytecode_length,
         const int m, 
@@ -149,8 +163,6 @@ void VirtualMachine::fit(const Program& program) {
             reset_gradients,gridDim, blockDim, 0, 0,
             weights_grad_d, nweights, dataset.m);
 
-        HIP_CALL(hipDeviceSynchronize());
-
         // Run forward propagation and backpropagation
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, 0,
@@ -164,8 +176,6 @@ void VirtualMachine::fit(const Program& program) {
             weights_d,
             weights_grad_d);
 
-        HIP_CALL(hipDeviceSynchronize());
-
         // Launch a separate reduction kernel for every weight
         for (int i = 0; i < nweights; ++i) {
             hipLaunchKernelGGL(
@@ -178,17 +188,19 @@ void VirtualMachine::fit(const Program& program) {
                 dataset.m);
         }
 
-        HIP_CALL(hipDeviceSynchronize());
-
         // Compute final sum on host
-        for (int i = 0; i < nweights; ++i) {
-            float totalSum = 0.0f;
-            for (int j = 0; j < reduction_grid_dim.x; ++j) {
-                totalSum += block_sums[i][j];
-            }
-            weights_d[i] -= 0.0001 * totalSum;
-        }
+        hipLaunchKernelGGL(
+            sum_gradients,
+            dim3(1),
+            dim3(1),
+            0, 0,
+            block_sums,
+            weights_d,
+            nweights,
+            reduction_grid_dim.x);
     }
+
+    HIP_CALL(hipDeviceSynchronize());
 
     // Print calculated weights
     for (int i = 0; i < nweights; ++i) {
