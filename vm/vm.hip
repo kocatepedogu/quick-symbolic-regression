@@ -14,7 +14,10 @@ constexpr int max_stack_depth = 32;
 
 constexpr int reduction_threads_per_block = 32;
 
-__global__ void weight_update(const float *const weight_grads, float *const weight, int m, float learning_rate) {
+__global__ 
+void weight_update(const float *const __restrict__ weight_grads, 
+                   float *const __restrict__ weight, 
+                   int m, float learning_rate) {
     // Shared memory for block-level reduction
     __shared__ float sharedMem[reduction_threads_per_block];
     
@@ -42,15 +45,15 @@ __global__ void weight_update(const float *const weight_grads, float *const weig
 }
 
 __global__
-void vm(const Instruction* bytecode, 
+void vm(const Instruction *bytecode, 
         const int bytecode_length,
         const int m, 
-        const float *const *const X_d, 
-        const float *const y_d, 
-        float *const *const stack_d, 
-        float *const *const intermediate_d,
-        float *const weights_d,
-        float *const *const weights_grad_d,
+        const float *const __restrict__ *const __restrict__ X_d, 
+        const float *const __restrict__ y_d, 
+        float *const __restrict__ *const __restrict__ stack_d, 
+        float *const __restrict__ *const __restrict__ intermediate_d,
+        float *const __restrict__ weights_d,
+        float *const __restrict__ *const __restrict__ weights_grad_d,
         const int nweights)
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;

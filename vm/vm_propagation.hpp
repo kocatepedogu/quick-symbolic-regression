@@ -22,7 +22,7 @@ static inline void propagate_immediate(int tid, const float& immediate, const St
 
 template <PropagationType proptype> __device__
 static inline void propagate_variable(int tid, const int& variable_index, const StackState& s, 
-                                      const float *const *const X_d) {
+                                      const float *const __restrict__ *const __restrict__ X_d) {
     if constexpr (proptype == FORWARD) {
         s.stack_d[s.stack_pointer++][tid] = X_d[variable_index][tid];
     }
@@ -35,7 +35,8 @@ static inline void propagate_variable(int tid, const int& variable_index, const 
 
 template <PropagationType proptype> __device__
 static inline void propagate_parameter(int tid, const int& param_index, const StackState& s,
-                                       float *const weights, float *const *const weights_grad_d) {
+                                       float *const __restrict__ weights, 
+                                       float *const __restrict__ *const __restrict__ weights_grad_d) {
     if constexpr (proptype == FORWARD) {
         s.stack_d[s.stack_pointer++][tid] = weights[param_index];
     }

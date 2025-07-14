@@ -7,14 +7,14 @@ enum PropagationType {
 };
 
 struct StackState {
-    float *const *const &stack_d;
-    float *const *const &intermediate_d;
+    float *const __restrict__ *const __restrict__ &stack_d;
+    float *const __restrict__ *const __restrict__ &intermediate_d;
     int& stack_pointer;
     int& intermediate_pointer;
 
     constexpr StackState(
-        float *const *const &stack_d, 
-        float *const *const &intermediate_d,
+        float *const __restrict__ *const __restrict__ &stack_d, 
+        float *const __restrict__ *const __restrict__ &intermediate_d,
         int& stack_pointer, 
         int& intermediate_pointer) :
         stack_d(stack_d), 

@@ -16,12 +16,12 @@ void vm_control(const int tid,
                 const Instruction* bytecode, 
                 const int bytecode_length,
                 const int m, 
-                const float *const *const X_d, 
-                const float *const y_d,
+                const float *const __restrict__ *const __restrict__ X_d, 
+                const float *const __restrict__ y_d,
                 const StackState& s, 
                 int& program_counter,
-                float *const weights_d,
-                float *const *const weights_grad_d)
+                float *const __restrict__ weights_d,
+                float *const __restrict__ *const __restrict__ weights_grad_d)
 {
     bool exit = false;
 
