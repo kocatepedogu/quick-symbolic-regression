@@ -13,7 +13,13 @@
 #include <iostream>
 #include <cmath>
 
+#include </usr/lib/clang/20/include/omp.h>
+
+omp_lock_t print_lock;
+
 int main(void) {
+    omp_init_lock(&print_lock);
+
     float **X, *y;
 
     // Generate ground truth data
@@ -22,7 +28,7 @@ int main(void) {
     });
 
     // Generate ground truth dataset
-    Dataset dataset(X, y, 10000, 1);
+    Dataset dataset(X, y, test_data_length, 1);
 
     // Input feature
     Expression x = Var(0);
@@ -51,7 +57,7 @@ int main(void) {
         HIP_CALL(hipStreamCreate(&stream));
 
         // Virtual machine of the thread
-        VirtualMachine *vm = new VirtualMachine(dataset, stream, 2);
+        VirtualMachine *vm = new VirtualMachine(dataset, stream, 2, print_lock);
 
         // Fit
         for (int j = 0; j < 1000 / nstreams; ++j) {

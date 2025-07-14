@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <hip/hip_runtime.h>
+#include </usr/lib/clang/20/include/omp.h>
 
 #include "vm.hpp"
 #include "vm_debug.hpp"
@@ -80,11 +81,9 @@ void vm(const Instruction* bytecode,
     }
 }
 
-VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights) :
-    dataset(dataset), stream(stream), nweights(nweights)
+VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
+    dataset(dataset), stream(stream), nweights(nweights), print_lock(print_lock)
 {
-    omp_init_lock(&print_lock);
-
     HIP_CALL(hipGetDevice(&device_id));
     HIP_CALL(hipGetDeviceProperties(&props, device_id));
 
@@ -235,6 +234,4 @@ VirtualMachine::~VirtualMachine() {
         HIP_CALL(hipFree(stack_d[i]));
     }
     HIP_CALL(hipFree(stack_d));
-
-    omp_destroy_lock(&print_lock);
 }

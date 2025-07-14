@@ -6,13 +6,13 @@
 
 #include "../compiler/bytecode.hpp"
 #include "../dataset/dataset.hpp"
-#include </usr/lib/clang/20/include/omp.h>
 
 #include <hip/hip_runtime.h>
+#include </usr/lib/clang/20/include/omp.h>
 
 class VirtualMachine {
 public:
-    VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights);
+    VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock);
 
     void fit(const Program& program, int epochs = 500, float learning_rate = 5e-4);
 
@@ -38,7 +38,7 @@ private:
     float **weights_grad_d;
     float **weights_grad_reduced_sum_d;
 
-    omp_lock_t print_lock;
+    omp_lock_t &print_lock;
 };
 
 #endif
