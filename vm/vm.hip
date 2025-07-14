@@ -14,16 +14,6 @@
 constexpr int max_stack_depth = 32;
 
 __global__
-void reset_gradients(float *const *const weights_grad_d, int nweights, int m) {
-    const int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    if (tid < m) {
-        for (int j = 0; j < nweights; ++j) {
-            weights_grad_d[j][tid] = 0;
-        }
-    }
-}
-
-__global__
 void update_weights(const float *const *const weights_grad_reduced_sum_d, 
                     float *const weights_d, 
                     const int num_weights, 
@@ -50,10 +40,16 @@ void vm(const Instruction* bytecode,
         float *const *const stack_d, 
         float *const *const intermediate_d,
         float *const weights_d,
-        float *const *const weights_grad_d)
+        float *const *const weights_grad_d,
+        const int nweights)
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     const int stride = gridDim.x * blockDim.x;
+
+    // Reset weight gradients that will be computed by this thread
+    for (int j = 0; j < nweights; ++j) {
+        weights_grad_d[j][tid] = 0;
+    }
 
     for (int i = tid; i < m; i += stride) {
         int stack_pointer = 0;
@@ -167,11 +163,6 @@ void VirtualMachine::fit(const Program& program, int epochs, float learning_rate
     }
 
     for (int i = 0; i < epochs; ++i) {
-        // Initialize weight gradients to zero
-        hipLaunchKernelGGL(
-            reset_gradients,gridDim, blockDim, 0, stream,
-            weights_grad_d, nweights, dataset.m);
-
         // Run forward propagation and backpropagation to compute
         // weight gradients for each weight and for each data point
         hipLaunchKernelGGL(
@@ -179,7 +170,7 @@ void VirtualMachine::fit(const Program& program, int epochs, float learning_rate
             program.bytecode, program.length, 
             dataset.m, dataset.X_d, dataset.y_d,
             stack_d, intermediate_d,
-            weights_d, weights_grad_d);
+            weights_d, weights_grad_d, nweights);
 
         // For every weight, sum gradient contributions from all data points using reduction
         // The result is a separate array of block sums weights_grad_reduced_sum_d[i] for every weight i.
