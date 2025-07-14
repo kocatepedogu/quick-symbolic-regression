@@ -2,34 +2,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <hip/hip_runtime.h>
+#include <hip/hip_cooperative_groups.h>
+
 #include </usr/lib/clang/20/include/omp.h>
 
 #include "vm.hpp"
 #include "vm_debug.hpp"
 #include "vm_control.hpp"
-#include "vm_helper.hpp"
 
 #include "../util.hpp"
 
 constexpr int max_stack_depth = 32;
-
-__global__
-void update_weights(const float *const *const weights_grad_reduced_sum_d, 
-                    float *const weights_d, 
-                    const int num_weights, 
-                    const int num_reduction_blocks, 
-                    const float learning_rate) 
-{
-    if (threadIdx.x == 0) {
-        if (blockIdx.x < num_weights) {
-            float weights_grad_total_sum = 0.0f;
-            for (int j = 0; j < num_reduction_blocks; ++j) {
-                weights_grad_total_sum += weights_grad_reduced_sum_d[blockIdx.x][j];
-            }
-            weights_d[blockIdx.x] -= learning_rate * weights_grad_total_sum;
-        }
-    }
-}
 
 __global__
 void vm(const Instruction* bytecode, 
@@ -41,37 +24,71 @@ void vm(const Instruction* bytecode,
         float *const *const intermediate_d,
         float *const weights_d,
         float *const *const weights_grad_d,
-        const int nweights)
+        const int nweights,
+        float *const *const weights_grad_reduced_sum_d,
+        const int epochs,
+        const float learning_rate
+    )
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
+    auto grid_group = cooperative_groups::this_grid();
 
-    // Reset weight gradients that will be computed by this thread
-    for (int j = 0; j < nweights; ++j) {
-        weights_grad_d[j][tid] = 0;
-    }
+    // Shared memory for block-level reduction
+    __shared__ float sharedMem[1024];
 
-    int stack_pointer = 0;
-    int intermediate_pointer = 0;
+    for (int iter = 0; iter < epochs; ++iter) {
+        // Reset weight gradients that will be computed by this thread
+        for (int j = 0; j < nweights; ++j) {
+            weights_grad_d[j][tid] = 0;
+        }
 
-    const StackState s(
-        stack_d,
-        intermediate_d,
-        stack_pointer,
-        intermediate_pointer
-    );
+        int stack_pointer = 0;
+        int intermediate_pointer = 0;
 
-    int program_counter = 0;
+        const StackState s(
+            stack_d,
+            intermediate_d,
+            stack_pointer,
+            intermediate_pointer
+        );
 
-    // Forward propagate and evaluate loss
-    vm_debug_print(tid, "Forward propagation");
-    vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        int program_counter = 0;
 
-    // Print an empty line in between forward propagation output and backpropagation output
-    vm_debug_print(tid, "");
+        // Forward propagate and evaluate loss
+        vm_debug_print(tid, "Forward propagation");
+        vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
 
-    // Backpropagate
-    vm_debug_print(tid, "Backpropagation");
-    vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        // Print an empty line in between forward propagation output and backpropagation output
+        vm_debug_print(tid, "");
+
+        // Backpropagate
+        vm_debug_print(tid, "Backpropagation");
+        vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+
+        grid_group.sync();
+
+        // Reduce sum individual gradients coming from each data point
+        for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+            // Load data into shared memory
+            sharedMem[threadIdx.x] = (tid < m) ? weights_grad_d[weight_idx][tid] : 0.0f;
+            __syncthreads();
+            
+            // Parallel reduction within the block
+            for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+                if (threadIdx.x < stride) {
+                    sharedMem[threadIdx.x] += sharedMem[threadIdx.x + stride];
+                }
+                __syncthreads();
+            }
+            
+            // First thread of each block writes block sum to output
+            if (threadIdx.x == 0) {
+                atomicAdd(&weights_d[weight_idx], -learning_rate * sharedMem[0]);
+            }
+        }
+
+        grid_group.sync();
+    }    
 }
 
 VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
@@ -94,18 +111,6 @@ VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int 
 
     gridDim = dim3(blocks);
     blockDim = dim3(threadsPerBlock);
-
-    /* 
-     * Decide number of blocks for reduce sum
-     * - Each block will produce a separate block sum. These block sums are then
-     *   sequentially summed to produce the final sum for each weight.
-     */
-
-    int reduction_blocks_per_grid = (dataset.m + reduction_threads_per_block - 1) / 
-        reduction_threads_per_block;
-
-    reduction_grid_dim = dim3(reduction_blocks_per_grid);
-    reduction_block_dim = dim3(reduction_threads_per_block);
 
     /* 
      * Allocate array stack_d as stack memory for bytecode virtual machine.
@@ -149,7 +154,7 @@ VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int 
         nweights * sizeof *weights_grad_reduced_sum_d));
     for (int i = 0; i < nweights; ++i) {
         HIP_CALL(hipMallocManaged(&weights_grad_reduced_sum_d[i], 
-            reduction_blocks_per_grid * sizeof **weights_grad_reduced_sum_d));
+            gridDim.x * sizeof **weights_grad_reduced_sum_d));
     }
 }
 
@@ -159,31 +164,17 @@ void VirtualMachine::fit(const Program& program, int epochs, float learning_rate
         weights_d[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;
     }
 
-    for (int i = 0; i < epochs; ++i) {
-        // Run forward propagation and backpropagation to compute
-        // weight gradients for each weight and for each data point
-        hipLaunchKernelGGL(
-            vm, gridDim, blockDim, 0, stream,
-            program.bytecode, program.length, 
-            dataset.m, dataset.X_d, dataset.y_d,
-            stack_d, intermediate_d,
-            weights_d, weights_grad_d, nweights);
+    const void *params[] = {
+        &program.bytecode, &program.length, 
+        &dataset.m, &dataset.X_d, &dataset.y_d,
+        &stack_d, &intermediate_d,
+        &weights_d, &weights_grad_d, &nweights, &weights_grad_reduced_sum_d,
+        &epochs, &learning_rate
+    };
 
-        // For every weight, sum gradient contributions from all data points using reduction
-        // The result is a separate array of block sums weights_grad_reduced_sum_d[i] for every weight i.
-        for (int i = 0; i < nweights; ++i) {
-            hipLaunchKernelGGL(
-                reduce_sum, reduction_grid_dim, reduction_block_dim, 0, stream, 
-                weights_grad_d[i], weights_grad_reduced_sum_d[i], dataset.m);
-        }
-
-        // To find the total gradient for a particular weight i, sequentially sum the elements 
-        // of weights_grad_reduced_sum_d[i]. Then use gradient descent rule to update the weight.
-        // Repeat for every weight i.
-        hipLaunchKernelGGL(
-            update_weights, dim3(nweights), dim3(1), 0, stream,
-            weights_grad_reduced_sum_d, weights_d, nweights, reduction_grid_dim.x, learning_rate);
-    }
+    HIP_CALL(hipLaunchCooperativeKernel(
+        vm, gridDim, blockDim, 
+        (void **)params, 0, stream));
 
     HIP_CALL(hipStreamSynchronize(stream));
 

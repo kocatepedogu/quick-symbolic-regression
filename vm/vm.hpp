@@ -29,8 +29,6 @@ private:
 
     dim3 gridDim;
     dim3 blockDim;
-    dim3 reduction_grid_dim;
-    dim3 reduction_block_dim;
 
     float **stack_d;
     float **intermediate_d;
