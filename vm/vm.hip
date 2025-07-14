@@ -44,37 +44,34 @@ void vm(const Instruction* bytecode,
         const int nweights)
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    const int stride = gridDim.x * blockDim.x;
 
     // Reset weight gradients that will be computed by this thread
     for (int j = 0; j < nweights; ++j) {
         weights_grad_d[j][tid] = 0;
     }
 
-    for (int i = tid; i < m; i += stride) {
-        int stack_pointer = 0;
-        int intermediate_pointer = 0;
+    int stack_pointer = 0;
+    int intermediate_pointer = 0;
 
-        const StackState s(
-            stack_d,
-            intermediate_d,
-            stack_pointer,
-            intermediate_pointer
-        );
+    const StackState s(
+        stack_d,
+        intermediate_d,
+        stack_pointer,
+        intermediate_pointer
+    );
 
-        int program_counter = 0;
+    int program_counter = 0;
 
-        // Forward propagate and evaluate loss
-        vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+    // Forward propagate and evaluate loss
+    vm_debug_print(tid, "Forward propagation");
+    vm_control<FORWARD>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
 
-        // Print an empty line in between forward propagation output and backpropagation output
-        vm_debug_print(tid, "");
+    // Print an empty line in between forward propagation output and backpropagation output
+    vm_debug_print(tid, "");
 
-        // Backpropagate
-        vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
-    }
+    // Backpropagate
+    vm_debug_print(tid, "Backpropagation");
+    vm_control<BACK>(tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
 }
 
 VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
