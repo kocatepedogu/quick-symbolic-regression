@@ -29,14 +29,13 @@ void update_weights(const float *const *const weights_grad_reduced_sum_d,
                     const int num_reduction_blocks, 
                     const float learning_rate) 
 {
-    const int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    if (tid == 0) {
-        for (int i = 0; i < num_weights; ++i) {
+    if (threadIdx.x == 0) {
+        if (blockIdx.x < num_weights) {
             float weights_grad_total_sum = 0.0f;
             for (int j = 0; j < num_reduction_blocks; ++j) {
-                weights_grad_total_sum += weights_grad_reduced_sum_d[i][j];
+                weights_grad_total_sum += weights_grad_reduced_sum_d[blockIdx.x][j];
             }
-            weights_d[i] -= learning_rate * weights_grad_total_sum;
+            weights_d[blockIdx.x] -= learning_rate * weights_grad_total_sum;
         }
     }
 }
@@ -84,6 +83,8 @@ void vm(const Instruction* bytecode,
 VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights) :
     dataset(dataset), stream(stream), nweights(nweights)
 {
+    omp_init_lock(&print_lock);
+
     HIP_CALL(hipGetDevice(&device_id));
     HIP_CALL(hipGetDeviceProperties(&props, device_id));
 
@@ -137,11 +138,8 @@ VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int 
         HIP_CALL(hipMallocManaged(&intermediate_d[i], sizeof **intermediate_d * dataset.m));
     }
 
-    /* Allocate and randomly initialize weights with values between -1.0 and 1.0 */
+    /* Allocate weights */
     HIP_CALL(hipMallocManaged(&weights_d, sizeof *weights_d * nweights));
-    for (int i = 0; i < nweights; ++i) {
-        weights_d[i] = 2.0 * rand() / (float)RAND_MAX - 1.0;
-    }
 
     /*
      * Allocate array weights_grad_d.
@@ -163,8 +161,13 @@ VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int 
     }
 }
 
-void VirtualMachine::fit(const Program& program, float learning_rate) {
-    for (int i = 0; i < 500; ++i) {
+void VirtualMachine::fit(const Program& program, int epochs, float learning_rate) {
+    // Randomly initialize weights with values between -1.0 and 1.0
+    for (int i = 0; i < nweights; ++i) {
+        weights_d[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;
+    }
+
+    for (int i = 0; i < epochs; ++i) {
         // Initialize weight gradients to zero
         hipLaunchKernelGGL(
             reset_gradients,gridDim, blockDim, 0, stream,
@@ -191,16 +194,18 @@ void VirtualMachine::fit(const Program& program, float learning_rate) {
         // of weights_grad_reduced_sum_d[i]. Then use gradient descent rule to update the weight.
         // Repeat for every weight i.
         hipLaunchKernelGGL(
-            update_weights, dim3(1), dim3(1), 0, stream,
+            update_weights, dim3(nweights), dim3(1), 0, stream,
             weights_grad_reduced_sum_d, weights_d, nweights, reduction_grid_dim.x, learning_rate);
     }
 
     HIP_CALL(hipStreamSynchronize(stream));
 
     // Print calculated weights
+    omp_set_lock(&print_lock);
     for (int i = 0; i < nweights; ++i) {
         std::cout << weights_d[i] << std::endl;
-    }
+    } std::cout << std::endl;
+    omp_unset_lock(&print_lock);
 }
 
 VirtualMachine::~VirtualMachine() {
@@ -230,4 +235,6 @@ VirtualMachine::~VirtualMachine() {
         HIP_CALL(hipFree(stack_d[i]));
     }
     HIP_CALL(hipFree(stack_d));
+
+    omp_destroy_lock(&print_lock);
 }
