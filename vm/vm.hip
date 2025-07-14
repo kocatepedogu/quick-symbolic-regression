@@ -7,27 +7,37 @@
 #include "vm.hpp"
 #include "vm_debug.hpp"
 #include "vm_control.hpp"
-#include "vm_helper.hpp"
 
 #include "../util.hpp"
 
 constexpr int max_stack_depth = 32;
 
-__global__
-void update_weights(const float *const *const weights_grad_reduced_sum_d, 
-                    float *const weights_d, 
-                    const int num_weights, 
-                    const int num_reduction_blocks, 
-                    const float learning_rate) 
-{
-    if (threadIdx.x == 0) {
-        if (blockIdx.x < num_weights) {
-            float weights_grad_total_sum = 0.0f;
-            for (int j = 0; j < num_reduction_blocks; ++j) {
-                weights_grad_total_sum += weights_grad_reduced_sum_d[blockIdx.x][j];
-            }
-            weights_d[blockIdx.x] -= learning_rate * weights_grad_total_sum;
+constexpr int reduction_threads_per_block = 32;
+
+__global__ void weight_update(const float *const weight_grads, float *const weight, int m, float learning_rate) {
+    // Shared memory for block-level reduction
+    __shared__ float sharedMem[reduction_threads_per_block];
+    
+    // Thread and block indices
+    int tid = threadIdx.x;
+    int bid = blockIdx.x;
+    int globalIdx = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    // Load data into shared memory
+    sharedMem[tid] = (globalIdx < m) ? weight_grads[globalIdx] : 0.0f;
+    __syncthreads();
+    
+    // Parallel reduction within the block
+    for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (tid < stride) {
+            sharedMem[tid] += sharedMem[tid + stride];
         }
+        __syncthreads();
+    }
+    
+    // First thread of each block writes block sum to output
+    if (tid == 0) {
+        atomicAdd(weight, -learning_rate * sharedMem[0]);
     }
 }
 
@@ -170,19 +180,12 @@ void VirtualMachine::fit(const Program& program, int epochs, float learning_rate
             weights_d, weights_grad_d, nweights);
 
         // For every weight, sum gradient contributions from all data points using reduction
-        // The result is a separate array of block sums weights_grad_reduced_sum_d[i] for every weight i.
+        // Apply gradient descent rule
         for (int i = 0; i < nweights; ++i) {
             hipLaunchKernelGGL(
-                reduce_sum, reduction_grid_dim, reduction_block_dim, 0, stream, 
-                weights_grad_d[i], weights_grad_reduced_sum_d[i], dataset.m);
+                weight_update, reduction_grid_dim, reduction_block_dim, 0, stream, 
+                weights_grad_d[i], &weights_d[i], dataset.m, learning_rate);
         }
-
-        // To find the total gradient for a particular weight i, sequentially sum the elements 
-        // of weights_grad_reduced_sum_d[i]. Then use gradient descent rule to update the weight.
-        // Repeat for every weight i.
-        hipLaunchKernelGGL(
-            update_weights, dim3(nweights), dim3(1), 0, stream,
-            weights_grad_reduced_sum_d, weights_d, nweights, reduction_grid_dim.x, learning_rate);
     }
 
     HIP_CALL(hipStreamSynchronize(stream));
