@@ -11,7 +11,7 @@
 
 #include "../util.hpp"
 
-constexpr int max_stack_depth = 1024;
+constexpr int max_stack_depth = 32;
 
 __global__
 void reset_gradients(float *const *const weights_grad_d, int nweights, int m) {
