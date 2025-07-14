@@ -15,9 +15,11 @@
 
 #include </usr/lib/clang/20/include/omp.h>
 
+omp_lock_t lock;
 omp_lock_t print_lock;
 
 int main(void) {
+    omp_init_lock(&lock);
     omp_init_lock(&print_lock);
 
     float **X, *y;
@@ -49,6 +51,9 @@ int main(void) {
     // Number of streams
     constexpr int nstreams = 2;
 
+    // Remaining work
+    int work_count = 100;
+
     // Parallel region
     #pragma omp parallel num_threads(nstreams)
     {
@@ -60,7 +65,16 @@ int main(void) {
         VirtualMachine *vm = new VirtualMachine(dataset, stream, 2, print_lock);
 
         // Fit
-        for (int j = 0; j < 1000 / nstreams; ++j) {
+        while(true) {
+            omp_set_lock(&lock);
+            if (work_count == 0) {
+                omp_unset_lock(&lock);
+                break;
+            } else {
+                --work_count;
+                omp_unset_lock(&lock);
+            }
+            
             vm->fit(p);
         }
 
@@ -73,6 +87,10 @@ int main(void) {
 
     // Free data
     delete_test_data(X, y);
+
+    // Remove locks
+    omp_destroy_lock(&lock);
+    omp_destroy_lock(&print_lock);
 
     return 0;
 }
