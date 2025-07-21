@@ -10,35 +10,37 @@
 #include <hip/hip_runtime.h>
 #include </usr/lib/clang/20/include/omp.h>
 
-class VirtualMachine {
-public:
-    VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock);
+namespace intra_individual {
+    class VirtualMachine {
+    public:
+        VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock);
 
-    void fit(const Program& program, int epochs = 500, float learning_rate = 5e-4);
+        void fit(const Program& program, int epochs = 500, float learning_rate = 5e-4);
 
-    ~VirtualMachine();
+        ~VirtualMachine();
 
-private:
-    const Dataset& dataset;
-    const int nweights;
+    private:
+        const Dataset& dataset;
+        const int nweights;
 
-    int device_id;
+        int device_id;
 
-    hipDeviceProp_t props;
-    hipStream_t& stream;
+        hipDeviceProp_t props;
+        hipStream_t& stream;
 
-    dim3 gridDim;
-    dim3 blockDim;
-    dim3 reduction_grid_dim;
-    dim3 reduction_block_dim;
+        dim3 gridDim;
+        dim3 blockDim;
+        dim3 reduction_grid_dim;
+        dim3 reduction_block_dim;
 
-    float **stack_d;
-    float **intermediate_d;
-    float  *weights_d;
-    float **weights_grad_d;
-    float **weights_grad_reduced_sum_d;
+        float **stack_d;
+        float **intermediate_d;
+        float  *weights_d;
+        float **weights_grad_d;
+        float **weights_grad_reduced_sum_d;
 
-    omp_lock_t &print_lock;
-};
+        omp_lock_t &print_lock;
+    };
+}
 
 #endif

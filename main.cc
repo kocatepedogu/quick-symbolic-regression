@@ -21,7 +21,7 @@ int main(void) {
     });
 
     // Generate ground truth dataset
-    Dataset dataset(X, y, test_data_length, 1);
+    intra_individual::Dataset dataset(X, y, test_data_length, 1);
 
     // Input feature
     Expression x = Var(0);
@@ -40,7 +40,7 @@ int main(void) {
     }
 
     // Fit expressions
-    Runner runner;
+    intra_individual::Runner runner;
     runner.run(expression_pop, dataset);
 
     // Free data

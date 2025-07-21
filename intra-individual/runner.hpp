@@ -6,16 +6,18 @@
 
 #include </usr/lib/clang/20/include/omp.h>
 
-class Runner {
-private:
-    omp_lock_t lock;
-    omp_lock_t print_lock;
+namespace intra_individual {
+    class Runner {
+    private:
+        omp_lock_t lock;
+        omp_lock_t print_lock;
 
-public:
-    Runner();
-    ~Runner();
+    public:
+        Runner();
+        ~Runner();
 
-    void run(const std::vector<Expression>& population, const Dataset& dataset);
-};
+        void run(const std::vector<Expression>& population, const Dataset& dataset);
+    };
+}
 
 #endif
