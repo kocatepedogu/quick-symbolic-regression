@@ -9,15 +9,41 @@
 #include "../../compiler/ir.hpp"
 
 namespace intra_individual {
+    __device__
+    static inline void push_stack(const StackState &s, int tid, float value) {
+        s.stack_d[s.stack_pointer++][tid] = value;
+    }
+
+    __device__
+    static inline float pop_stack(const StackState &s, int tid) {
+        return s.stack_d[--s.stack_pointer][tid];
+    }
+
+    __device__
+    static inline void push_intermediate(const StackState &s, int tid, float value) {
+        s.intermediate_d[s.intermediate_pointer++][tid] = value;
+    }
+
+    __device__
+    static inline float read_intermediate(const StackState &s, int tid, int index) {
+        return s.intermediate_d[index][tid];
+    }
+
+    __device__
+    static inline float read_dataset(const float *const __restrict__ *const __restrict__ X_d,
+                                     const int feature_index, const int datapoint_index) {
+        return X_d[feature_index][datapoint_index];
+    }
+
     template <PropagationType proptype> __device__
     static inline void propagate_immediate(int tid, const float& immediate, const StackState& s) {
         if constexpr (proptype == FORWARD) {
-            s.stack_d[s.stack_pointer++][tid] = immediate;
+            push_stack(s, tid, immediate);
         }
 
         if constexpr (proptype == BACK) {
             // Pop gradient from stack, discard the value.
-            --s.stack_pointer;
+            pop_stack(s, tid);
         }
     }
 
@@ -25,12 +51,12 @@ namespace intra_individual {
     static inline void propagate_variable(int tid, const int& variable_index, const StackState& s, 
                                         const float *const __restrict__ *const __restrict__ X_d) {
         if constexpr (proptype == FORWARD) {
-            s.stack_d[s.stack_pointer++][tid] = X_d[variable_index][tid];
+            push_stack(s, tid, read_dataset(X_d, variable_index, tid)); 
         }
 
         if constexpr (proptype == BACK) {
             // Pop gradient from stack, discard the value.
-            --s.stack_pointer;
+            pop_stack(s, tid);
         }
     }
 
@@ -39,12 +65,12 @@ namespace intra_individual {
                                         float *const __restrict__ weights, 
                                         float *const __restrict__ *const __restrict__ weights_grad_d) {
         if constexpr (proptype == FORWARD) {
-            s.stack_d[s.stack_pointer++][tid] = weights[param_index];
+            push_stack(s, tid, weights[param_index]);
         }
 
         if constexpr (proptype == BACK) {
             // Pop gradient from stack
-            const float incoming_grad = s.stack_d[--s.stack_pointer][tid];
+            const float incoming_grad = pop_stack(s, tid);
             vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
             // Add gradient to the total gradient of the associated trainable parameter
@@ -59,29 +85,29 @@ namespace intra_individual {
             float operands[opcount];
             #pragma unroll
             for (int k = opcount - 1; k >= 0; k--) {
-                operands[k] = s.stack_d[--s.stack_pointer][tid];
+                operands[k] = pop_stack(s, tid);
             }
 
             // Apply operation and push the result to the stack
-            s.stack_d[s.stack_pointer++][tid] = operation(operands);
+            push_stack(s, tid, operation(operands));
 
             // Save consumed operand as intermediate value for backpropagation
             #pragma unroll
             for (int k = 0; k < opcount; ++k) {
-                s.intermediate_d[s.intermediate_pointer++][tid] = operands[k];
+                push_intermediate(s, tid, operands[k]);
             }
         }
 
         if constexpr (proptype == BACK) {
             // Pop incoming gradient from the stack
-            const float incoming_grad = s.stack_d[--s.stack_pointer][tid];
+            const float incoming_grad = pop_stack(s, tid);
             vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
             // Pop intermediate calculation results from forward propagation from intermediate_d
             float intermediates[opcount];
             #pragma unroll
             for (int k = opcount - 1; k >= 0; k--) {
-                const float intermediate = s.intermediate_d[inst.intermediate_index + k][tid];
+                const float intermediate = read_intermediate(s, tid, inst.intermediate_index + k);
                 intermediates[k] = intermediate;
                 vm_debug_print(tid, "  intermediates[%d]=%f", k, intermediate);
             }
@@ -103,7 +129,7 @@ namespace intra_individual {
             // Push outgoing gradients to the stack
             #pragma unroll
             for (int k = opcount - 1; k >= 0; k--) {
-                s.stack_d[s.stack_pointer++][tid] = local_grad[k];
+                push_stack(s, tid, local_grad[k]);
             }
         }
     }
