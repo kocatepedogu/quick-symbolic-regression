@@ -1,0 +1,21 @@
+#ifndef RUNNER_HPP
+#define RUNNER_HPP
+
+#include "../expressions/expression.hpp"
+#include "./dataset/dataset.hpp"
+
+#include </usr/lib/clang/20/include/omp.h>
+
+class Runner {
+private:
+    omp_lock_t lock;
+    omp_lock_t print_lock;
+
+public:
+    Runner();
+    ~Runner();
+
+    void run(const std::vector<Expression>& population, const Dataset& dataset);
+};
+
+#endif

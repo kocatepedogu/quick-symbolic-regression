@@ -8,21 +8,11 @@
 #include "./expressions/unary.hpp"
 
 #include "./intra-individual/dataset/dataset.hpp"
-#include "./intra-individual/compiler/programpopulation.hpp"
-#include "./intra-individual/vm/vm.hpp"
-
-#include "util.hpp"
+#include "./intra-individual/runner.hpp"
 
 #include <cmath>
-#include </usr/lib/clang/20/include/omp.h>
-
-omp_lock_t lock;
-omp_lock_t print_lock;
 
 int main(void) {
-    omp_init_lock(&lock);
-    omp_init_lock(&print_lock);
-
     float **X, *y;
 
     // Generate ground truth data
@@ -49,52 +39,12 @@ int main(void) {
         expression_pop.push_back(f);
     }
 
-    // Convert symbolic expression to bytecode program
-    ProgramPopulation program_pop = compile(expression_pop);
-
-    // Number of streams
-    constexpr int nstreams = 2;
-
-    // Remaining work
-    int work_count = expression_pop.size();
-
-    // Parallel region
-    #pragma omp parallel num_threads(nstreams)
-    {
-        // Stream of the thread
-        hipStream_t stream;
-        HIP_CALL(hipStreamCreate(&stream));
-
-        // Virtual machine of the thread
-        VirtualMachine *vm = new VirtualMachine(dataset, stream, 2, print_lock);
-
-        // Fit
-        while(true) {
-            omp_set_lock(&lock);
-            if (work_count == 0) {
-                omp_unset_lock(&lock);
-                break;
-            } else {
-                const Program *p = program_pop.individuals[work_count - 1];
-                --work_count;
-                omp_unset_lock(&lock);
-                vm->fit(*p);
-            }
-        }
-
-        // Delete machine
-        delete vm;
-
-        // Delete stream
-        HIP_CALL(hipStreamDestroy(stream));
-    }
+    // Fit expressions
+    Runner runner;
+    runner.run(expression_pop, dataset);
 
     // Free data
     delete_test_data(X, y);
-
-    // Remove locks
-    omp_destroy_lock(&lock);
-    omp_destroy_lock(&print_lock);
 
     return 0;
 }

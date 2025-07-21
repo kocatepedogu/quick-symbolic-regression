@@ -2,11 +2,6 @@ CompileFlags:
   Add:
     - "-I/usr/include/hip"
     - "-I/usr/include/rocm"
-    - "-I./expressions"
-    - "-I./compiler"
-    - "-I./dataset"
-    - "-I./tests"
-    - "-I./vm"
     - "-I./"
     - "-D__HIP_PLATFORM_AMD__"
     - "-nogpulib"
