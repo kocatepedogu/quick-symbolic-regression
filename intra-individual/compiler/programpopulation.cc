@@ -14,6 +14,9 @@ namespace intra_individual {
         }
         delete[] individuals;
 
+        // Update length
+        this->length = pop.length;
+
         // Allocate new target memory and copy from source
         this->individuals = new Program*[pop.length];
         for (int i = 0; i < pop.length; ++i) {
@@ -30,6 +33,9 @@ namespace intra_individual {
             delete this->individuals[i];
         }
         delete[] individuals;
+
+        // Update length
+        this->length = pop.length;
 
         // Allocate new target memory and copy from source
         this->individuals = new Program*[pop.length];
