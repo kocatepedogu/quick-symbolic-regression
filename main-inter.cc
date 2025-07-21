@@ -6,6 +6,8 @@
 #include "./expressions/expression.hpp"
 #include "./expressions/binary.hpp"
 #include "./expressions/unary.hpp"
+
+#include "inter-individual/program/program.hpp"
 #include "inter-individual/dataset/dataset.hpp"
 
 #include <cmath>
@@ -22,8 +24,34 @@ int main(void) {
     // Create dataset
     inter_individual::Dataset dataset(X, y, test_data_length, 1);
 
+    // Input feature
+    Expression x = Var(0);
+
+    // Trainable parameters
+    Expression w0 = Parameter(0);
+    Expression w1 = Parameter(1);
+
+    // Symbolic expression
+    Expression f = w0 * Cos(x)*x + x*x - w1;
+
+    // Construct a population
+    std::vector<Expression> expression_pop;
+    for (int i = 0; i < 100; ++i) {
+        expression_pop.push_back(f);
+    }
+
+    // Compile expressions
+    inter_individual::Program program_pop;
+    inter_individual::program_create(&program_pop, expression_pop);
+
+    for (int i = 0; i < program_pop.max_num_of_instructions; ++i) {
+        std::cout << program_pop.bytecode[i][0] << std::endl;
+    }
+
     // Free data
     delete_test_data(X, y);
+
+    inter_individual::program_destroy(program_pop);
 
     return 0;
 }
