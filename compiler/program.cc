@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "bytecode.hpp"
+#include "program.hpp"
 
 #include <hip/hip_runtime.h>
 #include <iomanip>
@@ -12,6 +12,31 @@ Program::Program(int length) : length(length) {
     HIP_CALL(hipMallocManaged(&bytecode, sizeof *bytecode * length));
     for (int i = 0; i < length; ++i) {
         bytecode[i] = Instruction();
+    }
+}
+
+Program& Program::operator=(const Program& prog) {
+    // Delete target memory
+    HIP_CALL(hipFree(this->bytecode));
+
+    // Allocate new target memory and copy from source
+    HIP_CALL(hipMallocManaged(&this->bytecode, sizeof *this->bytecode * prog.length));
+    for (int i = 0; i < prog.length; ++i) {
+        this->bytecode[i] = prog.bytecode[i];
+    }
+
+    // Return self
+    return *this;
+}
+
+Program::Program(const Program& prog) {
+    // Delete target memory
+    HIP_CALL(hipFree(this->bytecode));
+
+    // Allocate new target memory and copy from source
+    HIP_CALL(hipMallocManaged(&this->bytecode, sizeof *this->bytecode * prog.length));
+    for (int i = 0; i < prog.length; ++i) {
+        this->bytecode[i] = prog.bytecode[i];
     }
 }
 

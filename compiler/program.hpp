@@ -64,6 +64,12 @@ struct Program {
     /** @brief Creates empty program on GPU memory */
     Program(int length);
 
+    /** @brief Copy assignment operator */
+    Program& operator=(const Program& prog);
+
+    /** @brief Copy constructor */
+    Program(const Program& prog);
+
     /** @brief Deletes program from GPU memory */
     ~Program();
 };

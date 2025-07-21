@@ -5,8 +5,8 @@
 #define COMPILER_HPP
 
 #include "../expressions/expression.hpp"
-#include "bytecode.hpp"
+#include "programpopulation.hpp"
 
-Program compile(const Expression& e) noexcept;
+ProgramPopulation compile(const std::vector<Expression>& exp_pop) noexcept;
 
 #endif

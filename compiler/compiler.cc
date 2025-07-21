@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "compiler.hpp"
-#include "bytecode.hpp"
+#include "program.hpp"
+#include "programpopulation.hpp"
 
 
 // Intermediate compiler state
@@ -26,14 +27,14 @@ struct CompilerState {
 
 
 // Forward declaration for indirect recursion
-static void compile(const Expression& e, Program& p, CompilerState& s) noexcept;
+static void compile(const Expression& e, Program* p, CompilerState& s) noexcept;
 
 
 // Generates a single instruction
 template <int opcount, typename ...T>
-static void compile(const Expression& e, Program&p, CompilerState& s, T... args) {
+static void compile(const Expression& e, Program *p, CompilerState& s, T... args) {
     // In backpropagation, operation comes first, operands come afterwards
-    auto& backprop_inst = p.bytecode[s.backward_offset + s.backward_length++];
+    auto& backprop_inst = p->bytecode[s.backward_offset + s.backward_length++];
     backprop_inst = Instruction(args...);
 
     // Operands
@@ -43,7 +44,7 @@ static void compile(const Expression& e, Program&p, CompilerState& s, T... args)
     }
     
     // In forward propagation, operands come first, followed by operation
-    auto& forwprop_inst = p.bytecode[s.forward_offset + s.forward_length++];
+    auto& forwprop_inst = p->bytecode[s.forward_offset + s.forward_length++];
     forwprop_inst = Instruction(args...);
 
     // Calculate at which point the stack intermediate pointer will be before and after this 
@@ -55,7 +56,7 @@ static void compile(const Expression& e, Program&p, CompilerState& s, T... args)
 }
 
 
-static void compile(const Expression& e, Program& p, CompilerState& s) noexcept {
+static void compile(const Expression& e, Program* p, CompilerState& s) noexcept {
     switch (e.operation) {
         case CONSTANT:
             compile<0>(e, p, s, PUSH_IMMEDIATE, e.value);
@@ -90,7 +91,7 @@ static void compile(const Expression& e, Program& p, CompilerState& s) noexcept 
     }
 }
 
-static void compile(const Expression& e, Program& p) noexcept {
+static void compile(const Expression& e, Program* p) noexcept {
     // - Initially, the number of instructions are set to zero.
     // - In the end, there will be e.num_of_nodes different instructions for both,
     //   and one additional instruction in betwen for loss evaluation.
@@ -111,11 +112,19 @@ static void compile(const Expression& e, Program& p) noexcept {
 
     // Add loss function evaluation in between forward propagation and backpropagation
 
-    p.bytecode[s.backward_offset - 1] = Instruction(LOSS);
+    p->bytecode[s.backward_offset - 1] = Instruction(LOSS);
 }
 
 Program compile(const Expression& e) noexcept {
-    Program program(2*e.num_of_nodes + 1);
-    compile(e, program);
-    return program;
+    Program p(2*e.num_of_nodes + 1);
+    compile(e, &p);
+    return p;
+}
+
+ProgramPopulation compile(const std::vector<Expression>& exp_pop) noexcept {
+    ProgramPopulation programPopulation(exp_pop.size());
+    for (int i = 0; i < exp_pop.size(); ++i) {
+        programPopulation.individuals[i] = new Program(compile(exp_pop[i]));
+    }
+    return programPopulation;
 }

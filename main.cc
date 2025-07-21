@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "programpopulation.hpp"
 #include "testdata.hpp"
 #include "expression.hpp"
 #include "binary.hpp"
@@ -10,9 +11,7 @@
 #include "util.hpp"
 #include "vm.hpp"
 
-#include <iostream>
 #include <cmath>
-
 #include </usr/lib/clang/20/include/omp.h>
 
 omp_lock_t lock;
@@ -42,17 +41,20 @@ int main(void) {
     // Symbolic expression
     Expression f = w0 * Cos(x)*x + x*x - w1;
 
-    // Convert symbolic expression to bytecode program
-    Program p = compile(f);
+    // Construct a population
+    std::vector<Expression> expression_pop;
+    for (int i = 0; i < 100; ++i) {
+        expression_pop.push_back(f);
+    }
 
-    // Print bytecode instructions
-    std::cout << p << std::endl;
+    // Convert symbolic expression to bytecode program
+    ProgramPopulation program_pop = compile(expression_pop);
 
     // Number of streams
     constexpr int nstreams = 2;
 
     // Remaining work
-    int work_count = 100;
+    int work_count = expression_pop.size();
 
     // Parallel region
     #pragma omp parallel num_threads(nstreams)
@@ -71,11 +73,11 @@ int main(void) {
                 omp_unset_lock(&lock);
                 break;
             } else {
+                const Program *p = program_pop.individuals[work_count - 1];
                 --work_count;
                 omp_unset_lock(&lock);
+                vm->fit(*p);
             }
-            
-            vm->fit(p);
         }
 
         // Delete machine
