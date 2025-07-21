@@ -5,7 +5,7 @@
 #define COMPILER_HPP
 
 #include "../expressions/expression.hpp"
-#include "program.hpp"
+#include "ir.hpp"
 
 Program compile(const Expression& e) noexcept;
 

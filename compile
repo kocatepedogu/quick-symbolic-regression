@@ -9,7 +9,7 @@ hipcc -c main-intra.cc -o main-intra.o $FLAGS
 hipcc -c expressions/expression.cc -o expressions/expression.o $FLAGS
 hipcc -c expressions/binary.cc -o expressions/binary.o $FLAGS
 
-hipcc -c compiler/program.cc -o compiler/program.o $FLAGS
+hipcc -c compiler/ir.cc -o compiler/ir.o $FLAGS
 hipcc -c compiler/compiler.cc -o compiler/compiler.o $FLAGS
 
 hipcc -c intra-individual/dataset/dataset.cc -o intra-individual/dataset/dataset.o $FLAGS
@@ -18,6 +18,7 @@ hipcc -c intra-individual/compiler/programpopulation.cc -o intra-individual/comp
 hipcc -c intra-individual/runner.cc -o intra-individual/runner.o $FLAGS
 
 hipcc -c inter-individual/dataset/dataset.cc -o inter-individual/dataset/dataset.o $FLAGS
+hipcc -c inter-individual/compiler/programpopulation.cc -o inter-individual/compiler/programpopulation.o $FLAGS
 
 hipcc -c tests/testdata.cc $FLAGS
 
@@ -26,7 +27,7 @@ hipcc main-inter.o \
       expressions/expression.o \
       expressions/binary.o \
       \
-      compiler/program.o \
+      compiler/ir.o \
       compiler/compiler.o \
       \
       intra-individual/dataset/dataset.o \

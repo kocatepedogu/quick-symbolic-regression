@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "compiler.hpp"
-#include "program.hpp"
+#include "ir.hpp"
 
 
 // Intermediate compiler state

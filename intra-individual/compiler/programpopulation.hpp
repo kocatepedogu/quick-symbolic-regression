@@ -1,7 +1,7 @@
 #ifndef INTRA_PROGRAMPOPULATION_HPP
 #define INTRA_PROGRAMPOPULATION_HPP
 
-#include "../../compiler/program.hpp"
+#include "../../compiler/ir.hpp"
 #include "../../expressions/expression.hpp"
 
 #include <vector>

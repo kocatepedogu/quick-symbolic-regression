@@ -1,5 +1,6 @@
 #include "programpopulation.hpp"
 
+#include "../../compiler/ir.hpp"
 #include "../../compiler/compiler.hpp"
 
 namespace intra_individual {
