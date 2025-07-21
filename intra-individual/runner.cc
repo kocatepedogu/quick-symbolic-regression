@@ -18,7 +18,8 @@ namespace intra_individual {
 
     void Runner::run(const std::vector<Expression>& population, const Dataset& dataset) {
         // Convert symbolic expression to bytecode program
-        ProgramPopulation program_pop = compile(population);
+        ProgramPopulation program_pop;
+        program_create(&program_pop, population);
 
         // Number of streams
         constexpr int nstreams = 2;
@@ -43,10 +44,13 @@ namespace intra_individual {
                     omp_unset_lock(&lock);
                     break;
                 } else {
-                    const IntermediateRepresentation *p = program_pop.individuals[work_count - 1];
+                    const Instruction *code = program_pop.bytecode[work_count - 1];
+                    const int code_length = program_pop.num_of_instructions[work_count - 1];
+
                     --work_count;
                     omp_unset_lock(&lock);
-                    vm->fit(*p);
+
+                    vm->fit(code, code_length);
                 }
             }
 
@@ -56,5 +60,8 @@ namespace intra_individual {
             // Delete stream
             HIP_CALL(hipStreamDestroy(stream));
         }
+
+        // Destroy programs
+        program_destroy(program_pop);
     }
 }

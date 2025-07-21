@@ -9,25 +9,18 @@
 namespace intra_individual {
     struct ProgramPopulation {
         /// Programs
-        IntermediateRepresentation **individuals;
+        Instruction **bytecode;
+
+        /// Length of Programs
+        int *num_of_instructions;
 
         /// Total number of individuals
-        int length;
-
-        /** @brief Creates empty program population on GPU memory */
-        ProgramPopulation(int length);
-
-        /** @brief Copy assignment operator */
-        ProgramPopulation& operator=(const ProgramPopulation& pop);
-
-        /** @brief Copy constructor */
-        ProgramPopulation(const ProgramPopulation& pop);
-
-        /** @brief Deletes program population from GPU memory */
-        ~ProgramPopulation();
+        int num_of_individuals;
     };
 
-    ProgramPopulation compile(const std::vector<Expression>& exp_pop) noexcept;
+    void program_create(ProgramPopulation *prog_pop, const std::vector<Expression>& exp_pop);
+
+    void program_destroy(ProgramPopulation &prog_pop);
 }
 
 #endif

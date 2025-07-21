@@ -168,7 +168,7 @@ namespace intra_individual {
         }
     }
 
-    void VirtualMachine::fit(const IntermediateRepresentation& program, int epochs, float learning_rate) {
+    void VirtualMachine::fit(const Instruction* code, int code_length, int epochs, float learning_rate) {
         // Randomly initialize weights with values between -1.0 and 1.0
         for (int i = 0; i < nweights; ++i) {
             weights_d[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;
@@ -179,7 +179,7 @@ namespace intra_individual {
             // weight gradients for each weight and for each data point
             hipLaunchKernelGGL(
                 vm, gridDim, blockDim, 0, stream,
-                program.bytecode, program.length, 
+                code, code_length, 
                 dataset.m, dataset.X_d, dataset.y_d,
                 stack_d, intermediate_d,
                 weights_d, weights_grad_d, nweights);

@@ -3,45 +3,13 @@
 
 #include "ir.hpp"
 
-#include <hip/hip_runtime.h>
+#include <cmath>
 #include <iomanip>
 
-#include "../util.hpp"
-
-IntermediateRepresentation::IntermediateRepresentation(int length) : length(length) {
-    HIP_CALL(hipMallocManaged(&bytecode, sizeof *bytecode * length));
+IntermediateRepresentation::IntermediateRepresentation(int length) : bytecode(length) {
     for (int i = 0; i < length; ++i) {
         bytecode[i] = Instruction();
     }
-}
-
-IntermediateRepresentation& IntermediateRepresentation::operator=(const IntermediateRepresentation& prog) {
-    // Delete target memory
-    HIP_CALL(hipFree(this->bytecode));
-
-    // Allocate new target memory and copy from source
-    HIP_CALL(hipMallocManaged(&this->bytecode, sizeof *this->bytecode * prog.length));
-    for (int i = 0; i < prog.length; ++i) {
-        this->bytecode[i] = prog.bytecode[i];
-    }
-
-    // Return self
-    return *this;
-}
-
-IntermediateRepresentation::IntermediateRepresentation(const IntermediateRepresentation& prog) {
-    // Delete target memory
-    HIP_CALL(hipFree(this->bytecode));
-
-    // Allocate new target memory and copy from source
-    HIP_CALL(hipMallocManaged(&this->bytecode, sizeof *this->bytecode * prog.length));
-    for (int i = 0; i < prog.length; ++i) {
-        this->bytecode[i] = prog.bytecode[i];
-    }
-}
-
-IntermediateRepresentation::~IntermediateRepresentation() {
-    HIP_CALL(hipFree(bytecode));
 }
 
 std::ostream& operator << (std::ostream& os, const Instruction& instruction) noexcept {
@@ -96,10 +64,10 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
 }
 
 std::ostream& operator << (std::ostream& os, const IntermediateRepresentation& program) noexcept {
-    int max_line_number_digits = ceil(log10(program.length));
+    int max_line_number_digits = ceil(log10(program.bytecode.size()));
 
     os << "Program instructions: " << std::endl;
-    for (int i = 0; i < program.length; ++i) {
+    for (int i = 0; i < program.bytecode.size(); ++i) {
         os << std::setw(max_line_number_digits) << std::right << std::setfill(' ') << i << " ";
         os << program.bytecode[i] << std::endl;
     }

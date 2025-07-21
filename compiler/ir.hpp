@@ -5,6 +5,7 @@
 #define BYTECODE_HPP
 
 #include <ostream>
+#include <vector>
 
 enum Opcode {
     PUSH_IMMEDIATE,
@@ -56,22 +57,10 @@ struct Instruction {
 
 struct IntermediateRepresentation {
     /// Instructions
-    Instruction *bytecode;
-
-    /// Total number of instructions
-    int length;
+    std::vector<Instruction> bytecode;
     
     /** @brief Creates empty program on GPU memory */
     IntermediateRepresentation(int length);
-
-    /** @brief Copy assignment operator */
-    IntermediateRepresentation& operator=(const IntermediateRepresentation& prog);
-
-    /** @brief Copy constructor */
-    IntermediateRepresentation(const IntermediateRepresentation& prog);
-
-    /** @brief Deletes program from GPU memory */
-    ~IntermediateRepresentation();
 };
 
 /**
