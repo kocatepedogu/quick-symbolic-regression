@@ -5,8 +5,10 @@
 #include </usr/lib/clang/20/include/omp.h>
 
 #include "vm.hpp"
-#include "vm_debug.hpp"
 #include "vm_control.hpp"
+
+#include "../../vm/vm_debug.hpp"
+#include "../../vm/vm_types.hpp"
 
 #include "../../util.hpp"
 

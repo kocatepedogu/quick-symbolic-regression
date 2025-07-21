@@ -2,8 +2,9 @@
 #define INTRA_VM_PROPAGATION_HPP
 
 #include <hip/hip_runtime.h>
-#include "vm_debug.hpp"
-#include "vm_types.hpp"
+
+#include "../../vm/vm_debug.hpp"
+#include "../../vm/vm_types.hpp"
 
 #include "../../compiler/ir.hpp"
 

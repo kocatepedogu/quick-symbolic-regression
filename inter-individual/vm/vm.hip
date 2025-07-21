@@ -1,4 +1,8 @@
+#include <hip/hip_runtime.h>
 #include "vm.hpp"
+
+#include "../../vm/vm_debug.hpp"
+#include "../../vm/vm_types.hpp"
 
 #include "../../util.hpp"
 
@@ -8,13 +12,16 @@ namespace inter_individual {
     __global__
     void vm(Instruction **bytecode, 
             const int max_num_of_instructions,
+            const int num_of_individuals,
             const int m, 
             const float *const __restrict__ *const __restrict__ X_d, 
             const float *const __restrict__ y_d, 
             float *const __restrict__ *const __restrict__ stack_d, 
             float *const __restrict__ *const __restrict__ intermediate_d) 
     {
-        
+        const int tid = blockDim.x * blockIdx.x + threadIdx.x;
+
+        vm_debug_print(tid, "test\n");
     }
 
     VirtualMachine::VirtualMachine(const Dataset& dataset) :
@@ -64,10 +71,14 @@ namespace inter_individual {
         }
 
         hipLaunchKernelGGL(
-                vm, gridDim, blockDim, 0, 0,
-                program.bytecode, program.max_num_of_instructions, 
-                dataset.m, dataset.X_d, dataset.y_d,
-                stack_d, intermediate_d);
+            vm, gridDim, blockDim, 0, 0,
+            program.bytecode, 
+            program.max_num_of_instructions, 
+            program.num_of_individuals,
+            dataset.m, dataset.X_d, dataset.y_d,
+            stack_d, intermediate_d);
+
+        HIP_CALL(hipDeviceSynchronize());
 
         // Deallocate array intermediate_d.
         for (int i = 0; i < max_stack_depth; ++i) {
