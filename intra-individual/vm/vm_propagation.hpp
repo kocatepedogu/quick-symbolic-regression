@@ -29,29 +29,10 @@ namespace intra_individual {
         return s.intermediate_d[index][tid];
     }
 
-    __device__
-    static inline float read_dataset(const float *const __restrict__ *const __restrict__ X_d,
-                                     const int feature_index, const int datapoint_index) {
-        return X_d[feature_index][datapoint_index];
-    }
-
     template <PropagationType proptype> __device__
     static inline void propagate_immediate(int tid, const float& immediate, const StackState& s) {
         if constexpr (proptype == FORWARD) {
             push_stack(s, tid, immediate);
-        }
-
-        if constexpr (proptype == BACK) {
-            // Pop gradient from stack, discard the value.
-            pop_stack(s, tid);
-        }
-    }
-
-    template <PropagationType proptype> __device__
-    static inline void propagate_variable(int tid, const int& variable_index, const StackState& s, 
-                                        const float *const __restrict__ *const __restrict__ X_d) {
-        if constexpr (proptype == FORWARD) {
-            push_stack(s, tid, read_dataset(X_d, variable_index, tid)); 
         }
 
         if constexpr (proptype == BACK) {

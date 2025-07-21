@@ -38,8 +38,7 @@ namespace intra_individual {
                 /* Operations with index operands */
                 case PUSH_VARIABLE:
                     vm_debug_print(tid, "var %d", instruction.argindex);
-                    propagate_variable<propType>(tid, instruction.argindex, s, 
-                        X_d);
+                    propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
                     break;
                 case PUSH_PARAMETER:
                     vm_debug_print(tid, "param %d", instruction.argindex);
