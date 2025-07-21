@@ -33,3 +33,8 @@ hipcc main.o \
       -o quicksr.exe $FLAGS
 
 rm *.o
+rm compiler/*.o
+rm expressions/*.o
+rm intra-individual/compiler/*.o
+rm intra-individual/dataset/*.o
+rm intra-individual/vm/*.o
