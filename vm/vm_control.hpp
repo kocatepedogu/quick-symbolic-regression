@@ -6,9 +6,9 @@
 
 #include <hip/hip_runtime.h>
 
-#include "../../vm/vm_functions.hpp"
-#include "../../vm/vm_gradients.hpp"
-#include "../../vm/vm_debug.hpp"
+#include "vm_functions.hpp"
+#include "vm_gradients.hpp"
+#include "vm_debug.hpp"
 #include "vm_propagation.hpp"
 
 namespace intra_individual {
