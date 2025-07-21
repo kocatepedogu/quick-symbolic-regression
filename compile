@@ -3,7 +3,8 @@ FLAGS=""
 FLAGS="$FLAGS -Wno-format-security"
 FLAGS="$FLAGS -g --std=c++20 -fopenmp -O3"
 
-hipcc -c main.cc -o main.o $FLAGS
+hipcc -c main-inter.cc -o main-inter.o $FLAGS
+hipcc -c main-intra.cc -o main-intra.o $FLAGS
 
 hipcc -c expressions/expression.cc -o expressions/expression.o $FLAGS
 hipcc -c expressions/binary.cc -o expressions/binary.o $FLAGS
@@ -18,7 +19,7 @@ hipcc -c intra-individual/runner.cc -o intra-individual/runner.o $FLAGS
 
 hipcc -c tests/testdata.cc $FLAGS
 
-hipcc main.o \
+hipcc main-inter.o \
       \
       expressions/expression.o \
       expressions/binary.o \
