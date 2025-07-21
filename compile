@@ -17,6 +17,8 @@ hipcc -c intra-individual/vm/vm.hip -o intra-individual/vm/vm.o $FLAGS
 hipcc -c intra-individual/compiler/programpopulation.cc -o intra-individual/compiler/programpopulation.o $FLAGS
 hipcc -c intra-individual/runner.cc -o intra-individual/runner.o $FLAGS
 
+hipcc -c inter-individual/dataset/dataset.cc -o inter-individual/dataset/dataset.o $FLAGS
+
 hipcc -c tests/testdata.cc $FLAGS
 
 hipcc main-inter.o \
@@ -32,13 +34,22 @@ hipcc main-inter.o \
       intra-individual/compiler/programpopulation.o \
       intra-individual/runner.o \
       \
+      inter-individual/dataset/dataset.o \
+      \
       testdata.o \
       -o quicksr.exe $FLAGS
 
 rm *.o
+
 rm compiler/*.o
 rm expressions/*.o
+
 rm intra-individual/compiler/*.o
 rm intra-individual/dataset/*.o
 rm intra-individual/vm/*.o
 rm intra-individual/*.o
+
+#rm inter-individual/compiler/*.o
+rm inter-individual/dataset/*.o
+#rm inter-individual/vm/*.o
+#rm inter-individual/*.o
