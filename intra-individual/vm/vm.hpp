@@ -4,7 +4,7 @@
 #ifndef VM_HPP
 #define VM_HPP
 
-#include "../compiler/program.hpp"
+#include "../../compiler/program.hpp"
 #include "../dataset/dataset.hpp"
 
 #include <hip/hip_runtime.h>

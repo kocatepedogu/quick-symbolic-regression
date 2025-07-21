@@ -1,7 +1,10 @@
 #ifndef PROGRAMPOPULATION_HPP
 #define PROGRAMPOPULATION_HPP
 
-#include "program.hpp"
+#include "../../compiler/program.hpp"
+#include "../../expressions/expression.hpp"
+
+#include <vector>
 
 struct ProgramPopulation {
     /// Programs
@@ -22,5 +25,7 @@ struct ProgramPopulation {
     /** @brief Deletes program population from GPU memory */
     ~ProgramPopulation();
 };
+
+ProgramPopulation compile(const std::vector<Expression>& exp_pop) noexcept;
 
 #endif

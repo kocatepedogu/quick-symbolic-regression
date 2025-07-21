@@ -8,7 +8,7 @@
 #include "vm_debug.hpp"
 #include "vm_control.hpp"
 
-#include "../util.hpp"
+#include "../../util.hpp"
 
 constexpr int max_stack_depth = 32;
 

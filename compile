@@ -1,30 +1,34 @@
 #!/bin/sh
-FLAGS="-I./expressions"
-FLAGS="$FLAGS -I./compiler"
-FLAGS="$FLAGS -I./dataset"
-FLAGS="$FLAGS -I./vm"
-FLAGS="$FLAGS -I./tests"
+FLAGS=""
 FLAGS="$FLAGS -Wno-format-security"
 FLAGS="$FLAGS -g --std=c++20 -fopenmp -O3"
 
-hipcc -c main.cc $FLAGS
-hipcc -c expressions/expression.cc $FLAGS
-hipcc -c expressions/binary.cc $FLAGS
-hipcc -c compiler/program.cc $FLAGS
-hipcc -c compiler/programpopulation.cc $FLAGS
-hipcc -c compiler/compiler.cc $FLAGS
-hipcc -c dataset/dataset.cc $FLAGS
-hipcc -c vm/vm.hip $FLAGS
+hipcc -c main.cc -o main.o $FLAGS
+
+hipcc -c expressions/expression.cc -o expressions/expression.o $FLAGS
+hipcc -c expressions/binary.cc -o expressions/binary.o $FLAGS
+
+hipcc -c compiler/program.cc -o compiler/program.o $FLAGS
+hipcc -c compiler/compiler.cc -o compiler/compiler.o $FLAGS
+
+hipcc -c intra-individual/dataset/dataset.cc -o intra-individual/dataset/dataset.o $FLAGS
+hipcc -c intra-individual/vm/vm.hip -o intra-individual/vm/vm.o $FLAGS
+hipcc -c intra-individual/compiler/programpopulation.cc -o intra-individual/compiler/programpopulation.o $FLAGS
+
 hipcc -c tests/testdata.cc $FLAGS
 
 hipcc main.o \
-      expression.o \
-      binary.o \
-      program.o \
-      programpopulation.o \
-      compiler.o \
-      dataset.o \
-      vm.o \
+      \
+      expressions/expression.o \
+      expressions/binary.o \
+      \
+      compiler/program.o \
+      compiler/compiler.o \
+      \
+      intra-individual/dataset/dataset.o \
+      intra-individual/vm/vm.o \
+      intra-individual/compiler/programpopulation.o \
+      \
       testdata.o \
       -o quicksr.exe $FLAGS
 

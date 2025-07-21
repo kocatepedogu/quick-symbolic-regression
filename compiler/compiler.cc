@@ -3,7 +3,6 @@
 
 #include "compiler.hpp"
 #include "program.hpp"
-#include "programpopulation.hpp"
 
 
 // Intermediate compiler state
@@ -119,12 +118,4 @@ Program compile(const Expression& e) noexcept {
     Program p(2*e.num_of_nodes + 1);
     compile(e, &p);
     return p;
-}
-
-ProgramPopulation compile(const std::vector<Expression>& exp_pop) noexcept {
-    ProgramPopulation programPopulation(exp_pop.size());
-    for (int i = 0; i < exp_pop.size(); ++i) {
-        programPopulation.individuals[i] = new Program(compile(exp_pop[i]));
-    }
-    return programPopulation;
 }

@@ -4,7 +4,7 @@
 #include <hip/hip_runtime.h>
 
 #include "dataset.hpp"
-#include "../util.hpp"
+#include "../../util.hpp"
 
 
 Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept : 

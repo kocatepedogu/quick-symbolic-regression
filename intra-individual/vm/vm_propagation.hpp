@@ -5,7 +5,7 @@
 #include "vm_debug.hpp"
 #include "vm_types.hpp"
 
-#include "../compiler/program.hpp"
+#include "../../compiler/program.hpp"
 
 
 template <PropagationType proptype> __device__

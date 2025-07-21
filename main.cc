@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "programpopulation.hpp"
-#include "testdata.hpp"
-#include "expression.hpp"
-#include "binary.hpp"
-#include "unary.hpp"
-#include "compiler.hpp"
-#include "dataset.hpp"
+#include "./tests/testdata.hpp"
+
+#include "./expressions/expression.hpp"
+#include "./expressions/binary.hpp"
+#include "./expressions/unary.hpp"
+
+#include "./intra-individual/dataset/dataset.hpp"
+#include "./intra-individual/compiler/programpopulation.hpp"
+#include "./intra-individual/vm/vm.hpp"
+
 #include "util.hpp"
-#include "vm.hpp"
 
 #include <cmath>
 #include </usr/lib/clang/20/include/omp.h>

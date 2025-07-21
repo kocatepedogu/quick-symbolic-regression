@@ -1,5 +1,7 @@
 #include "programpopulation.hpp"
 
+#include "../../compiler/compiler.hpp"
+
 ProgramPopulation::ProgramPopulation(int length) : length(length) {
     individuals = new Program*[length];
 }
@@ -40,4 +42,12 @@ ProgramPopulation::~ProgramPopulation() {
         delete this->individuals[i];
     }
     delete[] individuals;
+}
+
+ProgramPopulation compile(const std::vector<Expression>& exp_pop) noexcept {
+    ProgramPopulation programPopulation(exp_pop.size());
+    for (int i = 0; i < exp_pop.size(); ++i) {
+        programPopulation.individuals[i] = new Program(compile(exp_pop[i]));
+    }
+    return programPopulation;
 }
