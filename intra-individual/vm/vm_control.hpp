@@ -12,8 +12,8 @@
 #include "vm_propagation.hpp"
 
 namespace intra_individual {
-    template <PropagationType propType> __device__
-    void vm_control(const int tid, 
+    template <PropagationType propType, ParallelismType paraType> __device__
+    void vm_control(const int tid, const int datapoint_idx,
                     const Instruction* bytecode, 
                     const int bytecode_length,
                     const int m, 
@@ -38,7 +38,12 @@ namespace intra_individual {
                 /* Operations with index operands */
                 case PUSH_VARIABLE:
                     vm_debug_print(tid, "var %d", instruction.argindex);
-                    propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
+                    if constexpr (paraType == INTRA_INDIVIDUAL) {
+                        propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
+                    }
+                    if constexpr (paraType == INTER_INDIVIDUAL) {
+                        propagate_immediate<propType>(tid, X_d[datapoint_idx][instruction.argindex], s);
+                    }
                     break;
                 case PUSH_PARAMETER:
                     vm_debug_print(tid, "param %d", instruction.argindex);

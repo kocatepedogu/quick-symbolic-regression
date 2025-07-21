@@ -1,6 +1,11 @@
 #ifndef INTRA_VM_TYPES_HPP
 #define INTRA_VM_TYPES_HPP
 
+enum ParallelismType {
+    INTRA_INDIVIDUAL,
+    INTER_INDIVIDUAL
+};
+
 enum PropagationType {
     FORWARD,
     BACK
