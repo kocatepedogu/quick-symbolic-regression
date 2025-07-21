@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef VM_CONTROL_HPP
-#define VM_CONTROL_HPP
+#ifndef INTRA_VM_CONTROL_HPP
+#define INTRA_VM_CONTROL_HPP
 
 #include <hip/hip_runtime.h>
 

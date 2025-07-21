@@ -1,5 +1,5 @@
-#ifndef RUNNER_HPP
-#define RUNNER_HPP
+#ifndef INTRA_RUNNER_HPP
+#define INTRA_RUNNER_HPP
 
 #include "../expressions/expression.hpp"
 #include "./dataset/dataset.hpp"

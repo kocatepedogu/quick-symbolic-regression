@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef DATASET_HPP
-#define DATASET_HPP
+#ifndef INTRA_DATASET_HPP
+#define INTRA_DATASET_HPP
 
 namespace intra_individual {
   struct Dataset {

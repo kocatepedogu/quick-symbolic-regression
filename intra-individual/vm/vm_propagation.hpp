@@ -1,5 +1,5 @@
-#ifndef VM_PROPAGATION_HPP
-#define VM_PROPAGATION_HPP
+#ifndef INTRA_VM_PROPAGATION_HPP
+#define INTRA_VM_PROPAGATION_HPP
 
 #include <hip/hip_runtime.h>
 #include "vm_debug.hpp"

@@ -1,5 +1,5 @@
-#ifndef VM_TYPES_HPP
-#define VM_TYPES_HPP
+#ifndef INTRA_VM_TYPES_HPP
+#define INTRA_VM_TYPES_HPP
 
 namespace intra_individual {
     enum PropagationType {

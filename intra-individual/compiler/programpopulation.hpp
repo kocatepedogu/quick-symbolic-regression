@@ -1,5 +1,5 @@
-#ifndef PROGRAMPOPULATION_HPP
-#define PROGRAMPOPULATION_HPP
+#ifndef INTRA_PROGRAMPOPULATION_HPP
+#define INTRA_PROGRAMPOPULATION_HPP
 
 #include "../../compiler/program.hpp"
 #include "../../expressions/expression.hpp"

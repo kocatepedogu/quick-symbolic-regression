@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef VM_HPP
-#define VM_HPP
+#ifndef INTRA_VM_HPP
+#define INTRA_VM_HPP
 
 #include "../../compiler/program.hpp"
 #include "../dataset/dataset.hpp"

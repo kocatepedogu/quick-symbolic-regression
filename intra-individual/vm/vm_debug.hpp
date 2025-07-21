@@ -1,5 +1,5 @@
-#ifndef VM_DEBUG_HPP
-#define VM_DEBUG_HPP
+#ifndef INTRA_VM_DEBUG_HPP
+#define INTRA_VM_DEBUG_HPP
 
 #include <hip/hip_runtime.h>
 #include "vm_types.hpp"
