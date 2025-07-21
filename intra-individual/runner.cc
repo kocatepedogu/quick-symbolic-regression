@@ -1,6 +1,6 @@
 #include "runner.hpp"
 
-#include "./compiler/programpopulation.hpp"
+#include "./program/program.hpp"
 #include "./vm/vm.hpp"
 
 #include "../util.hpp"
@@ -18,7 +18,7 @@ namespace intra_individual {
 
     void Runner::run(const std::vector<Expression>& population, const Dataset& dataset) {
         // Convert symbolic expression to bytecode program
-        ProgramPopulation program_pop;
+        Program program_pop;
         program_create(&program_pop, population);
 
         // Number of streams

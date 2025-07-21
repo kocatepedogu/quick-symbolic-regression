@@ -1,4 +1,4 @@
-#include "programpopulation.hpp"
+#include "program.hpp"
 
 #include "../../compiler/ir.hpp"
 #include "../../compiler/compiler.hpp"
@@ -7,7 +7,7 @@
 #include <hip/hip_runtime.h>
 
 namespace intra_individual {
-    void program_create(ProgramPopulation *prog_pop, const std::vector<Expression>& exp_pop) {
+    void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop) {
         const int num_of_individuals = exp_pop.size();
         prog_pop->num_of_individuals = num_of_individuals;
 
@@ -34,7 +34,7 @@ namespace intra_individual {
         }
     }
 
-    void program_destroy(ProgramPopulation &prog_pop) {
+    void program_destroy(Program &prog_pop) {
         // Delete program contents from GPU memory
         for (int i = 0; i < prog_pop.num_of_individuals; ++i) {
             HIP_CALL(hipFree(prog_pop.bytecode[i]));

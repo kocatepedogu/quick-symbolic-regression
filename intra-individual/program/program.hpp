@@ -1,5 +1,5 @@
-#ifndef INTRA_PROGRAMPOPULATION_HPP
-#define INTRA_PROGRAMPOPULATION_HPP
+#ifndef INTRA_PROGRAM_HPP
+#define INTRA_PROGRAM_HPP
 
 #include "../../compiler/ir.hpp"
 #include "../../expressions/expression.hpp"
@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace intra_individual {
-    struct ProgramPopulation {
+    struct Program {
         /// Programs
         Instruction **bytecode;
 
@@ -18,9 +18,9 @@ namespace intra_individual {
         int num_of_individuals;
     };
 
-    void program_create(ProgramPopulation *prog_pop, const std::vector<Expression>& exp_pop);
+    void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop);
 
-    void program_destroy(ProgramPopulation &prog_pop);
+    void program_destroy(Program &prog_pop);
 }
 
 #endif
