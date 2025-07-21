@@ -11,9 +11,7 @@
 #include "../../util.hpp"
 
 namespace intra_individual {
-
     constexpr int max_stack_depth = 32;
-
     constexpr int reduction_threads_per_block = 32;
 
     __global__ 
@@ -168,7 +166,7 @@ namespace intra_individual {
         }
     }
 
-    void VirtualMachine::fit(const Instruction* code, int code_length, int epochs, float learning_rate) {
+    void VirtualMachine::fit(const Instruction *code, int code_length, int epochs, float learning_rate) {
         // Randomly initialize weights with values between -1.0 and 1.0
         for (int i = 0; i < nweights; ++i) {
             weights_d[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;

@@ -15,7 +15,7 @@ namespace intra_individual {
     public:
         VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock);
 
-        void fit(const Instruction* code, int code_length, int epochs = 500, float learning_rate = 5e-4);
+        void fit(const Instruction *code, int code_length, int epochs = 500, float learning_rate = 5e-4);
 
         ~VirtualMachine();
 
