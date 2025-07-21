@@ -43,7 +43,7 @@ namespace intra_individual {
                     omp_unset_lock(&lock);
                     break;
                 } else {
-                    const Program *p = program_pop.individuals[work_count - 1];
+                    const IntermediateRepresentation *p = program_pop.individuals[work_count - 1];
                     --work_count;
                     omp_unset_lock(&lock);
                     vm->fit(*p);

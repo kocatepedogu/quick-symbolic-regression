@@ -7,6 +7,6 @@
 #include "../expressions/expression.hpp"
 #include "ir.hpp"
 
-Program compile(const Expression& e) noexcept;
+IntermediateRepresentation compile(const Expression& e) noexcept;
 
 #endif

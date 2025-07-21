@@ -5,7 +5,7 @@
 
 namespace intra_individual {
     ProgramPopulation::ProgramPopulation(int length) : length(length) {
-        individuals = new Program*[length];
+        individuals = new IntermediateRepresentation*[length];
     }
 
     ProgramPopulation& ProgramPopulation::operator=(const ProgramPopulation& pop) {
@@ -19,9 +19,9 @@ namespace intra_individual {
         this->length = pop.length;
 
         // Allocate new target memory and copy from source
-        this->individuals = new Program*[pop.length];
+        this->individuals = new IntermediateRepresentation*[pop.length];
         for (int i = 0; i < pop.length; ++i) {
-            this->individuals[i] = new Program(*pop.individuals[i]);
+            this->individuals[i] = new IntermediateRepresentation(*pop.individuals[i]);
         }
 
         // Return self
@@ -39,9 +39,9 @@ namespace intra_individual {
         this->length = pop.length;
 
         // Allocate new target memory and copy from source
-        this->individuals = new Program*[pop.length];
+        this->individuals = new IntermediateRepresentation*[pop.length];
         for (int i = 0; i < pop.length; ++i) {
-            this->individuals[i] = new Program(*pop.individuals[i]);
+            this->individuals[i] = new IntermediateRepresentation(*pop.individuals[i]);
         }
     }
 
@@ -55,7 +55,7 @@ namespace intra_individual {
     ProgramPopulation compile(const std::vector<Expression>& exp_pop) noexcept {
         ProgramPopulation programPopulation(exp_pop.size());
         for (int i = 0; i < exp_pop.size(); ++i) {
-            programPopulation.individuals[i] = new Program(compile(exp_pop[i]));
+            programPopulation.individuals[i] = new IntermediateRepresentation(compile(exp_pop[i]));
         }
         return programPopulation;
     }

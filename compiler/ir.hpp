@@ -54,7 +54,7 @@ struct Instruction {
 };
 
 
-struct Program {
+struct IntermediateRepresentation {
     /// Instructions
     Instruction *bytecode;
 
@@ -62,16 +62,16 @@ struct Program {
     int length;
     
     /** @brief Creates empty program on GPU memory */
-    Program(int length);
+    IntermediateRepresentation(int length);
 
     /** @brief Copy assignment operator */
-    Program& operator=(const Program& prog);
+    IntermediateRepresentation& operator=(const IntermediateRepresentation& prog);
 
     /** @brief Copy constructor */
-    Program(const Program& prog);
+    IntermediateRepresentation(const IntermediateRepresentation& prog);
 
     /** @brief Deletes program from GPU memory */
-    ~Program();
+    ~IntermediateRepresentation();
 };
 
 /**
@@ -82,6 +82,6 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
 /**
   * @brief Yields text representation of a program
   */
-std::ostream& operator << (std::ostream& os, const Program& program) noexcept;
+std::ostream& operator << (std::ostream& os, const IntermediateRepresentation& program) noexcept;
 
 #endif

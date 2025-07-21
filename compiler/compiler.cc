@@ -26,12 +26,12 @@ struct CompilerState {
 
 
 // Forward declaration for indirect recursion
-static void compile(const Expression& e, Program* p, CompilerState& s) noexcept;
+static void compile(const Expression& e, IntermediateRepresentation* p, CompilerState& s) noexcept;
 
 
 // Generates a single instruction
 template <int opcount, typename ...T>
-static void compile(const Expression& e, Program *p, CompilerState& s, T... args) {
+static void compile(const Expression& e, IntermediateRepresentation *p, CompilerState& s, T... args) {
     // In backpropagation, operation comes first, operands come afterwards
     auto& backprop_inst = p->bytecode[s.backward_offset + s.backward_length++];
     backprop_inst = Instruction(args...);
@@ -55,7 +55,7 @@ static void compile(const Expression& e, Program *p, CompilerState& s, T... args
 }
 
 
-static void compile(const Expression& e, Program* p, CompilerState& s) noexcept {
+static void compile(const Expression& e, IntermediateRepresentation* p, CompilerState& s) noexcept {
     switch (e.operation) {
         case CONSTANT:
             compile<0>(e, p, s, PUSH_IMMEDIATE, e.value);
@@ -90,7 +90,7 @@ static void compile(const Expression& e, Program* p, CompilerState& s) noexcept 
     }
 }
 
-static void compile(const Expression& e, Program* p) noexcept {
+static void compile(const Expression& e, IntermediateRepresentation* p) noexcept {
     // - Initially, the number of instructions are set to zero.
     // - In the end, there will be e.num_of_nodes different instructions for both,
     //   and one additional instruction in betwen for loss evaluation.
@@ -114,8 +114,8 @@ static void compile(const Expression& e, Program* p) noexcept {
     p->bytecode[s.backward_offset - 1] = Instruction(LOSS);
 }
 
-Program compile(const Expression& e) noexcept {
-    Program p(2*e.num_of_nodes + 1);
+IntermediateRepresentation compile(const Expression& e) noexcept {
+    IntermediateRepresentation p(2*e.num_of_nodes + 1);
     compile(e, &p);
     return p;
 }

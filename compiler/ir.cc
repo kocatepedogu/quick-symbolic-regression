@@ -8,14 +8,14 @@
 
 #include "../util.hpp"
 
-Program::Program(int length) : length(length) {
+IntermediateRepresentation::IntermediateRepresentation(int length) : length(length) {
     HIP_CALL(hipMallocManaged(&bytecode, sizeof *bytecode * length));
     for (int i = 0; i < length; ++i) {
         bytecode[i] = Instruction();
     }
 }
 
-Program& Program::operator=(const Program& prog) {
+IntermediateRepresentation& IntermediateRepresentation::operator=(const IntermediateRepresentation& prog) {
     // Delete target memory
     HIP_CALL(hipFree(this->bytecode));
 
@@ -29,7 +29,7 @@ Program& Program::operator=(const Program& prog) {
     return *this;
 }
 
-Program::Program(const Program& prog) {
+IntermediateRepresentation::IntermediateRepresentation(const IntermediateRepresentation& prog) {
     // Delete target memory
     HIP_CALL(hipFree(this->bytecode));
 
@@ -40,7 +40,7 @@ Program::Program(const Program& prog) {
     }
 }
 
-Program::~Program() {
+IntermediateRepresentation::~IntermediateRepresentation() {
     HIP_CALL(hipFree(bytecode));
 }
 
@@ -95,7 +95,7 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
     return os;
 }
 
-std::ostream& operator << (std::ostream& os, const Program& program) noexcept {
+std::ostream& operator << (std::ostream& os, const IntermediateRepresentation& program) noexcept {
     int max_line_number_digits = ceil(log10(program.length));
 
     os << "Program instructions: " << std::endl;

@@ -9,7 +9,7 @@
 namespace intra_individual {
     struct ProgramPopulation {
         /// Programs
-        Program **individuals;
+        IntermediateRepresentation **individuals;
 
         /// Total number of individuals
         int length;
