@@ -7,11 +7,10 @@
 #include "./expressions/binary.hpp"
 #include "./expressions/unary.hpp"
 
-#include "inter-individual/program/program.hpp"
 #include "inter-individual/dataset/dataset.hpp"
+#include "inter-individual/runner.hpp"
 
 #include <cmath>
-#include <iostream>
 
 int main(void) {
     float **X, *y;
@@ -40,18 +39,12 @@ int main(void) {
         expression_pop.push_back(f);
     }
 
-    // Compile expressions
-    inter_individual::Program program_pop;
-    inter_individual::program_create(&program_pop, expression_pop);
-
-    for (int i = 0; i < program_pop.max_num_of_instructions; ++i) {
-        std::cout << program_pop.bytecode[i][0] << std::endl;
-    }
+    // Fit expressions
+    inter_individual::Runner runner;
+    runner.run(expression_pop, dataset);
 
     // Free data
     delete_test_data(X, y);
-
-    inter_individual::program_destroy(program_pop);
 
     return 0;
 }

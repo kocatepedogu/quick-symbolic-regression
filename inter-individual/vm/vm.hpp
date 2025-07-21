@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef INTER_VM_HPP
+#define INTER_VM_HPP
+
+#include "../dataset/dataset.hpp"
+#include "../program/program.hpp"
+
+#include <hip/hip_runtime.h>
+
+namespace inter_individual {
+    class VirtualMachine {
+    public:
+        VirtualMachine(const Dataset& dataset);
+
+        void fit(const Program& program);
+
+    private:
+        const Dataset& dataset;
+
+        int device_id;
+        hipDeviceProp_t props;
+    };
+};
+
+#endif
