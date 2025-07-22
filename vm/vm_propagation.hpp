@@ -51,7 +51,8 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
             push_stack(s, tid, weights[param_index]);
         }
         else {
-            /// TODO: Inter-individual
+            /// Inter-individual
+            push_stack(s, tid, weights[param_index][tid]);
         }
     }
 

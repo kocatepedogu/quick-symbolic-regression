@@ -33,7 +33,7 @@ void vm_control(const int tid, const int datapoint_idx,
             instruction = bytecode[program_counter];
         }
         if constexpr (paraType == INTER_INDIVIDUAL) {
-            /// TODO: Inter individual
+            instruction = bytecode[program_counter][tid];
         }
         
         switch (instruction.opcode) {

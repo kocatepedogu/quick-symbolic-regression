@@ -12,12 +12,13 @@
 namespace inter_individual {
     class VirtualMachine {
     public:
-        VirtualMachine(const Dataset& dataset);
+        VirtualMachine(const Dataset& dataset, int nweights);
 
         void fit(const Program& program);
 
     private:
         const Dataset& dataset;
+        const int nweights;
 
         int device_id;
         hipDeviceProp_t props;

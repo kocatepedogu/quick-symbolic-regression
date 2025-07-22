@@ -10,7 +10,7 @@ namespace inter_individual {
         program_create(&program_pop, population);
 
         // Virtual machine of the thread
-        VirtualMachine *vm = new VirtualMachine(dataset);
+        VirtualMachine *vm = new VirtualMachine(dataset, 3);
         vm->fit(program_pop);
 
         // Delete machine

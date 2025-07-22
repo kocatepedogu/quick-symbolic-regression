@@ -3,6 +3,7 @@
 
 #include "../../vm/vm_debug.hpp"
 #include "../../vm/vm_types.hpp"
+#include "../../vm/vm_control.hpp"
 
 #include "../../util.hpp"
 
@@ -10,22 +11,39 @@ namespace inter_individual {
     constexpr int max_stack_depth = 32;
 
     __global__
-    void vm(Instruction **bytecode, 
+    void vm(const Instruction *const *const bytecode, 
             const int max_num_of_instructions,
             const int num_of_individuals,
             const int m, 
             const float *const __restrict__ *const __restrict__ X_d, 
             const float *const __restrict__ y_d, 
             float *const __restrict__ *const __restrict__ stack_d, 
-            float *const __restrict__ *const __restrict__ intermediate_d) 
+            float *const __restrict__ *const __restrict__ intermediate_d,
+            float *const __restrict__ *const __restrict__ weights_d,
+            float *const __restrict__ *const __restrict__ weights_grad_d,
+            const int nweights) 
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
-        vm_debug_print(tid, "test\n");
+        int stack_pointer = 0;
+        int intermediate_pointer = 0;
+
+        const StackState s(
+            stack_d,
+            intermediate_d,
+            stack_pointer,
+            intermediate_pointer
+        );
+
+        int program_counter = 0;
+
+        // Forward propagate and evaluate loss
+        vm_debug_print(tid, "Forward propagation");
+        vm_control<FORWARD, INTER_INDIVIDUAL, const Instruction *const *const, const float *const __restrict *const __restrict>(tid, 0, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
     }
 
-    VirtualMachine::VirtualMachine(const Dataset& dataset) :
-        dataset(dataset)
+    VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
+        dataset(dataset), nweights(nweights)
     {
         HIP_CALL(hipGetDevice(&device_id));
         HIP_CALL(hipGetDeviceProperties(&props, device_id));
@@ -34,6 +52,9 @@ namespace inter_individual {
     void VirtualMachine::fit(const Program &program) {
         float **stack_d;
         float **intermediate_d;
+
+        float **weights_d;
+        float **weights_grad_d;
 
         /* 
         * Decide number of blocks and threads for computation
@@ -70,13 +91,34 @@ namespace inter_individual {
             HIP_CALL(hipMallocManaged(&intermediate_d[i], sizeof **intermediate_d * program.num_of_individuals));
         }
 
+        /*
+        * Allocate array weights_d.
+        * - Each thread fits a different expression and has a different set of weight values.
+        * - The array has dimensions [nweights][num_threads].
+        */
+        HIP_CALL(hipMallocManaged(&weights_d, sizeof *weights_d * nweights));
+        for (int i = 0; i < nweights; ++i) {
+            HIP_CALL(hipMallocManaged(&weights_d[i], sizeof **weights_d * program.num_of_individuals));
+        }
+
+        /*
+        * Allocate array weights_grad_d.
+        * - The array has the same dimensions as weights_d. 
+        * - i'th weight gradient of the j'th expression is (sequentially) accumulated in weights_grad_d[i][j]
+        */
+        HIP_CALL(hipMallocManaged(&weights_grad_d, sizeof *weights_grad_d * nweights));
+        for (int i = 0; i < nweights; ++i) {
+            HIP_CALL(hipMallocManaged(&weights_grad_d[i], sizeof **weights_grad_d * dataset.m));
+        }
+
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, 0,
             program.bytecode, 
             program.max_num_of_instructions, 
             program.num_of_individuals,
             dataset.m, dataset.X_d, dataset.y_d,
-            stack_d, intermediate_d);
+            stack_d, intermediate_d,
+            weights_d, weights_grad_d, nweights);
 
         HIP_CALL(hipDeviceSynchronize());
 
@@ -91,5 +133,17 @@ namespace inter_individual {
             HIP_CALL(hipFree(stack_d[i]));
         }
         HIP_CALL(hipFree(stack_d));
+
+        // Deallocate array weights_d
+        for (int i = 0; i < nweights; ++i) {
+            HIP_CALL(hipFree(weights_d[i]));
+        }
+        HIP_CALL(hipFree(weights_d));
+
+        // Deallocate array weights_grad_d
+        for (int i = 0; i < nweights; ++i) {
+            HIP_CALL(hipFree(weights_grad_d[i]));
+        }
+        HIP_CALL(hipFree(weights_grad_d));
     }
 };
