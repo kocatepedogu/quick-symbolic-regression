@@ -3,7 +3,13 @@ gpucore.*
 
 *.o
 compiler/*.o
+dataset/*.o
 expressions/*.o
-intra-individual/compiler/*.o
-intra-individual/dataset/*.o
+
+intra-individual/program/*.o
 intra-individual/vm/*.o
+intra-individual/.o
+
+inter-individual/program/*.o
+inter-individual/vm/*.o
+inter-individual/.o
