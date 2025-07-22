@@ -105,7 +105,7 @@ void vm_control(const int tid, const int datapoint_idx,
                 float& stack_value = s.stack_d[0][tid];
 
                 const float y_predicted = stack_value;
-                const float y_target = y_d[tid];
+                const float y_target = y_d[datapoint_idx];
 
                 stack_value = (y_predicted - y_target) / m;
 
