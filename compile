@@ -47,6 +47,7 @@ hipcc main-intra.o \
 
 rm *.o
 
+rm dataset/*.o
 rm compiler/*.o
 rm expressions/*.o
 
