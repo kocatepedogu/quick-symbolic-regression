@@ -40,8 +40,8 @@ int main(void) {
     }
 
     // Fit expressions
-    intra_individual::Runner runner;
-    runner.run(expression_pop, dataset);
+    intra_individual::Runner runner(dataset, 2);
+    runner.run(expression_pop);
 
     // Free data
     delete_test_data(X, y);
