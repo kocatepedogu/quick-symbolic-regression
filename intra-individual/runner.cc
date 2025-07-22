@@ -44,7 +44,7 @@ namespace intra_individual {
                     omp_unset_lock(&lock);
                     break;
                 } else {
-                    const Instruction *code = program_pop.bytecode[work_count - 1];
+                    c_inst_1d code = program_pop.bytecode[work_count - 1];
                     const int code_length = program_pop.num_of_instructions[work_count - 1];
 
                     --work_count;

@@ -10,12 +10,14 @@
 #include <hip/hip_runtime.h>
 #include </usr/lib/clang/20/include/omp.h>
 
+#include "../../vm/vm_types.hpp"
+
 namespace intra_individual {
     class VirtualMachine {
     public:
         VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock);
 
-        void fit(const Instruction *code, int code_length, int epochs = 500, float learning_rate = 5e-4);
+        void fit(c_inst_1d code, int code_length, int epochs = 500, float learning_rate = 5e-4);
 
         ~VirtualMachine();
 
@@ -33,11 +35,11 @@ namespace intra_individual {
         dim3 reduction_grid_dim;
         dim3 reduction_block_dim;
 
-        float **stack_d;
-        float **intermediate_d;
-        float  *weights_d;
-        float **weights_grad_d;
-        float **weights_grad_reduced_sum_d;
+        real_2d_mut stack_d;
+        real_2d_mut intermediate_d;
+        real_1d_mut weights_d;
+        real_2d_mut weights_grad_d;
+        real_2d_mut weights_grad_reduced_sum_d;
 
         omp_lock_t &print_lock;
     };

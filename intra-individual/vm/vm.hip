@@ -17,9 +17,7 @@ namespace intra_individual {
     constexpr int reduction_threads_per_block = 32;
 
     __global__ 
-    void weight_update(const float *const __restrict__ weight_grads, 
-                    float *const __restrict__ weight, 
-                    int m, float learning_rate) {
+    void weight_update(c_real_1d weight_grads, real_1d weight, int m, float learning_rate) {
         // Shared memory for block-level reduction
         __shared__ float sharedMem[reduction_threads_per_block];
         
@@ -47,15 +45,15 @@ namespace intra_individual {
     }
 
     __global__
-    void vm(const Instruction *bytecode, 
+    void vm(c_inst_1d bytecode, 
             const int bytecode_length,
             const int m, 
-            const float *const __restrict__ *const __restrict__ X_d, 
-            const float *const __restrict__ y_d, 
-            float *const __restrict__ *const __restrict__ stack_d, 
-            float *const __restrict__ *const __restrict__ intermediate_d,
-            float *const __restrict__ weights_d,
-            float *const __restrict__ *const __restrict__ weights_grad_d,
+            c_real_2d X_d, 
+            c_real_1d y_d, 
+            real_2d stack_d, 
+            real_2d intermediate_d,
+            c_real_1d weights_d,
+            real_2d weights_grad_d,
             const int nweights)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
@@ -79,14 +77,14 @@ namespace intra_individual {
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTRA_INDIVIDUAL, const Instruction *, const float *>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTRA_INDIVIDUAL, const Instruction *, const float *>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
     }
 
     VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
@@ -168,7 +166,7 @@ namespace intra_individual {
         }
     }
 
-    void VirtualMachine::fit(const Instruction *code, int code_length, int epochs, float learning_rate) {
+    void VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
         // Randomly initialize weights with values between -1.0 and 1.0
         for (int i = 0; i < nweights; ++i) {
             weights_d[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;

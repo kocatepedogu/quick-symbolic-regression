@@ -1,40 +1,41 @@
 #ifndef VM_FUNCTIONS_HPP
 #define VM_FUNCTIONS_HPP
 
+#include "vm_types.hpp"
 #include <hip/hip_runtime.h>
 
 __device__
-static inline float forward_add(const float *const __restrict__ &x) {
+static inline float forward_add(c_real_1d &x) {
     return x[0] + x[1];
 }
 
 __device__
-static inline float forward_sub(const float *const __restrict__ &x) {
+static inline float forward_sub(c_real_1d &x) {
     return x[0] - x[1];
 }
 
 __device__
-static inline float forward_mul(const float *const __restrict__ &x) {
+static inline float forward_mul(c_real_1d &x) {
     return x[0] * x[1];
 }
 
 __device__
-static inline float forward_div(const float *const __restrict__ &x) {
+static inline float forward_div(c_real_1d &x) {
     return x[0] / x[1];
 }
 
 __device__
-static inline float forward_sin(const float *const __restrict__ &x) {
+static inline float forward_sin(c_real_1d &x) {
     return sin(x[0]);
 }
 
 __device__
-static inline float forward_cos(const float *const __restrict__ &x) {
+static inline float forward_cos(c_real_1d &x) {
     return cos(x[0]);
 }
 
 __device__
-static inline float forward_exp(const float *const __restrict__ &x) {
+static inline float forward_exp(c_real_1d &x) {
     return exp(x[0]);
 }
 

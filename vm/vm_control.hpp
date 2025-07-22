@@ -13,16 +13,17 @@
 #include "vm_types.hpp"
 
 template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights> __device__
-void vm_control(const int tid, const int datapoint_idx,
+void vm_control(const int tid, 
+                const int datapoint_idx,
                 const Code bytecode, 
                 const int bytecode_length,
                 const int m, 
-                const float *const __restrict__ *const __restrict__ X_d, 
-                const float *const __restrict__ y_d,
+                c_real_2d X_d, 
+                c_real_1d y_d,
                 const StackState& s, 
                 int& program_counter,
                 Weights weights_d,
-                float *const __restrict__ *const __restrict__ weights_grad_d)
+                real_2d weights_grad_d)
 {
     bool exit = false;
 

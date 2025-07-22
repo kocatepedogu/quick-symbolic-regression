@@ -11,17 +11,17 @@ namespace inter_individual {
     constexpr int max_stack_depth = 32;
 
     __global__
-    void vm(const Instruction *const *const bytecode, 
+    void vm(c_inst_2d bytecode, 
             const int max_num_of_instructions,
             const int num_of_individuals,
             const int m, 
-            const float *const __restrict__ *const __restrict__ X_d, 
-            const float *const __restrict__ y_d, 
-            float *const __restrict__ *const __restrict__ stack_d, 
-            float *const __restrict__ *const __restrict__ intermediate_d,
-            float *const __restrict__ *const __restrict__ weights_d,
-            float *const __restrict__ *const __restrict__ weights_grad_d,
-            const int nweights) 
+            c_real_2d X_d, 
+            c_real_1d y_d, 
+            real_2d stack_d, 
+            real_2d intermediate_d,
+            c_real_2d weights_d,
+            real_2d weights_grad_d,
+            const int nweights)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -39,7 +39,7 @@ namespace inter_individual {
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTER_INDIVIDUAL, const Instruction *const *const, const float *const __restrict *const __restrict>(tid, 0, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        vm_control<FORWARD, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, 0, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
     }
 
     VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
@@ -50,11 +50,11 @@ namespace inter_individual {
     }
 
     void VirtualMachine::fit(const Program &program) {
-        float **stack_d;
-        float **intermediate_d;
+        real_2d_mut stack_d;
+        real_2d_mut intermediate_d;
 
-        float **weights_d;
-        float **weights_grad_d;
+        real_2d_mut weights_d;
+        real_2d_mut weights_grad_d;
 
         /* 
         * Decide number of blocks and threads for computation

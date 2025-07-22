@@ -44,9 +44,9 @@ static inline void propagate_immediate(int tid, const float& immediate, const St
 template <PropagationType proptype, typename Weight> __device__
 static inline void propagate_parameter(int tid, const int& param_index, const StackState& s,
                                     Weight weights, 
-                                    float *const __restrict__ *const __restrict__ weights_grad_d) {
+                                    real_2d weights_grad_d) {
     if constexpr (proptype == FORWARD) {
-        if constexpr (std::is_same_v<Weight, const float *>) {
+        if constexpr (std::is_same_v<Weight, c_real_1d>) {
             // Intra-individual
             push_stack(s, tid, weights[param_index]);
         }
