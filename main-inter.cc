@@ -11,6 +11,7 @@
 #include "inter-individual/runner.hpp"
 
 #include <cmath>
+#include <iostream>
 
 int main(void) {
     float **X, *y;
@@ -29,19 +30,24 @@ int main(void) {
     // Trainable parameters
     Expression w0 = Parameter(0);
     Expression w1 = Parameter(1);
+    Expression w2 = Parameter(2);
 
     // Symbolic expression
-    Expression f = w0 * Cos(x)*x + x*x - w1;
+    Expression f1 = w0 * Cos(x)*x + x*x - w1;
+    Expression f2 = w0 * Cos(x) + x - w1;
+    Expression f3 = w0 * Sin(x + w2)*x + x*x - w1;
 
     // Construct a population
-    std::vector<Expression> expression_pop;
-    for (int i = 0; i < 11200; ++i) {
-        expression_pop.push_back(f);
-    }
+    std::vector<Expression> expression_pop = {f1, f2, f3,};
 
     // Fit expressions
-    inter_individual::Runner runner(dataset, 2);
+    inter_individual::Runner runner(dataset, 3);
     runner.run(expression_pop);
+
+    // Print fitnesses
+    std::cout << "f1: " << expression_pop[0].fitness << std::endl;
+    std::cout << "f2: " << expression_pop[1].fitness << std::endl;
+    std::cout << "f3: " << expression_pop[2].fitness << std::endl;
 
     // Free data
     delete_test_data(X, y);

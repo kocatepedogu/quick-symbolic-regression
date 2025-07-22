@@ -23,16 +23,21 @@ namespace inter_individual {
             real_2d weights_grad_d,
             const int nweights,
             const int nepochs,
-            const float learning_rate)
+            const float learning_rate,
+            real_1d loss_d)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
         if (tid < num_of_individuals) {
+            float total_loss = 0;
+
             for (int epoch = 0; epoch < nepochs; ++epoch) {
                 // Reset weight gradients
                 for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
                     weights_grad_d[weight_idx][tid] = 0;
                 }
+
+                total_loss = 0;
 
                 // For all datapoints, compute and sum weight gradients
                 for (int datapoint_idx = 0; datapoint_idx < m; ++datapoint_idx) {
@@ -55,6 +60,9 @@ namespace inter_individual {
                     // Print an empty line in between forward propagation output and backpropagation output
                     vm_debug_print(tid, "");
 
+                    // Add squared difference to total loss
+                    total_loss += powf(stack_d[0][tid], 2);
+
                     // Backpropagate
                     vm_debug_print(tid, "Backpropagation");
                     vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, datapoint_idx, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
@@ -66,11 +74,7 @@ namespace inter_individual {
                 }
             }
 
-            for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
-                if (tid == 50 && weight_idx <= 1) {
-                    printf("%d %d %f\n", tid, weight_idx, weights_d[weight_idx][tid]);
-                }
-            }
+            loss_d[tid] = total_loss;
         }
     }
 
@@ -81,7 +85,7 @@ namespace inter_individual {
         HIP_CALL(hipGetDeviceProperties(&props, device_id));
     }
 
-    void VirtualMachine::fit(const Program &program, int epochs, float learning_rate) {
+    void VirtualMachine::fit(const Program &program, real_1d loss_d, int epochs, float learning_rate) {
         real_2d_mut stack_d;
         real_2d_mut intermediate_d;
 
@@ -144,7 +148,7 @@ namespace inter_individual {
             dataset.m, dataset.X_d, dataset.y_d,
             stack_d, intermediate_d,
             weights_d, weights_grad_d, nweights,
-            epochs, learning_rate);
+            epochs, learning_rate, loss_d);
 
         HIP_CALL(hipDeviceSynchronize());
 

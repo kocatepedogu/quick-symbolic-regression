@@ -24,7 +24,7 @@ hipcc -c inter-individual/runner.cc -o inter-individual/runner.o $FLAGS
 
 hipcc -c tests/testdata.cc $FLAGS
 
-hipcc main-intra.o \
+hipcc main-inter.o \
       \
       expressions/expression.o \
       expressions/binary.o \

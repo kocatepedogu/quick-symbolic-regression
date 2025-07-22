@@ -4,6 +4,7 @@
 #ifndef INTER_VM_HPP
 #define INTER_VM_HPP
 
+#include "../../vm/vm_types.hpp"
 #include "../../dataset/dataset.hpp"
 #include "../program/program.hpp"
 
@@ -14,7 +15,7 @@ namespace inter_individual {
     public:
         VirtualMachine(const Dataset& dataset, int nweights);
 
-        void fit(const Program& program, int epochs, float learning_rate);
+        void fit(const Program& program, real_1d loss_d, int epochs, float learning_rate);
 
     private:
         const Dataset& dataset;

@@ -89,6 +89,9 @@ struct Expression
 
     /// Total number of nodes in the tree representing the expression
     int num_of_nodes;
+
+    /// Fitness value of the expression
+    float fitness;
 };
 
 /**
