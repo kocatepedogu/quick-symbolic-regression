@@ -1,10 +1,14 @@
 quicksr.exe
 gpucore.*
 
+*.so
 *.o
+
 compiler/*.o
 dataset/*.o
 expressions/*.o
+tests/*.o
+tests/*.exe
 
 intra-individual/program/*.o
 intra-individual/vm/*.o

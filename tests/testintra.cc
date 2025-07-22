@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "./tests/testdata.hpp"
+#include "testdata.hpp"
 
-#include "./expressions/expression.hpp"
-#include "./expressions/binary.hpp"
-#include "./expressions/unary.hpp"
+#include "../expressions/expression.hpp"
+#include "../expressions/binary.hpp"
+#include "../expressions/unary.hpp"
 
-#include "./dataset/dataset.hpp"
-#include "./intra-individual/runner.hpp"
+#include "../dataset/dataset.hpp"
+#include "../intra-individual/runner.hpp"
 
 #include <cmath>
 #include <iostream>
