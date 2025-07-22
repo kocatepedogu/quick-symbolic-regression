@@ -40,6 +40,13 @@ namespace inter_individual {
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
         vm_control<FORWARD, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, 0, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+
+        // Print an empty line in between forward propagation output and backpropagation output
+        vm_debug_print(tid, "");
+
+        // Backpropagate
+        vm_debug_print(tid, "Backpropagation");
+        vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, 0, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
     }
 
     VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
@@ -91,6 +98,11 @@ namespace inter_individual {
         * - The array has dimensions [nweights][num_threads].
         */
         init_arr_2d(weights_d, nweights, program.num_of_individuals);
+        for (int i = 0; i < nweights; ++i) {
+            for (int j = 0; j < program.num_of_individuals; ++j) {
+                weights_d[i][j] = 0.5;
+            }
+        }
 
         /*
         * Allocate array weights_grad_d.
@@ -98,6 +110,11 @@ namespace inter_individual {
         * - i'th weight gradient of the j'th expression is (sequentially) accumulated in weights_grad_d[i][j]
         */
         init_arr_2d(weights_grad_d, nweights, program.num_of_individuals);
+        for (int i = 0; i < nweights; ++i) {
+            for (int j = 0; j < program.num_of_individuals; ++j) {
+                weights_grad_d[i][j] = 0.0;
+            }
+        }
 
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, 0,
