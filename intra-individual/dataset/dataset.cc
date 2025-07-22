@@ -16,10 +16,7 @@ namespace intra_individual {
         * The goal is to convert X to X_d on device, which is in structure of array form.
         * The dimensions should be X_d[n][m]
         */
-        HIP_CALL(hipMallocManaged(&X_d, sizeof *X_d * n));
-        for (int i = 0; i < n; ++i) {
-            HIP_CALL(hipMallocManaged(&X_d[i], sizeof **X_d * m));
-        }
+        init_arr_2d(X_d, n, m);
 
         // Copy X to X_d on device
         for (int i = 0; i < n; ++i) {
@@ -29,7 +26,7 @@ namespace intra_individual {
         }
 
         // Allocate y_d on device
-        HIP_CALL(hipMallocManaged(&y_d, sizeof *y_d * m));
+        init_arr_1d(y_d, m);
 
         // Copy y to y_d on device
         for (int j = 0; j < m; ++j) {
@@ -40,12 +37,9 @@ namespace intra_individual {
 
     Dataset::~Dataset() noexcept {
         // Delete y_d from device
-        HIP_CALL(hipFree(y_d));
+        del_arr_1d(y_d);
 
         // Delete X_d from device
-        for (int i = 0; i < n; ++i) {
-            HIP_CALL(hipFree(X_d[i]));
-        }
-        HIP_CALL(hipFree(X_d));
+        del_arr_2d(X_d, n);
     }
 }

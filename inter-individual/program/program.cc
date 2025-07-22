@@ -25,16 +25,14 @@ namespace inter_individual {
             const int num_of_instructions = ir.bytecode.size();
 
             ir_list.push_back(ir);
-            prog_pop->max_num_of_instructions = num_of_instructions > prog_pop->max_num_of_instructions ? 
-                num_of_instructions : prog_pop->max_num_of_instructions;
+
+            if (num_of_instructions > prog_pop->max_num_of_instructions) {
+                prog_pop->max_num_of_instructions = num_of_instructions;
+            }
         }
 
         // Element i points to the array containing ith instructions of every program
-        HIP_CALL(hipMallocManaged(&prog_pop->bytecode, 
-            sizeof *prog_pop->bytecode * prog_pop->max_num_of_instructions));
-        for (int i = 0; i < prog_pop->max_num_of_instructions; ++i) {
-            HIP_CALL(hipMallocManaged(&prog_pop->bytecode[i], sizeof prog_pop->bytecode[0] * num_of_individuals));
-        }
+        init_arr_2d(prog_pop->bytecode, prog_pop->max_num_of_instructions, num_of_individuals);
 
         // Copy instructions to GPU memory
         for (int j = 0; j < num_of_individuals; ++j) {
@@ -55,9 +53,6 @@ namespace inter_individual {
     }
 
     void program_destroy(Program &prog_pop) {
-        for (int i = 0; i < prog_pop.max_num_of_instructions; ++i) {
-            HIP_CALL(hipFree(prog_pop.bytecode[i]));
-        }
-        HIP_CALL(hipFree(prog_pop.bytecode));
+        del_arr_2d(prog_pop.bytecode, prog_pop.max_num_of_instructions);
     }
 }

@@ -76,40 +76,28 @@ namespace inter_individual {
         * - Each thread accesses its own stack. 
         *   The dimensions of the stack are [max_stack_depth][num_threads]
         */
-        HIP_CALL(hipMallocManaged(&stack_d, sizeof *stack_d * max_stack_depth));
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipMallocManaged(&stack_d[i], sizeof **stack_d * program.num_of_individuals));
-        }
+        init_arr_2d(stack_d, max_stack_depth, program.num_of_individuals);
 
         /*
         * Allocate array intermediate_d to store intermediate calculation 
         * results for later use in backpropagation. The dimensions of 
         * intermediate_d is the same as stack_d.
         */
-        HIP_CALL(hipMallocManaged(&intermediate_d, sizeof *intermediate_d * max_stack_depth));
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipMallocManaged(&intermediate_d[i], sizeof **intermediate_d * program.num_of_individuals));
-        }
+        init_arr_2d(intermediate_d, max_stack_depth, program.num_of_individuals);
 
         /*
         * Allocate array weights_d.
         * - Each thread fits a different expression and has a different set of weight values.
         * - The array has dimensions [nweights][num_threads].
         */
-        HIP_CALL(hipMallocManaged(&weights_d, sizeof *weights_d * nweights));
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipMallocManaged(&weights_d[i], sizeof **weights_d * program.num_of_individuals));
-        }
+        init_arr_2d(weights_d, nweights, program.num_of_individuals);
 
         /*
         * Allocate array weights_grad_d.
-        * - The array has the same dimensions as weights_d. 
+        * - The array has the same dimensions as weights_d: [nweights][num_threads]. 
         * - i'th weight gradient of the j'th expression is (sequentially) accumulated in weights_grad_d[i][j]
         */
-        HIP_CALL(hipMallocManaged(&weights_grad_d, sizeof *weights_grad_d * nweights));
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipMallocManaged(&weights_grad_d[i], sizeof **weights_grad_d * dataset.m));
-        }
+        init_arr_2d(weights_grad_d, nweights, program.num_of_individuals);
 
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, 0,
@@ -123,27 +111,15 @@ namespace inter_individual {
         HIP_CALL(hipDeviceSynchronize());
 
         // Deallocate array intermediate_d.
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipFree(intermediate_d[i]));
-        }
-        HIP_CALL(hipFree(intermediate_d));
+        del_arr_2d(intermediate_d, max_stack_depth);
 
         // Deallocate array stack_d
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipFree(stack_d[i]));
-        }
-        HIP_CALL(hipFree(stack_d));
+        del_arr_2d(stack_d, max_stack_depth);
 
         // Deallocate array weights_d
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipFree(weights_d[i]));
-        }
-        HIP_CALL(hipFree(weights_d));
+        del_arr_2d(weights_d, nweights);
 
         // Deallocate array weights_grad_d
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipFree(weights_grad_d[i]));
-        }
-        HIP_CALL(hipFree(weights_grad_d));
+        del_arr_2d(weights_grad_d, nweights);
     }
 };

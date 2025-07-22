@@ -128,23 +128,17 @@ namespace intra_individual {
         * - Consecutive threads should access consecutive locations in the stack.
         *   The dimensions of the stack are [max_stack_depth][num_threads]
         */
-        HIP_CALL(hipMallocManaged(&stack_d, sizeof *stack_d * max_stack_depth));
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipMallocManaged(&stack_d[i], sizeof **stack_d * dataset.m));
-        }
+        init_arr_2d(stack_d, max_stack_depth, dataset.m);
 
         /*
         * Allocate array intermediate_d to store intermediate calculation 
         * results for later use in backpropagation. The dimensions of 
         * intermediate_d is the same as stack_d.
         */
-        HIP_CALL(hipMallocManaged(&intermediate_d, sizeof *intermediate_d * max_stack_depth));
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipMallocManaged(&intermediate_d[i], sizeof **intermediate_d * dataset.m));
-        }
+        init_arr_2d(intermediate_d, max_stack_depth, dataset.m);
 
         /* Allocate weights */
-        HIP_CALL(hipMallocManaged(&weights_d, sizeof *weights_d * nweights));
+        init_arr_1d(weights_d, nweights);
 
         /*
         * Allocate array weights_grad_d.
@@ -152,18 +146,10 @@ namespace intra_individual {
         *   computed from different data points.
         * - weights_grad_d is an array of arrays with dimensions [nweights][num_threads]
         */
-        HIP_CALL(hipMallocManaged(&weights_grad_d, sizeof *weights_grad_d * nweights));
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipMallocManaged(&weights_grad_d[i], sizeof **weights_grad_d * dataset.m));
-        }
+        init_arr_2d(weights_grad_d, nweights, dataset.m);
 
         // Allocate memory for block sums
-        HIP_CALL(hipMallocManaged(&weights_grad_reduced_sum_d, 
-            nweights * sizeof *weights_grad_reduced_sum_d));
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipMallocManaged(&weights_grad_reduced_sum_d[i], 
-                reduction_blocks_per_grid * sizeof **weights_grad_reduced_sum_d));
-        }
+        init_arr_2d(weights_grad_reduced_sum_d, nweights, reduction_blocks_per_grid);
     }
 
     void VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
@@ -203,30 +189,18 @@ namespace intra_individual {
 
     VirtualMachine::~VirtualMachine() {
         // Deallocate array for block sums
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipFree(weights_grad_reduced_sum_d[i]));
-        }
-        HIP_CALL(hipFree(weights_grad_reduced_sum_d));
+        del_arr_2d(weights_grad_reduced_sum_d, nweights);
 
         // Deallocate array weights_grad_d.
-        for (int i = 0; i < nweights; ++i) {
-            HIP_CALL(hipFree(weights_grad_d[i]));
-        }
-        HIP_CALL(hipFree(weights_grad_d));
+        del_arr_2d(weights_grad_d, nweights);
 
         // Deallocate array weights_d
-        HIP_CALL(hipFree(weights_d));
+        del_arr_1d(weights_d);
 
         // Deallocate array intermediate_d.
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipFree(intermediate_d[i]));
-        }
-        HIP_CALL(hipFree(intermediate_d));
+        del_arr_2d(intermediate_d, max_stack_depth);
 
         // Deallocate array stack_d
-        for (int i = 0; i < max_stack_depth; ++i) {
-            HIP_CALL(hipFree(stack_d[i]));
-        }
-        HIP_CALL(hipFree(stack_d));
+        del_arr_2d(stack_d, max_stack_depth);
     }
 }

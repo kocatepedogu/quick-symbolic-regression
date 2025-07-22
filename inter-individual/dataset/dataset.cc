@@ -14,10 +14,7 @@ namespace inter_individual {
         * The device array X_d is also going to be in array of structures form.
         * The dimensions should be X_d[m][n]
         */
-        HIP_CALL(hipMallocManaged(&X_d, sizeof *X_d * m));
-        for (int i = 0; i < m; ++i) {
-            HIP_CALL(hipMallocManaged(&X_d[i], sizeof **X_d * n));
-        }
+        init_arr_2d(X_d, m, n);
 
         // Copy X to X_d on device
         for (int i = 0; i < m; ++i) {
@@ -27,7 +24,7 @@ namespace inter_individual {
         }
 
         // Allocate y_d on device
-        HIP_CALL(hipMallocManaged(&y_d, sizeof *y_d * m));
+        init_arr_1d(y_d, m);
 
         // Copy y to y_d on device
         for (int j = 0; j < m; ++j) {
@@ -37,12 +34,9 @@ namespace inter_individual {
 
     Dataset::~Dataset() noexcept {
         // Delete y_d from device
-        HIP_CALL(hipFree(y_d));
+        del_arr_1d(y_d);
 
         // Delete X_d from device
-        for (int i = 0; i < m; ++i) {
-            HIP_CALL(hipFree(X_d[i]));
-        }
-        HIP_CALL(hipFree(X_d));
+        del_arr_2d(X_d, m);
     }
 };

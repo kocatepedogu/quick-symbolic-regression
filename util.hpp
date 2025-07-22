@@ -23,3 +23,29 @@
     } while(0)
 
 #endif
+
+template <typename T>
+static inline void init_arr_1d(T *&ptr, int dim1) {
+    HIP_CALL(hipMallocManaged(&ptr, sizeof(T) * dim1));
+}
+
+template <typename T>
+static inline void del_arr_1d(T *ptr) {
+    HIP_CALL(hipFree(ptr));
+}
+
+template <typename T>
+static inline void init_arr_2d(T **&ptr, int dim1, int dim2) {
+    HIP_CALL(hipMallocManaged(&ptr, sizeof *ptr * dim1));
+    for (int i = 0; i < dim1; ++i) {
+        HIP_CALL(hipMallocManaged(&ptr[i], sizeof **ptr * dim2));
+    }
+}
+
+template <typename T>
+static inline void del_arr_2d(T **ptr, int dim1) {
+    for (int i = 0; i < dim1; ++i) {
+        HIP_CALL(hipFree(ptr[i]));
+    }
+    HIP_CALL(hipFree(ptr));
+}

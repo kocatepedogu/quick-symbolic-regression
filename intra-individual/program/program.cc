@@ -12,12 +12,10 @@ namespace intra_individual {
         prog_pop->num_of_individuals = num_of_individuals;
 
         // Create array for storing number of instructions in each program
-        HIP_CALL(hipMallocManaged(&prog_pop->num_of_instructions, 
-            sizeof *prog_pop->num_of_instructions * num_of_individuals));
+        init_arr_1d(prog_pop->num_of_instructions, num_of_individuals);
 
         // Create array for storing pointers to individual programs
-        HIP_CALL(hipMallocManaged(&prog_pop->bytecode, 
-            sizeof *prog_pop->bytecode * num_of_individuals));
+        init_arr_1d(prog_pop->bytecode, num_of_individuals);
 
         // Compile every expression to IR and copy to GPU memory
         for (int i = 0; i < num_of_individuals; ++i) {
@@ -29,21 +27,16 @@ namespace intra_individual {
             prog_pop->num_of_instructions[i] = num_of_instructions;
             
             // Copy program contents to GPU
-            HIP_CALL(hipMallocManaged(&prog_pop->bytecode[i], sizeof *prog_pop->bytecode[i] * num_of_instructions));
+            init_arr_1d(prog_pop->bytecode[i], num_of_instructions);
             memcpy(prog_pop->bytecode[i], &ir.bytecode[0], num_of_instructions * sizeof ir.bytecode[0]);
         }
     }
 
     void program_destroy(Program &prog_pop) {
         // Delete program contents from GPU memory
-        for (int i = 0; i < prog_pop.num_of_individuals; ++i) {
-            HIP_CALL(hipFree(prog_pop.bytecode[i]));
-        }
-
-        // Delete array for storing pointers to individual programs
-        HIP_CALL(hipFree(prog_pop.bytecode));
+        del_arr_2d(prog_pop.bytecode, prog_pop.num_of_individuals);
 
         // Delete array for storing number of instructions in each program
-        HIP_CALL(hipFree(prog_pop.num_of_instructions));
+        del_arr_1d(prog_pop.num_of_instructions);
     }
 }
