@@ -7,7 +7,7 @@
 #include "./expressions/binary.hpp"
 #include "./expressions/unary.hpp"
 
-#include "./intra-individual/dataset/dataset.hpp"
+#include "./dataset/dataset.hpp"
 #include "./intra-individual/runner.hpp"
 
 #include <cmath>
@@ -21,7 +21,7 @@ int main(void) {
     });
 
     // Generate ground truth dataset
-    intra_individual::Dataset dataset(X, y, test_data_length, 1);
+    Dataset dataset(X, y, test_data_length, 1);
 
     // Input feature
     Expression x = Var(0);

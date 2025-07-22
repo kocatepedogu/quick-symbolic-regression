@@ -2,7 +2,7 @@
 #define INTRA_RUNNER_HPP
 
 #include "../expressions/expression.hpp"
-#include "./dataset/dataset.hpp"
+#include "../dataset/dataset.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
 

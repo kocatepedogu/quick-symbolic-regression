@@ -7,7 +7,7 @@
 #include "./expressions/binary.hpp"
 #include "./expressions/unary.hpp"
 
-#include "inter-individual/dataset/dataset.hpp"
+#include "./dataset/dataset.hpp"
 #include "inter-individual/runner.hpp"
 
 #include <cmath>
@@ -21,7 +21,7 @@ int main(void) {
     });
 
     // Create dataset
-    inter_individual::Dataset dataset(X, y, test_data_length, 1);
+    Dataset dataset(X, y, test_data_length, 1);
 
     // Input feature
     Expression x = Var(0);

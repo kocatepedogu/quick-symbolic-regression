@@ -4,8 +4,7 @@
 #ifndef INTRA_VM_HPP
 #define INTRA_VM_HPP
 
-#include "../../compiler/ir.hpp"
-#include "../dataset/dataset.hpp"
+#include "../../dataset/dataset.hpp"
 
 #include <hip/hip_runtime.h>
 #include </usr/lib/clang/20/include/omp.h>

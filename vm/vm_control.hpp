@@ -51,7 +51,7 @@ void vm_control(const int tid,
                     propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
                 }
                 if constexpr (paraType == INTER_INDIVIDUAL) {
-                    propagate_immediate<propType>(tid, X_d[datapoint_idx][instruction.argindex], s);
+                    propagate_immediate<propType>(tid, X_d[instruction.argindex][datapoint_idx], s);
                 }
                 break;
             case PUSH_PARAMETER:

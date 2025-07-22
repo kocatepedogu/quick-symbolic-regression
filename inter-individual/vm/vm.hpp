@@ -4,7 +4,7 @@
 #ifndef INTER_VM_HPP
 #define INTER_VM_HPP
 
-#include "../dataset/dataset.hpp"
+#include "../../dataset/dataset.hpp"
 #include "../program/program.hpp"
 
 #include <hip/hip_runtime.h>
