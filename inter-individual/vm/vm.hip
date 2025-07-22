@@ -19,34 +19,59 @@ namespace inter_individual {
             c_real_1d y_d, 
             real_2d stack_d, 
             real_2d intermediate_d,
-            c_real_2d weights_d,
+            real_2d weights_d,
             real_2d weights_grad_d,
-            const int nweights)
+            const int nweights,
+            const int nepochs,
+            const float learning_rate)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
-        int stack_pointer = 0;
-        int intermediate_pointer = 0;
+        if (tid < num_of_individuals) {
+            for (int epoch = 0; epoch < nepochs; ++epoch) {
+                // Reset weight gradients
+                for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+                    weights_grad_d[weight_idx][tid] = 0;
+                }
 
-        const StackState s(
-            stack_d,
-            intermediate_d,
-            stack_pointer,
-            intermediate_pointer
-        );
+                // For all datapoints, compute and sum weight gradients
+                for (int datapoint_idx = 0; datapoint_idx < m; ++datapoint_idx) {
+                    int stack_pointer = 0;
+                    int intermediate_pointer = 0;
 
-        int program_counter = 0;
+                    const StackState s(
+                        stack_d,
+                        intermediate_d,
+                        stack_pointer,
+                        intermediate_pointer
+                    );
 
-        // Forward propagate and evaluate loss
-        vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, 0, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+                    int program_counter = 0;
 
-        // Print an empty line in between forward propagation output and backpropagation output
-        vm_debug_print(tid, "");
+                    // Forward propagate and evaluate loss
+                    vm_debug_print(tid, "Forward propagation");
+                    vm_control<FORWARD, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, datapoint_idx, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
 
-        // Backpropagate
-        vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, 0, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+                    // Print an empty line in between forward propagation output and backpropagation output
+                    vm_debug_print(tid, "");
+
+                    // Backpropagate
+                    vm_debug_print(tid, "Backpropagation");
+                    vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, datapoint_idx, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+                }
+
+                // Apply weight updates (gradient descent)
+                for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+                    weights_d[weight_idx][tid] -= learning_rate * weights_grad_d[weight_idx][tid];
+                }
+            }
+
+            for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+                if (tid == 50 && weight_idx <= 1) {
+                    printf("%d %d %f\n", tid, weight_idx, weights_d[weight_idx][tid]);
+                }
+            }
+        }
     }
 
     VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
@@ -56,7 +81,7 @@ namespace inter_individual {
         HIP_CALL(hipGetDeviceProperties(&props, device_id));
     }
 
-    void VirtualMachine::fit(const Program &program) {
+    void VirtualMachine::fit(const Program &program, int epochs, float learning_rate) {
         real_2d_mut stack_d;
         real_2d_mut intermediate_d;
 
@@ -110,11 +135,6 @@ namespace inter_individual {
         * - i'th weight gradient of the j'th expression is (sequentially) accumulated in weights_grad_d[i][j]
         */
         init_arr_2d(weights_grad_d, nweights, program.num_of_individuals);
-        for (int i = 0; i < nweights; ++i) {
-            for (int j = 0; j < program.num_of_individuals; ++j) {
-                weights_grad_d[i][j] = 0.0;
-            }
-        }
 
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, 0,
@@ -123,7 +143,8 @@ namespace inter_individual {
             program.num_of_individuals,
             dataset.m, dataset.X_d, dataset.y_d,
             stack_d, intermediate_d,
-            weights_d, weights_grad_d, nweights);
+            weights_d, weights_grad_d, nweights,
+            epochs, learning_rate);
 
         HIP_CALL(hipDeviceSynchronize());
 

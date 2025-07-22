@@ -35,7 +35,7 @@ int main(void) {
 
     // Construct a population
     std::vector<Expression> expression_pop;
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 11200; ++i) {
         expression_pop.push_back(f);
     }
 

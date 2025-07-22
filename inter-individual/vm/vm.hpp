@@ -14,7 +14,7 @@ namespace inter_individual {
     public:
         VirtualMachine(const Dataset& dataset, int nweights);
 
-        void fit(const Program& program);
+        void fit(const Program& program, int epochs = 25, float learning_rate = 1e-2);
 
     private:
         const Dataset& dataset;
