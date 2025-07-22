@@ -47,12 +47,7 @@ void vm_control(const int tid,
             /* Operations with index operands */
             case PUSH_VARIABLE:
                 vm_debug_print(tid, "var %d", instruction.argindex);
-                if constexpr (paraType == INTRA_INDIVIDUAL) {
-                    propagate_immediate<propType>(tid, X_d[instruction.argindex][tid], s);
-                }
-                if constexpr (paraType == INTER_INDIVIDUAL) {
-                    propagate_immediate<propType>(tid, X_d[instruction.argindex][datapoint_idx], s);
-                }
+                propagate_immediate<propType>(tid, X_d[instruction.argindex][datapoint_idx], s);
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(tid, "param %d", instruction.argindex);
