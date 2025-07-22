@@ -1,19 +1,10 @@
-quicksr.exe
 gpucore.*
 
-*.so
-*.o
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
 
-compiler/*.o
-dataset/*.o
-expressions/*.o
-tests/*.o
-tests/*.exe
-
-intra-individual/program/*.o
-intra-individual/vm/*.o
-intra-individual/.o
-
-inter-individual/program/*.o
-inter-individual/vm/*.o
-inter-individual/.o
+testinter
+testintra
+libquicksr.so
