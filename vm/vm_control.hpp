@@ -10,23 +10,32 @@
 #include "vm_gradients.hpp"
 #include "vm_debug.hpp"
 #include "vm_propagation.hpp"
+#include "vm_types.hpp"
 
-template <PropagationType propType, ParallelismType paraType> __device__
+template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights> __device__
 void vm_control(const int tid, const int datapoint_idx,
-                const Instruction* bytecode, 
+                const Code bytecode, 
                 const int bytecode_length,
                 const int m, 
                 const float *const __restrict__ *const __restrict__ X_d, 
                 const float *const __restrict__ y_d,
                 const StackState& s, 
                 int& program_counter,
-                float *const __restrict__ weights_d,
+                Weights weights_d,
                 float *const __restrict__ *const __restrict__ weights_grad_d)
 {
     bool exit = false;
 
     for (; !exit && program_counter < bytecode_length; ++program_counter) {
-        Instruction instruction = bytecode[program_counter];
+        Instruction instruction;
+
+        if constexpr (paraType == INTRA_INDIVIDUAL) {
+            instruction = bytecode[program_counter];
+        }
+        if constexpr (paraType == INTER_INDIVIDUAL) {
+            /// TODO: Inter individual
+        }
+        
         switch (instruction.opcode) {
             /* Operations with immediate operands */
             case PUSH_IMMEDIATE:
@@ -46,7 +55,7 @@ void vm_control(const int tid, const int datapoint_idx,
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(tid, "param %d", instruction.argindex);
-                propagate_parameter<propType>(tid, instruction.argindex, s, 
+                propagate_parameter<propType, Weights>(tid, instruction.argindex, s, 
                     weights_d, weights_grad_d);
                 break;
 

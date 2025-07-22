@@ -2,6 +2,7 @@
 #define INTRA_VM_PROPAGATION_HPP
 
 #include <hip/hip_runtime.h>
+#include <type_traits>
 
 #include "vm_debug.hpp"
 #include "vm_types.hpp"
@@ -40,12 +41,18 @@ static inline void propagate_immediate(int tid, const float& immediate, const St
     }
 }
 
-template <PropagationType proptype> __device__
+template <PropagationType proptype, typename Weight> __device__
 static inline void propagate_parameter(int tid, const int& param_index, const StackState& s,
-                                    float *const __restrict__ weights, 
+                                    Weight weights, 
                                     float *const __restrict__ *const __restrict__ weights_grad_d) {
     if constexpr (proptype == FORWARD) {
-        push_stack(s, tid, weights[param_index]);
+        if constexpr (std::is_same_v<Weight, const float *>) {
+            // Intra-individual
+            push_stack(s, tid, weights[param_index]);
+        }
+        else {
+            /// TODO: Inter-individual
+        }
     }
 
     if constexpr (proptype == BACK) {

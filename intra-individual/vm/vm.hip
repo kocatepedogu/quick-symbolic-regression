@@ -79,14 +79,14 @@ namespace intra_individual {
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTRA_INDIVIDUAL>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        vm_control<FORWARD, INTRA_INDIVIDUAL, const Instruction *, const float *>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTRA_INDIVIDUAL>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        vm_control<BACK, INTRA_INDIVIDUAL, const Instruction *, const float *>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
     }
 
     VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
