@@ -20,6 +20,8 @@ namespace intra_individual {
 
         ~VirtualMachine();
 
+        real_1d_mut loss_d;
+
     private:
         const Dataset& dataset;
         const int nweights;

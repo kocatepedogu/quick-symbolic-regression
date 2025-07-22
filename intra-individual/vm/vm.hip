@@ -54,7 +54,8 @@ namespace intra_individual {
             real_2d intermediate_d,
             c_real_1d weights_d,
             real_2d weights_grad_d,
-            const int nweights)
+            const int nweights,
+            real_1d loss_d)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -81,6 +82,9 @@ namespace intra_individual {
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
+
+        // Save squared difference as the loss
+        loss_d[tid] = powf(stack_d[0][tid], 2);
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
@@ -150,6 +154,9 @@ namespace intra_individual {
 
         // Allocate memory for block sums
         init_arr_2d(weights_grad_reduced_sum_d, nweights, reduction_blocks_per_grid);
+
+        // Allocate memory for loss
+        init_arr_1d(loss_d, dataset.m);
     }
 
     void VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
@@ -166,7 +173,7 @@ namespace intra_individual {
                 code, code_length, 
                 dataset.m, dataset.X_d, dataset.y_d,
                 stack_d, intermediate_d,
-                weights_d, weights_grad_d, nweights);
+                weights_d, weights_grad_d, nweights, loss_d);
 
             // For every weight, sum gradient contributions from all data points using reduction
             // Apply gradient descent rule
@@ -178,16 +185,12 @@ namespace intra_individual {
         }
 
         HIP_CALL(hipStreamSynchronize(stream));
-
-        // Print calculated weights
-        omp_set_lock(&print_lock);
-        for (int i = 0; i < nweights; ++i) {
-            std::cout << weights_d[i] << std::endl;
-        } std::cout << std::endl;
-        omp_unset_lock(&print_lock);
     }
 
     VirtualMachine::~VirtualMachine() {
+        // Deallocate memory for loss
+        del_arr_1d(loss_d);
+
         // Deallocate array for block sums
         del_arr_2d(weights_grad_reduced_sum_d, nweights);
 

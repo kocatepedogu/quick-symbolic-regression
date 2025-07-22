@@ -11,6 +11,7 @@
 #include "./intra-individual/runner.hpp"
 
 #include <cmath>
+#include <iostream>
 
 int main(void) {
     float **X, *y;
@@ -20,7 +21,7 @@ int main(void) {
         return 2.5382 * cos(x)*x + x*x - 0.5; 
     });
 
-    // Generate ground truth dataset
+    // Create dataset
     Dataset dataset(X, y, test_data_length, 1);
 
     // Input feature
@@ -29,19 +30,27 @@ int main(void) {
     // Trainable parameters
     Expression w0 = Parameter(0);
     Expression w1 = Parameter(1);
+    Expression w2 = Parameter(2);
 
     // Symbolic expression
-    Expression f = w0 * Cos(x)*x + x*x - w1;
+    Expression f1 = w0 * Cos(x)*x + x*x - w1;
+    Expression f2 = w0 * Cos(x) + x - w1;
+    Expression f3 = w0 * Sin(x + w2)*x + x*x - w1;
 
     // Construct a population
-    std::vector<Expression> expression_pop;
-    for (int i = 0; i < 100; ++i) {
-        expression_pop.push_back(f);
-    }
+    std::vector<Expression> expression_pop = {f1, f2, f3,};
 
     // Fit expressions
-    intra_individual::Runner runner(dataset, 2);
-    runner.run(expression_pop);
+    intra_individual::Runner runner(dataset, 3);
+    for (int i = 0; i < 60; ++i) {
+        runner.run(expression_pop, 10);
+    }
+
+    // Print fitnesses
+    std::cout << "Intra" << std::endl;
+    std::cout << "f1: " << expression_pop[0].fitness << std::endl;
+    std::cout << "f2: " << expression_pop[1].fitness << std::endl;
+    std::cout << "f3: " << expression_pop[2].fitness << std::endl;
 
     // Free data
     delete_test_data(X, y);

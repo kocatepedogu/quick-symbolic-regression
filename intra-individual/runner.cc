@@ -34,7 +34,7 @@ namespace intra_individual {
         }
     }
 
-    void Runner::run(const std::vector<Expression>& population, int epochs, float learning_rate) {
+    void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
         // Convert symbolic expressions to bytecode program
         Program program_pop;
         program_create(&program_pop, population);
@@ -57,8 +57,9 @@ namespace intra_individual {
                     break;
                 } else {
                     // If there is work, fetch the bytecode program
-                    c_inst_1d code = program_pop.bytecode[work_count - 1];
-                    const int code_length = program_pop.num_of_instructions[work_count - 1];
+                    const int program_idx = work_count - 1;
+                    c_inst_1d code = program_pop.bytecode[program_idx];
+                    const int code_length = program_pop.num_of_instructions[program_idx];
 
                     // Notify others about the fact that there is now less work
                     --work_count;
@@ -66,6 +67,14 @@ namespace intra_individual {
 
                     // Do the work
                     vms[tid]->fit(code, code_length, epochs, learning_rate);
+
+                    // Compute total loss
+                    float total_loss = 0;
+                    #pragma omp simd reduction(+:total_loss)
+                    for (int i = 0; i < dataset.m; ++i) {
+                        total_loss += vms[tid]->loss_d[i];
+                    }
+                    population[program_idx].fitness = -total_loss;
                 }
             }
         }

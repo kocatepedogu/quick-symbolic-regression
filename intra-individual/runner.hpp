@@ -24,7 +24,7 @@ namespace intra_individual {
     public:
         Runner(const Dataset& dataset, const int nweights);
 
-        void run(const std::vector<Expression>& population, int epochs = 500, float learning_rate = 1e-3);
+        void run(std::vector<Expression>& population, int epochs = 500, float learning_rate = 1e-3);
 
         ~Runner();
     };
