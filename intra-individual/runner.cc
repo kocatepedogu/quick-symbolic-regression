@@ -74,7 +74,7 @@ namespace intra_individual {
                     for (int i = 0; i < dataset.m; ++i) {
                         total_loss += vms[tid]->loss_d[i];
                     }
-                    population[program_idx].fitness = -total_loss;
+                    population[program_idx].loss = total_loss;
                 }
             }
         }

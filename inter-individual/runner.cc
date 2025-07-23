@@ -28,9 +28,9 @@ namespace inter_individual {
         // Destroy programs
         program_destroy(program_pop);
 
-        // Write fitness values (negative loss) to the original expressions
+        // Write loss values to the original expressions
         for (int i = 0; i < population.size(); ++i) {
-            population[i].fitness = -loss_d[i];
+            population[i].loss = loss_d[i];
         }
 
         // Destroy loss array

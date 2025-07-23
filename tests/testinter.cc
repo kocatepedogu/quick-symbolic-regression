@@ -46,11 +46,11 @@ int main(void) {
         runner.run(expression_pop, 10);
     }
 
-    // Print fitnesses
+    // Print losses
     std::cout << "Inter" << std::endl;
-    std::cout << "f1: " << expression_pop[0].fitness << std::endl;
-    std::cout << "f2: " << expression_pop[1].fitness << std::endl;
-    std::cout << "f3: " << expression_pop[2].fitness << std::endl;
+    std::cout << "f1: " << expression_pop[0].loss << std::endl;
+    std::cout << "f2: " << expression_pop[1].loss << std::endl;
+    std::cout << "f3: " << expression_pop[2].loss << std::endl;
 
     // Free data
     delete_test_data(X, y);

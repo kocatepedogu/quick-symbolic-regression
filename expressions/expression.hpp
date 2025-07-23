@@ -90,19 +90,14 @@ struct Expression
     /// Total number of nodes in the tree representing the expression
     int num_of_nodes;
 
-    /// Fitness value of the expression
-    float fitness;
+    /// Training loss (MSE on dataset)
+    float loss;
 };
 
 /**
   * @brief Yields infix representation of the expression
   */
 std::ostream& operator << (std::ostream& os, const Expression& m) noexcept;
-
-/**
-  * @brief Compares two expressions with respect to their fitness
-  */
-bool operator < (const Expression& left_operand, const Expression& right_operand) noexcept;
 
 /**
   * @brief Tests whether two expressions are the same
