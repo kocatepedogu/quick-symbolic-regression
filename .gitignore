@@ -8,4 +8,5 @@ CMakeFiles
 testinter
 testintra
 testexprgen
+testmutation
 libquicksr.so

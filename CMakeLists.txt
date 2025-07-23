@@ -73,7 +73,9 @@ install(TARGETS quicksr
 add_executable(testintra ${CMAKE_CURRENT_SOURCE_DIR}/tests/testintra.cc)
 add_executable(testinter ${CMAKE_CURRENT_SOURCE_DIR}/tests/testinter.cc)
 add_executable(testexprgen ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprgen.cc)
+add_executable(testmutation ${CMAKE_CURRENT_SOURCE_DIR}/tests/testmutation.cc)
 
 target_link_libraries(testintra quicksr)
 target_link_libraries(testinter quicksr)
 target_link_libraries(testexprgen quicksr)
+target_link_libraries(testmutation quicksr)
