@@ -16,7 +16,9 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/compiler
     ${CMAKE_CURRENT_SOURCE_DIR}/dataset
     ${CMAKE_CURRENT_SOURCE_DIR}/expressions
+    ${CMAKE_CURRENT_SOURCE_DIR}/genetic
     ${CMAKE_CURRENT_SOURCE_DIR}/vm
+    ${CMAKE_CURRENT_SOURCE_DIR}/util
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/common
     ${CMAKE_CURRENT_SOURCE_DIR}/inter-individual
     ${CMAKE_CURRENT_SOURCE_DIR}/inter-individual/program
@@ -70,6 +72,8 @@ install(TARGETS quicksr
 
 add_executable(testintra ${CMAKE_CURRENT_SOURCE_DIR}/tests/testintra.cc)
 add_executable(testinter ${CMAKE_CURRENT_SOURCE_DIR}/tests/testinter.cc)
+add_executable(testexprgen ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprgen.cc)
 
 target_link_libraries(testintra quicksr)
 target_link_libraries(testinter quicksr)
+target_link_libraries(testexprgen quicksr)
