@@ -15,11 +15,14 @@ int main(void) {
     // Create dataset
     Dataset dataset(X, y, test_data_length, 1);
 
-    // Create island
-    Island island(dataset, 2, 1000);
+    #pragma omp parallel num_threads(10)
+    {
+        // Create island
+        Island island(dataset, 2, 2000);
 
-    // Iterate island
-    island.iterate(20);
+        // Iterate island
+        island.iterate(10);
+    }
 
     return 0;
 }

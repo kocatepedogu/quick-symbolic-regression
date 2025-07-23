@@ -76,6 +76,12 @@ add_executable(testexprgen ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprgen.cc)
 add_executable(testmutation ${CMAKE_CURRENT_SOURCE_DIR}/tests/testmutation.cc)
 add_executable(testisland ${CMAKE_CURRENT_SOURCE_DIR}/tests/testisland.cc)
 
+target_compile_options(testintra PRIVATE -O3 -march=native -fopenmp)
+target_compile_options(testinter PRIVATE -O3 -march=native -fopenmp)
+target_compile_options(testexprgen PRIVATE -O3 -march=native -fopenmp)
+target_compile_options(testmutation PRIVATE -O3 -march=native -fopenmp)
+target_compile_options(testisland PRIVATE -O3 -march=native -fopenmp)
+
 target_link_libraries(testintra quicksr)
 target_link_libraries(testinter quicksr)
 target_link_libraries(testexprgen quicksr)
