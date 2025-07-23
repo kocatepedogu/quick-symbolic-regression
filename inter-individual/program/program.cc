@@ -6,7 +6,7 @@
 #include <hip/hip_runtime.h>
 
 #include "../../compiler/compiler.hpp"
-#include "../../util.hpp"
+#include "../../util/hip.hpp"
 
 namespace inter_individual {
     void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop) {

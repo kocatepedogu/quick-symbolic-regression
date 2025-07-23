@@ -2,7 +2,7 @@
 
 #include "../../compiler/ir.hpp"
 #include "../../compiler/compiler.hpp"
-#include "../../util.hpp"
+#include "../../util/hip.hpp"
 
 #include <hip/hip_runtime.h>
 

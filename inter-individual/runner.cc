@@ -3,7 +3,7 @@
 #include "./program/program.hpp"
 #include "./vm/vm.hpp"
 
-#include "../util.hpp"
+#include "../util/hip.hpp"
 
 namespace inter_individual {
     Runner::Runner(const Dataset& dataset, int nweights) :

@@ -5,7 +5,7 @@
 #include "../../vm/vm_types.hpp"
 #include "../../vm/vm_control.hpp"
 
-#include "../../util.hpp"
+#include "../../util/hip.hpp"
 
 namespace inter_individual {
     constexpr int max_stack_depth = 32;
