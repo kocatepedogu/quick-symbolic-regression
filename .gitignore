@@ -9,4 +9,5 @@ testinter
 testintra
 testexprgen
 testmutation
+testisland
 libquicksr.so
