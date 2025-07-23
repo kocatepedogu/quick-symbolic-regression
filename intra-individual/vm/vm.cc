@@ -13,7 +13,7 @@
 #include "../../util/hip.hpp"
 
 namespace intra_individual {
-    constexpr int max_stack_depth = 32;
+    constexpr int max_stack_depth = 128;
     constexpr int reduction_threads_per_block = 32;
 
     __global__ 

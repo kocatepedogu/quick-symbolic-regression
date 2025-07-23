@@ -4,13 +4,17 @@
 #include "./vm/vm.hpp"
 
 #include "../util/hip.hpp"
+#include <hip/hip_runtime.h>
 
 namespace inter_individual {
     Runner::Runner(const Dataset& dataset, int nweights) :
         dataset(dataset), nweights(nweights) 
     {
+        // Create stream
+        HIP_CALL(hipStreamCreate(&stream));
+
         // Create virtual machine
-        vm = new VirtualMachine(dataset, nweights);
+        vm = new VirtualMachine(dataset, nweights, stream);
     }
 
     void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
@@ -40,5 +44,8 @@ namespace inter_individual {
     Runner::~Runner() {
         // Destroy virtual machine
         delete vm;
+
+        // Destroy stream
+        HIP_CALL(hipStreamDestroy(stream));
     }
 }

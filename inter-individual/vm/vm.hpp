@@ -13,7 +13,7 @@
 namespace inter_individual {
     class VirtualMachine {
     public:
-        VirtualMachine(const Dataset& dataset, int nweights);
+        VirtualMachine(const Dataset& dataset, int nweights, hipStream_t &stream);
 
         void fit(const Program& program, real_1d loss_d, int epochs, float learning_rate);
 
@@ -23,6 +23,8 @@ namespace inter_individual {
 
         int device_id;
         hipDeviceProp_t props;
+
+        hipStream_t& stream;
     };
 };
 

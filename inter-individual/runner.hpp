@@ -20,6 +20,8 @@ namespace inter_individual {
 
         void run(std::vector<Expression>& population, int epochs = 500, float learning_rate = 1e-3);
 
+        hipStream_t stream;
+
         ~Runner();
     };
 }

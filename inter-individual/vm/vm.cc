@@ -8,7 +8,7 @@
 #include "../../util/hip.hpp"
 
 namespace inter_individual {
-    constexpr int max_stack_depth = 32;
+    constexpr int max_stack_depth = 128;
 
     __global__
     void vm(c_inst_2d bytecode, 
@@ -78,8 +78,8 @@ namespace inter_individual {
         }
     }
 
-    VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights) :
-        dataset(dataset), nweights(nweights)
+    VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights, hipStream_t &stream) :
+        dataset(dataset), nweights(nweights), stream(stream)
     {
         HIP_CALL(hipGetDevice(&device_id));
         HIP_CALL(hipGetDeviceProperties(&props, device_id));
@@ -141,7 +141,7 @@ namespace inter_individual {
         init_arr_2d(weights_grad_d, nweights, program.num_of_individuals);
 
         hipLaunchKernelGGL(
-            vm, gridDim, blockDim, 0, 0,
+            vm, gridDim, blockDim, 0, stream,
             program.bytecode, 
             program.max_num_of_instructions, 
             program.num_of_individuals,
@@ -150,7 +150,7 @@ namespace inter_individual {
             weights_d, weights_grad_d, nweights,
             epochs, learning_rate, loss_d);
 
-        HIP_CALL(hipDeviceSynchronize());
+        HIP_CALL(hipStreamSynchronize(stream));
 
         // Deallocate array intermediate_d.
         del_arr_2d(intermediate_d, max_stack_depth);
