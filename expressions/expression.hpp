@@ -76,7 +76,7 @@ struct Expression
     Expression(operation_t operation, const Expression& e1, const Expression& e2) noexcept;
 
     /// Operation type of the expression
-    const operation_t operation;
+    operation_t operation;
 
     /// For constants
     float value;
