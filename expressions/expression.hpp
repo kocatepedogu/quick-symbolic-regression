@@ -100,6 +100,11 @@ struct Expression
 std::ostream& operator << (std::ostream& os, const Expression& m) noexcept;
 
 /**
+  * @brief Compares two expressions with respect to their fitness
+  */
+bool operator < (const Expression& left_operand, const Expression& right_operand) noexcept;
+
+/**
   * @brief Tests whether two expressions are the same
   */
 bool operator == (const Expression& left_operand, const Expression& right_operand) noexcept;

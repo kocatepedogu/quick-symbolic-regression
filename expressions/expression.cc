@@ -57,6 +57,10 @@ std::ostream& operator<<(std::ostream& os, const Expression& e) noexcept
     return os;
 }
 
+bool operator < (const Expression& left_operand, const Expression& right_operand) noexcept {
+    return left_operand.fitness < right_operand.fitness;
+}
+
 bool operator == (const Expression& left_operand, const Expression& right_operand) noexcept {
     if (left_operand.operation != right_operand.operation) {
         return false;
