@@ -35,20 +35,30 @@ public:
             return false;
         }
 
-        // If a is at least 10% worse than b, return true.
-        if ((a.loss - b.loss) / b.loss > 0.10) {
-            return true;
-        }
-
-        // Otherwise, check if a is more complex than b.
-        // A simpler expression is preferable to an expression that has just 10% lower loss.
+        // If a is more complex
         if (a.num_of_nodes > b.num_of_nodes) {
-            return true;
-        }
+            // If a is more complex, but b has significantly higher loss
+            if ((b.loss - a.loss) / a.loss > 0.1) {
+                // fitness(a) > fitness(b)
+                return false;
+            }
 
-        // If the expressions have the same complexity (number of nodes), then
-        // look at the loss again.
-        return a.loss > b.loss;
+            // If a is more complex and the loss difference is insignificant or b is better
+            // fitness(a) < fitness(b)
+            return true;
+        } 
+        else 
+        {
+            // If a is simpler, but a has significantly higher loss
+            if ((a.loss - b.loss) / b.loss > 0.1) {
+                // fitness(a) < fitness(b)
+                return true;
+            }
+
+            // If a is simpler, and the loss difference is insignificant or a is better
+            // fitness(a) > fitness(b)
+            return false;
+        }
     }
 };
 
