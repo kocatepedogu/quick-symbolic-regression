@@ -2,6 +2,8 @@ CompileFlags:
   Add:
     - "-I/usr/include/hip"
     - "-I/usr/include/rocm"
+    - "-I/home/user/quick-symbolic-regression/extern/pybind11/include"
+    - "-I/usr/include/python3.13"
     - "-I./"
     - "-D__HIP_PLATFORM_AMD__"
     - "-nogpulib"

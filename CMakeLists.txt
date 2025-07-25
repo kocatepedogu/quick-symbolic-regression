@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find HIP package
 find_package(HIP REQUIRED)
 
+# Find Python3 Development Package
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
 # Define source directories
 set(SOURCE_DIRS 
     ${CMAKE_CURRENT_SOURCE_DIR}/compiler
@@ -19,6 +22,7 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic
     ${CMAKE_CURRENT_SOURCE_DIR}/vm
     ${CMAKE_CURRENT_SOURCE_DIR}/util
+    ${CMAKE_CURRENT_SOURCE_DIR}/python
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/common
     ${CMAKE_CURRENT_SOURCE_DIR}/inter-individual
     ${CMAKE_CURRENT_SOURCE_DIR}/inter-individual/program
@@ -44,11 +48,14 @@ add_library(quicksr SHARED ${SOURCES})
 target_include_directories(quicksr PUBLIC
     ${SOURCE_DIRS}
     ${HIP_INCLUDE_DIRS}
+    ${Python3_INCLUDE_DIRS}
+    extern/pybind11/include
 )
 
 # Link HIP libraries
 target_link_libraries(quicksr
     ${HIP_LIBRARIES}
+    ${Python3_LIBRARIES}
     hip::host
     hip::device
     -lomp
