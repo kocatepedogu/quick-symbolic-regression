@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(QuickSR LANGUAGES CXX)
 
+set(ENABLE_SANITIZERS OFF)
+
 # Set the HIP compiler
 set(CMAKE_CXX_COMPILER hipcc)
 
@@ -13,6 +15,17 @@ find_package(HIP REQUIRED)
 
 # Find Python3 Development Package
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+# Configuration for Address Sanitizer and Undefined Behavior Sanitizer
+if(ENABLE_SANITIZERS)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        # Compiler Flags
+        set(SANITIZER_COMPILER_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
+        
+        # Linker flags
+        set(SANITIZER_LINKER_FLAGS asan ubsan)
+    endif()
+endif()
 
 # Define source directories
 set(SOURCE_DIRS 
@@ -59,6 +72,7 @@ target_link_libraries(quicksr
     hip::host
     hip::device
     -lomp
+    ${SANITIZER_LINKER_FLAGS}
 )
 
 # Compiler options
@@ -69,6 +83,7 @@ target_compile_options(quicksr PRIVATE
     -march=native
     -fopenmp
     -Wno-format-security
+    ${SANITIZER_COMPILER_FLAGS}
 )
 
 # Optional: Install library
@@ -85,18 +100,18 @@ add_executable(testcrossover ${CMAKE_CURRENT_SOURCE_DIR}/tests/testcrossover.cc)
 add_executable(testisland ${CMAKE_CURRENT_SOURCE_DIR}/tests/testisland.cc)
 add_executable(testexprpick ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprpick.cc)
 
-target_compile_options(testintra PRIVATE -O3 -march=native -fopenmp)
-target_compile_options(testinter PRIVATE -O3 -march=native -fopenmp)
-target_compile_options(testexprgen PRIVATE -O3 -march=native -fopenmp)
-target_compile_options(testmutation PRIVATE -O3 -march=native -fopenmp)
-target_compile_options(testcrossover PRIVATE -O3 -march=native -fopenmp)
-target_compile_options(testisland PRIVATE -O3 -march=native -fopenmp)
-target_compile_options(testexprpick PRIVATE -O3 -march=native -fopenmp)
+target_compile_options(testintra PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
+target_compile_options(testinter PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
+target_compile_options(testexprgen PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
+target_compile_options(testmutation PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
+target_compile_options(testcrossover PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
+target_compile_options(testisland PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
+target_compile_options(testexprpick PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 
-target_link_libraries(testintra quicksr)
-target_link_libraries(testinter quicksr)
-target_link_libraries(testexprgen quicksr)
-target_link_libraries(testmutation quicksr)
-target_link_libraries(testcrossover quicksr)
-target_link_libraries(testisland quicksr)
-target_link_libraries(testexprpick quicksr)
+target_link_libraries(testintra ${SANITIZER_LINKER_FLAGS} quicksr)
+target_link_libraries(testinter ${SANITIZER_LINKER_FLAGS} quicksr)
+target_link_libraries(testexprgen ${SANITIZER_LINKER_FLAGS} quicksr)
+target_link_libraries(testmutation ${SANITIZER_LINKER_FLAGS} quicksr)
+target_link_libraries(testcrossover ${SANITIZER_LINKER_FLAGS} quicksr)
+target_link_libraries(testisland ${SANITIZER_LINKER_FLAGS} quicksr)
+target_link_libraries(testexprpick ${SANITIZER_LINKER_FLAGS} quicksr)
