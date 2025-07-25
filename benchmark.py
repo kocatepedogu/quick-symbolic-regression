@@ -14,7 +14,8 @@ y = [x0*np.exp(x0 + x1) + np.sin(x1)
 
 libquicksr.fit(
     X, y, 
-    nthreads=1, 
+    nthreads=20, 
     nweights=1, 
-    npopulation=20000, 
-    ngenerations=2)
+    npopulation=11200, 
+    ngenerations=1,
+    nsupergenerations=5)

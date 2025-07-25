@@ -37,6 +37,14 @@ Island::Island(const Dataset& dataset,
     std::sort(population.begin(), population.end(), ExpressionComparator());
 }
 
+Expression Island::get_best_solution() {
+    return population[npopulation - 1];
+}
+
+void Island::insert_solution(Expression e) {
+    population[npopulation - 2] = e;
+}
+
 void Island::iterate(int niters) noexcept {
     for (int iter = 0; iter < niters; ++iter)
     {

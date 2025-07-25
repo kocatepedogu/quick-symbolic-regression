@@ -20,6 +20,10 @@ public:
 
     void iterate(int niters) noexcept;
 
+    void insert_solution(Expression e);
+
+    Expression get_best_solution();
+
 private:
     const Dataset& dataset;
 

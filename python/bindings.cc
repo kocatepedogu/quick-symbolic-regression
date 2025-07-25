@@ -1,16 +1,20 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include </usr/lib/clang/20/include/omp.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <iostream>
 
 #include "../genetic/island.hpp"
+#include "../genetic/expression_comparator.hpp"
 
 namespace py = pybind11;
 
 void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y, 
         int nweights,
-        int npopulation, int ngenerations,
+        int npopulation, 
+        int ngenerations, int nsupergenerations,
         int max_initial_depth, int max_mutation_depth,
         float mutation_probability,
         int nthreads) 
@@ -54,16 +58,59 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
     // Create dataset
     Dataset dataset(X, y, num_data_points, num_features);
 
+    // Create empty island array
+    Island **islands = new Island*[nthreads];
+
+    // Current best solution
+    Expression best = 0.0;
+
     // Fit
     #pragma omp parallel num_threads(nthreads)
     {
-        // Create island
-        Island island(dataset, nweights, npopulation / nthreads, 
+        const int threadIdx = omp_get_thread_num();
+
+        islands[threadIdx] = new Island(dataset, nweights, npopulation / nthreads, 
             max_initial_depth, max_mutation_depth, mutation_probability);
 
-        // Iterate island
-        island.iterate(ngenerations);
+        for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
+            // Iterate island
+            islands[threadIdx]->iterate(ngenerations);
+
+            // Synchronize all islands
+            #pragma omp barrier
+
+            // Migrate solutions
+            #pragma omp single
+            {
+                // Find the best solution
+                for (int i = 0; i < nthreads; ++i) {
+                    Expression new_best = islands[i]->get_best_solution();
+                    if (ExpressionComparator()(best, new_best) || (supergeneration == 0 && i == 0)) {
+                        best = new_best;
+                    }
+                }
+
+                // Forward best solution of island i to island i+1
+                std::cerr << std::endl;
+                for (int i = nthreads - 1; i >= 0; --i) {
+                    Expression new_best = islands[i]->get_best_solution();
+
+                    int next = (i + 1) % nthreads;
+                    islands[next]->insert_solution(new_best);
+
+                    // Print best result of each island
+                    std::cerr << new_best << std::endl;
+                }
+            }
+
+            // Synchronize all islands
+            #pragma omp barrier
+        }
+
+        delete islands[threadIdx];
     }
+
+    delete[] islands;
 
     // Free y
     free(y);
@@ -83,6 +130,7 @@ PYBIND11_MODULE(libquicksr, m) {
         py::arg("nweights") = 2,                    // Optional argument with default value
         py::arg("npopulation") = 1000,              // Optional argument with default value
         py::arg("ngenerations") = 10,               // Optional argument with default value
+        py::arg("nsupergenerations") = 2,           // Optional argument with default value
         py::arg("max_initial_depth") = 3,           // Optional argument with default value
         py::arg("max_mutation_depth") = 3,          // Optional argument with default value
         py::arg("max_mutation_probability") = 0.7,  // Optional argument with default value
