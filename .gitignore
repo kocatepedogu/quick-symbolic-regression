@@ -9,6 +9,7 @@ testinter
 testintra
 testexprgen
 testmutation
+testcrossover
 testisland
 testexprpick
 libquicksr.so
