@@ -1,7 +1,9 @@
 #include "island.hpp"
 
 #include "../expressions/expression.hpp"
+#include "../expressions/binary.hpp"
 
+#include "crossover.hpp"
 #include "expression_generator.hpp"
 #include "mutation.hpp"
 
@@ -55,13 +57,15 @@ Island::Island(const Dataset& dataset,
                int npopulation, 
                int max_initial_depth, 
                int max_mutation_depth, 
-               float mutation_probability) noexcept : 
+               float mutation_probability,
+               float crossover_probability) noexcept : 
                dataset(dataset), 
                nvars(dataset.n), 
                nweights(nweights), 
-               npopulation(npopulation), 
+               npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
                runner(dataset, nweights), 
-               mutator(dataset.n, nweights, max_mutation_depth, mutation_probability)
+               mutator(dataset.n, nweights, max_mutation_depth, mutation_probability),
+               crossover(crossover_probability)
 {
     // Initialize island with a population of random expressions
     ExpressionGenerator initial_expression_generator(nvars, nweights, max_initial_depth);
@@ -80,20 +84,24 @@ void Island::iterate(int niters) noexcept {
     for (int iter = 0; iter < niters; ++iter)
     {
         /* Parent Selection */
-        auto best = population[npopulation - 1];
-        std::cout << "Best: " << best << " Loss: " << best.loss << std::endl;
+        const auto &best = population[npopulation - 1];
+        const auto &nextbest = population[npopulation - 2];
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
-        for (int i = 0; i < npopulation; ++i) {
-            offspring.push_back(mutator.mutate(best));
+        for (int i = 0; i < npopulation / 2; ++i) {
+            const auto &children = crossover.crossover(best, nextbest);
+            const auto &child1 = get<0>(children);
+            const auto &child2 = get<1>(children);
+            offspring.push_back(mutator.mutate(child1));
+            offspring.push_back(mutator.mutate(child2));
         }
 
         // Replace current population with offspring
         population = offspring;
 
         // Compute fitnesses
-        runner.run(population, 10);
+        runner.run(population, 1);
 
         // Sort population
         std::sort(population.begin(), population.end(), ExpressionComparator());
@@ -103,5 +111,7 @@ void Island::iterate(int niters) noexcept {
         if (!ExpressionComparator()(best, newbest)) {
             newbest = best;
         }
+        
+        std::cout << "Best: " << newbest << " Loss: " << newbest.loss << std::endl;
     }
 }

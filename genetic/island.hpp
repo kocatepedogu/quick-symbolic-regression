@@ -4,6 +4,7 @@
 #include "../dataset/dataset.hpp"
 #include "../expressions/expression.hpp"
 #include "../inter-individual/runner.hpp"
+#include "crossover.hpp"
 #include "mutation.hpp"
 
 
@@ -14,7 +15,8 @@ public:
            const int npopulation, 
            const int max_initial_depth = 3, 
            const int max_mutation_depth = 3, 
-           const float mutation_probability = 0.5) noexcept;
+           const float mutation_probability = 0.1,
+           const float crossover_probability = 0.7) noexcept;
 
     void iterate(int niters) noexcept;
 
@@ -24,6 +26,7 @@ private:
     std::vector<Expression> population;
 
     Mutation mutator;
+    Crossover crossover;
 
     inter_individual::Runner runner;
 
