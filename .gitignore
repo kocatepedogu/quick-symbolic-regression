@@ -10,4 +10,5 @@ testintra
 testexprgen
 testmutation
 testisland
+testexprpick
 libquicksr.so
