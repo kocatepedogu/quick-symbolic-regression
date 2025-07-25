@@ -43,7 +43,7 @@ public:
         // Otherwise, check if a is more complex than b.
         // A simpler expression is preferable to an expression that has just 10% lower loss.
         if (a.num_of_nodes > b.num_of_nodes) {
-            return 0;
+            return true;
         }
 
         // If the expressions have the same complexity (number of nodes), then
