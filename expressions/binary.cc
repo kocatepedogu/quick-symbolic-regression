@@ -5,8 +5,6 @@
 #include "expression.hpp"
 #include "../util/rng.hpp"
 
-
-
 #define PROPAGATION_TEMPLATE_INVERSE(OP, INVOP, INVERSE_OPERATION, TYPE) \
     if (left_operand.operation == CONSTANT && right_operand.operation == INVERSE_OPERATION) { \
         if (right_operand.operands[0].operation == CONSTANT) { \
@@ -26,27 +24,27 @@
     PROPAGATION_TEMPLATE_INVERSE(OP, INVOP, INVERSE_OPERATION, PARAMETER)
 
 
-#define PROPAGATION_TEMPLATE_HALF(FIRST_OPERAND, SECOND_OPERAND, OPERATION, TYPE) \
+#define PROPAGATION_TEMPLATE_HALF(OP, FIRST_OPERAND, SECOND_OPERAND, OPERATION, TYPE) \
     if (FIRST_OPERAND.operation == TYPE && SECOND_OPERAND.operation == OPERATION) { \
         if (SECOND_OPERAND.operands[0].operation == TYPE) { \
-            return Expression(FIRST_OPERAND.value + SECOND_OPERAND.operands[0].value) + SECOND_OPERAND.operands[1]; \
+            return Expression(FIRST_OPERAND.value OP SECOND_OPERAND.operands[0].value) OP SECOND_OPERAND.operands[1]; \
         } \
         if (SECOND_OPERAND.operands[1].operation == TYPE) { \
-            return Expression(FIRST_OPERAND.value + SECOND_OPERAND.operands[1].value) + SECOND_OPERAND.operands[0]; \
+            return Expression(FIRST_OPERAND.value OP SECOND_OPERAND.operands[1].value) OP SECOND_OPERAND.operands[0]; \
         } \
     }
 
-#define PROPAGATION_TEMPLATE(OPERATION, TYPE) \
-    PROPAGATION_TEMPLATE_HALF(left_operand, right_operand, OPERATION, TYPE) \
-    PROPAGATION_TEMPLATE_HALF(right_operand, left_operand, OPERATION, TYPE) \
+#define PROPAGATION_TEMPLATE(OPERATION, OP, TYPE) \
+    PROPAGATION_TEMPLATE_HALF(OP, left_operand, right_operand, OPERATION, TYPE) \
+    PROPAGATION_TEMPLATE_HALF(OP, right_operand, left_operand, OPERATION, TYPE) \
 
 
-#define CONSTANT_PROPAGATION(OPERATION) \
-    PROPAGATION_TEMPLATE(OPERATION, CONSTANT)
+#define CONSTANT_PROPAGATION(OPERATION, OP) \
+    PROPAGATION_TEMPLATE(OPERATION, OP, CONSTANT)
 
 
-#define PARAMETER_PROPAGATION(OPERATION) \
-    PROPAGATION_TEMPLATE(OPERATION, PARAMETER)
+#define PARAMETER_PROPAGATION(OPERATION, OP) \
+    PROPAGATION_TEMPLATE(OPERATION, OP, PARAMETER)
 
     
 Expression operator + (const Expression& left_operand, const Expression& right_operand) noexcept {
@@ -78,8 +76,8 @@ Expression operator + (const Expression& left_operand, const Expression& right_o
     }
 
     // Constant propagation and trainable parameter propagation
-    CONSTANT_PROPAGATION(ADDITION);
-    PARAMETER_PROPAGATION(ADDITION);
+    CONSTANT_PROPAGATION(ADDITION, +);
+    PARAMETER_PROPAGATION(ADDITION, +);
     CONSTANT_PROPAGATION_INVERSE(+, -, SUBTRACTION);
     PARAMETER_PROPAGATION_INVERSE(+, -, SUBTRACTION);
     
@@ -159,8 +157,8 @@ Expression operator * (const Expression& left_operand, const Expression& right_o
     }
 
     // Constant propagation and trainable parameter propagation
-    CONSTANT_PROPAGATION(MULTIPLICATION)
-    PARAMETER_PROPAGATION(MULTIPLICATION)
+    CONSTANT_PROPAGATION(MULTIPLICATION, *)
+    PARAMETER_PROPAGATION(MULTIPLICATION, *)
     CONSTANT_PROPAGATION_INVERSE(*, /, DIVISION);
     PARAMETER_PROPAGATION_INVERSE(*, /, DIVISION);
 
