@@ -1,6 +1,7 @@
 #include "island.hpp"
 
 #include "../expressions/expression.hpp"
+#include "../util/rng.hpp"
 
 #include "crossover.hpp"
 #include "expression_comparator.hpp"
@@ -22,7 +23,8 @@ Island::Island(const Dataset& dataset,
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
                runner(dataset, nweights), 
                mutator(dataset.n, nweights, max_mutation_depth, mutation_probability),
-               crossover(crossover_probability)
+               crossover(crossover_probability),
+               probabilities(npopulation)
 {
     // Initialize island with a population of random expressions
     ExpressionGenerator initial_expression_generator(nvars, nweights, max_initial_depth);
@@ -38,24 +40,71 @@ Island::Island(const Dataset& dataset,
 }
 
 Expression Island::get_best_solution() {
-    return population[npopulation - 1];
+    int max_index = -1;
+    float max_fitness = -1e30;
+    for (int i = 0; i < npopulation; ++i) {
+        float fitness = -population[i].loss;
+        if (fitness > max_fitness) {
+            max_fitness = fitness;
+            max_index = i;
+        }
+    }
+
+    return population[max_index];
 }
 
 void Island::insert_solution(Expression e) {
     population[npopulation - 2] = e;
 }
 
+void Island::parent_selection_fitness_proportional_probs() noexcept {
+    float min_fitness = 1e30;
+    for (int i = 0; i < npopulation; ++i) {
+        float fitness = -population[i].loss;
+        if (fitness < min_fitness) {
+            min_fitness = fitness;
+        }
+    }
+
+    float sum_of_fitnesses = 0;
+    for (int i = 0; i < npopulation; ++i) {
+        float fitness = (-population[i].loss) - min_fitness;
+        sum_of_fitnesses += fitness;
+    }
+
+    // Compute selection probabilities for each individual
+    for (int i = 0; i < npopulation; ++i) {
+        probabilities[i] = ((-population[i].loss) - min_fitness) / sum_of_fitnesses;
+    }
+}
+
+int Island::parent_selection_fitness_proportional() const noexcept {
+    float u = (thread_local_rng() % RAND_MAX) / (float)RAND_MAX;
+    float s = 0;
+
+    int parent_index = 0;
+    for (; parent_index < npopulation && u > s; ++parent_index) {
+        s += probabilities[parent_index];
+    }
+
+    if (parent_index < 0) parent_index = 0;
+    if (parent_index > npopulation - 1) parent_index = npopulation - 1;
+
+    return parent_index;
+}
+
 void Island::iterate(int niters) noexcept {
     for (int iter = 0; iter < niters; ++iter)
     {
-        /* Parent Selection */
-        const auto &best = population[npopulation - 1];
-        const auto &nextbest = population[npopulation - 2];
+        parent_selection_fitness_proportional_probs();
+        Expression best = get_best_solution();
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
         for (int i = 0; i < npopulation / 2; ++i) {
-            const auto &children = crossover.crossover(best, nextbest);
+            const auto &parent1 = parent_selection_fitness_proportional();
+            const auto &parent2 = parent_selection_fitness_proportional();
+            const auto &children = crossover.crossover(parent1, parent2);
             const auto &child1 = get<0>(children);
             const auto &child2 = get<1>(children);
             offspring.push_back(mutator.mutate(child1));
@@ -66,15 +115,9 @@ void Island::iterate(int niters) noexcept {
         population = offspring;
 
         // Compute fitnesses
-        runner.run(population, 1);
+        runner.run(population, 2);
 
-        // Sort population
-        std::sort(population.begin(), population.end(), ExpressionComparator());
-
-        /* Survival Selection */
-        Expression &newbest = population[npopulation - 1];
-        if (!ExpressionComparator()(best, newbest)) {
-            newbest = best;
-        }
+        // Preserve previous best
+        population[0] = best;
     }
 }

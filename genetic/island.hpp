@@ -15,8 +15,8 @@ public:
            const int npopulation, 
            const int max_initial_depth = 3, 
            const int max_mutation_depth = 3, 
-           const float mutation_probability = 0.1,
-           const float crossover_probability = 0.7) noexcept;
+           const float mutation_probability = 0.7,
+           const float crossover_probability = 1.0) noexcept;
 
     void iterate(int niters) noexcept;
 
@@ -28,9 +28,13 @@ private:
     const Dataset& dataset;
 
     std::vector<Expression> population;
+    std::vector<float> probabilities;
 
     Mutation mutator;
     Crossover crossover;
+
+    void parent_selection_fitness_proportional_probs() noexcept;
+    int parent_selection_fitness_proportional() const noexcept;
 
     inter_individual::Runner runner;
 
