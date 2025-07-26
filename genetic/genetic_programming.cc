@@ -1,10 +1,10 @@
 #include "genetic_programming.hpp"
 
 #include "../expressions/expression.hpp"
-#include "../util/rng.hpp"
 
 #include "expression_comparator.hpp"
 #include "expression_generator.hpp"
+#include "selection/fitness_proportional_selection.hpp"
 
 #include <algorithm>
 
@@ -22,7 +22,8 @@ Island::Island(const Dataset& dataset,
                runner(dataset, nweights), 
                mutator(dataset.n, nweights, max_mutation_depth, mutation_probability),
                crossover(crossover_probability),
-               probabilities(npopulation)
+               probabilities(npopulation),
+               fps(npopulation)
 {
     // Initialize island with a population of random expressions
     ExpressionGenerator initial_expression_generator(nvars, nweights, max_initial_depth);
@@ -55,53 +56,18 @@ void Island::insert_solution(Expression e) {
     population[npopulation - 2] = e;
 }
 
-void Island::parent_selection_fitness_proportional_probs() noexcept {
-    float min_fitness = 1e30;
-    for (int i = 0; i < npopulation; ++i) {
-        float fitness = -population[i].loss;
-        if (fitness < min_fitness) {
-            min_fitness = fitness;
-        }
-    }
-
-    float sum_of_fitnesses = 0;
-    for (int i = 0; i < npopulation; ++i) {
-        float fitness = (-population[i].loss) - min_fitness;
-        sum_of_fitnesses += fitness;
-    }
-
-    // Compute selection probabilities for each individual
-    for (int i = 0; i < npopulation; ++i) {
-        probabilities[i] = ((-population[i].loss) - min_fitness) / sum_of_fitnesses;
-    }
-}
-
-int Island::parent_selection_fitness_proportional() const noexcept {
-    float u = (thread_local_rng() % RAND_MAX) / (float)RAND_MAX;
-    float s = 0;
-
-    int parent_index = 0;
-    for (; parent_index < npopulation && u > s; ++parent_index) {
-        s += probabilities[parent_index];
-    }
-
-    if (parent_index < 0) parent_index = 0;
-    if (parent_index > npopulation - 1) parent_index = npopulation - 1;
-
-    return parent_index;
-}
-
 void Island::iterate(int niters) noexcept {
     for (int iter = 0; iter < niters; ++iter)
     {
-        parent_selection_fitness_proportional_probs();
         Expression best = get_best_solution();
+
+        fps.initialize(&population[0]);
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
         for (int i = 0; i < npopulation / 2; ++i) {
-            const auto &parent1 = parent_selection_fitness_proportional();
-            const auto &parent2 = parent_selection_fitness_proportional();
+            const auto &parent1 = fps.select(&population[0]);
+            const auto &parent2 = fps.select(&population[0]);
             const auto &children = crossover.crossover(parent1, parent2);
             const auto &child1 = get<0>(children);
             const auto &child2 = get<1>(children);

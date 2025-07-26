@@ -6,6 +6,7 @@
 #include "../inter-individual/runner.hpp"
 #include "crossover/default.hpp"
 #include "mutation/default.hpp"
+#include "selection/fitness_proportional_selection.hpp"
 
 
 class Island {
@@ -32,9 +33,7 @@ private:
 
     Mutation mutator;
     Crossover crossover;
-
-    void parent_selection_fitness_proportional_probs() noexcept;
-    int parent_selection_fitness_proportional() const noexcept;
+    FitnessProportionalSelection fps;
 
     inter_individual::Runner runner;
 
