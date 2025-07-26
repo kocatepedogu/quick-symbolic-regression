@@ -6,7 +6,7 @@
 #include <pybind11/numpy.h>
 #include <iostream>
 
-#include "../genetic/island.hpp"
+#include "../genetic/genetic_programming.hpp"
 #include "../genetic/expression_comparator.hpp"
 
 namespace py = pybind11;

@@ -1,6 +1,6 @@
 #include "common/testdata.hpp"
 
-#include "../genetic/island.hpp"
+#include "../genetic/genetic_programming.hpp"
 
 #include <cmath>
 

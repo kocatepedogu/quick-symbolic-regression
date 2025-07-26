@@ -1,4 +1,4 @@
-#include "../genetic/mutation.hpp"
+#include "../genetic/mutation/default.hpp"
 #include "../expressions/unary.hpp"
 #include "../expressions/binary.hpp"
 

@@ -1,11 +1,11 @@
-#ifndef ISLAND_HPP
-#define ISLAND_HPP
+#ifndef GENETIC_PROGRAMMING_HPP
+#define GENETIC_PROGRAMMING_HPP
 
 #include "../dataset/dataset.hpp"
 #include "../expressions/expression.hpp"
 #include "../inter-individual/runner.hpp"
-#include "crossover.hpp"
-#include "mutation.hpp"
+#include "crossover/default.hpp"
+#include "mutation/default.hpp"
 
 
 class Island {

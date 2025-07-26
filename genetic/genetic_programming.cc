@@ -1,12 +1,10 @@
-#include "island.hpp"
+#include "genetic_programming.hpp"
 
 #include "../expressions/expression.hpp"
 #include "../util/rng.hpp"
 
-#include "crossover.hpp"
 #include "expression_comparator.hpp"
 #include "expression_generator.hpp"
-#include "mutation.hpp"
 
 #include <algorithm>
 

@@ -1,9 +1,9 @@
-#ifndef MUTATION_HPP
-#define MUTATION_HPP
+#ifndef MUTATION_DEFAULT_HPP
+#define MUTATION_DEFAULT_HPP
 
-#include "../expressions/expression.hpp"
-#include "crossover.hpp"
-#include "expression_generator.hpp"
+#include "../../expressions/expression.hpp"
+#include "../crossover/default.hpp"
+#include "../expression_generator.hpp"
 
 class Mutation {
 public:
