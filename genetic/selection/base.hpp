@@ -1,13 +1,11 @@
 #ifndef SELECTION_BASE_HPP
 #define SELECTION_BASE_HPP
 
-#include "../../expressions/expression.hpp"
+#include "selector/base.hpp"
 
 class BaseSelection {
 public:
-    virtual void initialize(const Expression population[]) = 0;
-
-    virtual const Expression& select(const Expression population[]) = 0;
+    virtual BaseSelector *get_selector() = 0;
 };
 
 #endif

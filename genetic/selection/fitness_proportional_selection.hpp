@@ -1,24 +1,18 @@
 #ifndef FITNESS_PROPORTIONAL_SELECTION_HPP
 #define FITNESS_PROPORTIONAL_SELECTION_HPP
 
-#include <vector>
-
-#include "../../expressions/expression.hpp"
 #include "base.hpp"
+#include "selector/base.hpp"
 
 class FitnessProportionalSelection : public BaseSelection {
 public:
     constexpr FitnessProportionalSelection(int npopulation) :
-        npopulation(npopulation), probabilities(npopulation) {}
+        npopulation(npopulation) {}
 
-    void initialize(const Expression population[]);
-
-    const Expression& select(const Expression population[]);
+    BaseSelector *get_selector();
 
 private:
     const int npopulation;
-
-    std::vector<float> probabilities;
 };
 
 #endif

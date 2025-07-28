@@ -8,7 +8,7 @@
 #include "crossover/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
-
+#include "selection/selector/base.hpp"
 
 class GeneticProgramming {
 public:
@@ -26,6 +26,8 @@ public:
 
     Expression get_best_solution();
 
+    ~GeneticProgramming();
+
 private:
     const Dataset& dataset;
 
@@ -34,6 +36,7 @@ private:
     BaseMutation &mutator;
     BaseCrossover &crossover;
     BaseSelection &selection;
+    BaseSelector *selector;
 
     inter_individual::Runner runner;
 

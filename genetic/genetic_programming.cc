@@ -2,10 +2,7 @@
 
 #include "../expressions/expression.hpp"
 
-#include "expression_comparator.hpp"
 #include "expression_generator.hpp"
-
-#include <algorithm>
 
 GeneticProgramming::GeneticProgramming(
                const Dataset& dataset, 
@@ -33,8 +30,8 @@ GeneticProgramming::GeneticProgramming(
     // Compute initial fitnesses
     runner.run(population, 10);
 
-    // Sort population with respect to fitness
-    std::sort(population.begin(), population.end(), ExpressionComparator());
+    // Get selector
+    selector = selection.get_selector();
 }
 
 Expression GeneticProgramming::get_best_solution() {
@@ -60,13 +57,13 @@ void GeneticProgramming::iterate(int niters) noexcept {
     {
         Expression best = get_best_solution();
 
-        selection.initialize(&population[0]);
+        selector->update(&population[0]);
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
         for (int i = 0; i < npopulation / 2; ++i) {
-            const auto &parent1 = selection.select(&population[0]);
-            const auto &parent2 = selection.select(&population[0]);
+            const auto &parent1 = selector->select(&population[0]);
+            const auto &parent2 = selector->select(&population[0]);
             const auto &children = crossover.crossover(parent1, parent2);
             const auto &child1 = get<0>(children);
             const auto &child2 = get<1>(children);
@@ -83,4 +80,8 @@ void GeneticProgramming::iterate(int niters) noexcept {
         // Preserve previous best
         population[0] = best;
     }
+}
+
+GeneticProgramming::~GeneticProgramming() {
+    delete selector;
 }
