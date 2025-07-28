@@ -5,7 +5,9 @@
 
 class BaseMutation {
 public:
-    virtual Expression mutate(const Expression &expr) noexcept = 0;
+    virtual Expression mutate(const Expression &expr) noexcept;
+
+    virtual ~BaseMutation() = default;
 };
 
 #endif

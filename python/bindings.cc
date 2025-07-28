@@ -19,9 +19,11 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
         int nweights,
         int npopulation, 
         int ngenerations, int nsupergenerations,
-        int max_initial_depth, int max_mutation_depth,
-        float mutation_probability,
-        int nthreads) 
+        int max_initial_depth,
+        int nthreads,
+        BaseMutation *mutation,
+        BaseCrossover *crossover,
+        BaseSelection *selection) 
 {
     auto numpy_X_buffer_info = numpy_X.request();
     auto numpy_y_buffer_info = numpy_y.request();
@@ -62,17 +64,12 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
     // Create dataset
     Dataset dataset(X, y, num_data_points, num_features);
 
-    // Create genetic operators
-    DefaultMutation mutation(num_features, nweights, max_mutation_depth, mutation_probability);
-    DefaultCrossover crossover(1.0);
-    FitnessProportionalSelection selection;
-
     // Run genetic programming
     GeneticProgrammingIslands gp(
         dataset, nweights, npopulation, 
         max_initial_depth, nthreads, 
         ngenerations, nsupergenerations, 
-        mutation, crossover, selection);
+        *mutation, *crossover, *selection);
 
     gp.iterate();
 
@@ -88,7 +85,8 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
 
 PYBIND11_MODULE(libquicksr, m) {
     m.doc() = "pybind11 libquicksr plugin";
-    m.def("fit", &fit, "Fits a symbollic expression to given feature matrix X and target vector y",
+
+    m.def("fit", &fit, "Fits a symbolic expression to given feature matrix X and target vector y",
         py::arg("X"),                               // Required argument
         py::arg("y"),                               // Required argument
         py::arg("nweights") = 2,                    // Optional argument with default value
@@ -96,8 +94,32 @@ PYBIND11_MODULE(libquicksr, m) {
         py::arg("ngenerations") = 10,               // Optional argument with default value
         py::arg("nsupergenerations") = 2,           // Optional argument with default value
         py::arg("max_initial_depth") = 3,           // Optional argument with default value
-        py::arg("max_mutation_depth") = 3,          // Optional argument with default value
-        py::arg("max_mutation_probability") = 0.7,  // Optional argument with default value
-        py::arg("nthreads") = 1                     // Optional argument with default value
+        py::arg("nthreads") = 1,                    // Optional argument with default value
+        py::arg("mutation"),                        // Required argument
+        py::arg("crossover"),                       // Required argument
+        py::arg("selection")                        // Required argument
     );
+
+    py::class_<BaseMutation>(m, "BaseMutation")
+        .def(py::init<>());
+
+    py::class_<DefaultMutation, BaseMutation>(m, "DefaultMutation")
+        .def(py::init<int, int, int, float>(),
+            py::arg("nvars"), 
+            py::arg("nweights"), 
+            py::arg("max_depth") = 3, 
+            py::arg("mutation_probability") = 0.7);
+
+    py::class_<BaseCrossover>(m, "BaseCrossover")
+        .def(py::init<>());
+
+    py::class_<DefaultCrossover, BaseCrossover>(m, "DefaultCrossover")
+        .def(py::init<float>(), 
+             py::arg("crossover_probability") = 0.7);
+
+    py::class_<BaseSelection>(m, "BaseSelection")
+        .def(py::init<>());
+
+    py::class_<FitnessProportionalSelection, BaseSelection>(m, "FitnessProportionalSelection")
+        .def(py::init<>());
 }

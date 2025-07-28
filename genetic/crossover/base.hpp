@@ -7,7 +7,9 @@
 
 class BaseCrossover {
 public:
-    virtual std::tuple<Expression, Expression> crossover(Expression e1, Expression e2) noexcept = 0;
+    virtual std::tuple<Expression, Expression> crossover(Expression e1, Expression e2) noexcept;
+
+    virtual ~BaseCrossover() = default;
 };
 
 #endif

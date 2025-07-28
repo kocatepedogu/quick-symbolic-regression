@@ -5,7 +5,7 @@
 
 class BaseSelection {
 public:
-    virtual BaseSelector *get_selector(int npopulation) = 0;
+    virtual BaseSelector *get_selector(int npopulation);
 };
 
 #endif
