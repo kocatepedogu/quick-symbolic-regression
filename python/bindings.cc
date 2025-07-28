@@ -5,7 +5,8 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include <iostream>
+#include <sstream> 
+#include <string>
 
 #include "../genetic/genetic_programming_islands.hpp"
 
@@ -15,7 +16,7 @@
 
 namespace py = pybind11;
 
-void fit(Dataset *dataset, 
+std::string fit(Dataset *dataset, 
         int nweights,
         int npopulation, 
         int ngenerations, int nsupergenerations,
@@ -25,14 +26,20 @@ void fit(Dataset *dataset,
         BaseCrossover *crossover,
         BaseSelection *selection) 
 {
-    // Run genetic programming
+    // Construct genetic programming islands
     GeneticProgrammingIslands gp(
         *dataset, nweights, npopulation, 
         max_initial_depth, nthreads, 
         ngenerations, nsupergenerations, 
         *mutation, *crossover, *selection);
 
-    gp.iterate();
+    // Find solution
+    const auto &result = gp.iterate();
+
+    // Return as string
+    std::stringstream ss;
+    ss << result;
+    return ss.str();
 }
 
 PYBIND11_MODULE(libquicksr, m) {

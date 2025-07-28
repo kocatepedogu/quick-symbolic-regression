@@ -23,7 +23,7 @@ public:
 
     ~GeneticProgrammingIslands() noexcept;
 
-    void iterate() noexcept;
+    Expression iterate() noexcept;
 
 private:
     /// Dataset shared by all islands

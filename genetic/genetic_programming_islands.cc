@@ -29,7 +29,7 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
     delete[] islands;
 }
 
-void GeneticProgrammingIslands::iterate() noexcept {
+Expression GeneticProgrammingIslands::iterate() noexcept {
     // Current best solution
     Expression best = 0.0;
 
@@ -85,4 +85,6 @@ void GeneticProgrammingIslands::iterate() noexcept {
 
         delete islands[threadIdx];
     }
+
+    return best;
 }

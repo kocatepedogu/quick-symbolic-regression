@@ -17,9 +17,9 @@ for x0 in np.linspace(-5, 5, 64):
 y = [x0*np.exp(x0 + x1) + np.sin(x1) 
      for x0, x1 in X]
 
-libquicksr.fit(
+solution = libquicksr.fit(
     Dataset(X, y), 
-    nthreads=20, 
+    nthreads=8, 
     nweights=NWEIGHTS, 
     npopulation=11200, 
     ngenerations=1,
@@ -28,3 +28,5 @@ libquicksr.fit(
     crossover=DefaultCrossover(crossover_probability=0.8),
     selection=FitnessProportionalSelection()
 )
+
+print("Best solution: {}".format(solution))
