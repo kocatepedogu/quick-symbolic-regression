@@ -2,12 +2,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include </usr/lib/clang/20/include/omp.h>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <iostream>
 
 #include "../genetic/genetic_programming.hpp"
 #include "../genetic/expression_comparator.hpp"
+
+#include "../genetic/mutation/default.hpp"
+#include "../genetic/crossover/default.hpp"
+#include "../genetic/selection/fitness_proportional_selection.hpp"
 
 namespace py = pybind11;
 
@@ -68,9 +73,20 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
     #pragma omp parallel num_threads(nthreads)
     {
         const int threadIdx = omp_get_thread_num();
+        const int population_per_thread = npopulation / nthreads;
 
-        islands[threadIdx] = new GeneticProgramming(dataset, nweights, npopulation / nthreads, 
-            max_initial_depth, max_mutation_depth, mutation_probability);
+        DefaultMutation mutation(num_features, nweights, max_mutation_depth, mutation_probability);
+        DefaultCrossover crossover(1.0);
+        FitnessProportionalSelection selection(population_per_thread);
+
+        islands[threadIdx] = new GeneticProgramming(
+            dataset, 
+            nweights, 
+            population_per_thread, 
+            max_initial_depth,
+            mutation,
+            crossover,
+            selection);
 
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Iterate island

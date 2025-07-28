@@ -4,20 +4,21 @@
 #include "../dataset/dataset.hpp"
 #include "../expressions/expression.hpp"
 #include "../inter-individual/runner.hpp"
-#include "crossover/default.hpp"
-#include "mutation/default.hpp"
-#include "selection/fitness_proportional_selection.hpp"
+
+#include "crossover/base.hpp"
+#include "mutation/base.hpp"
+#include "selection/base.hpp"
 
 
 class GeneticProgramming {
 public:
     GeneticProgramming(const Dataset& dataset, 
-           const int nweights, 
-           const int npopulation, 
-           const int max_initial_depth = 3, 
-           const int max_mutation_depth = 3, 
-           const float mutation_probability = 0.7,
-           const float crossover_probability = 1.0) noexcept;
+                       int nweights, 
+                       int npopulation, 
+                       int max_initial_depth, 
+                       BaseMutation& mutator,
+                       BaseCrossover& crossover,
+                       BaseSelection& selection) noexcept;
 
     void iterate(int niters) noexcept;
 
@@ -29,11 +30,10 @@ private:
     const Dataset& dataset;
 
     std::vector<Expression> population;
-    std::vector<float> probabilities;
 
-    DefaultMutation mutator;
-    DefaultCrossover crossover;
-    FitnessProportionalSelection fps;
+    BaseMutation &mutator;
+    BaseCrossover &crossover;
+    BaseSelection &selection;
 
     inter_individual::Runner runner;
 

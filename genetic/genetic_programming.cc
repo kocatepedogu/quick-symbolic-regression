@@ -4,26 +4,25 @@
 
 #include "expression_comparator.hpp"
 #include "expression_generator.hpp"
-#include "selection/fitness_proportional_selection.hpp"
 
 #include <algorithm>
 
-GeneticProgramming::GeneticProgramming(const Dataset& dataset, 
+GeneticProgramming::GeneticProgramming(
+               const Dataset& dataset, 
                int nweights, 
                int npopulation, 
                int max_initial_depth, 
-               int max_mutation_depth, 
-               float mutation_probability,
-               float crossover_probability) noexcept : 
+               BaseMutation& mutator,
+               BaseCrossover& crossover,
+               BaseSelection& selection) noexcept : 
                dataset(dataset), 
                nvars(dataset.n), 
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
                runner(dataset, nweights), 
-               mutator(dataset.n, nweights, max_mutation_depth, mutation_probability),
-               crossover(crossover_probability),
-               probabilities(npopulation),
-               fps(npopulation)
+               mutator(mutator),
+               crossover(crossover),
+               selection(selection)
 {
     // Initialize island with a population of random expressions
     ExpressionGenerator initial_expression_generator(nvars, nweights, max_initial_depth);
@@ -61,13 +60,13 @@ void GeneticProgramming::iterate(int niters) noexcept {
     {
         Expression best = get_best_solution();
 
-        fps.initialize(&population[0]);
+        selection.initialize(&population[0]);
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
         for (int i = 0; i < npopulation / 2; ++i) {
-            const auto &parent1 = fps.select(&population[0]);
-            const auto &parent2 = fps.select(&population[0]);
+            const auto &parent1 = selection.select(&population[0]);
+            const auto &parent2 = selection.select(&population[0]);
             const auto &children = crossover.crossover(parent1, parent2);
             const auto &child1 = get<0>(children);
             const auto &child2 = get<1>(children);
