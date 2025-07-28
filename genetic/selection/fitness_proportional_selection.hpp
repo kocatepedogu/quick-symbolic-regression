@@ -6,13 +6,7 @@
 
 class FitnessProportionalSelection : public BaseSelection {
 public:
-    constexpr FitnessProportionalSelection(int npopulation) :
-        npopulation(npopulation) {}
-
-    BaseSelector *get_selector();
-
-private:
-    const int npopulation;
+    BaseSelector *get_selector(int npopulation) noexcept;
 };
 
 #endif

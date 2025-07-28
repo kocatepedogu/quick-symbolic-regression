@@ -7,8 +7,7 @@
 #include <pybind11/numpy.h>
 #include <iostream>
 
-#include "../genetic/genetic_programming.hpp"
-#include "../genetic/expression_comparator.hpp"
+#include "../genetic/genetic_programming_islands.hpp"
 
 #include "../genetic/mutation/default.hpp"
 #include "../genetic/crossover/default.hpp"
@@ -63,70 +62,19 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
     // Create dataset
     Dataset dataset(X, y, num_data_points, num_features);
 
-    // Create empty island array
-    GeneticProgramming **islands = new GeneticProgramming*[nthreads];
+    // Create genetic operators
+    DefaultMutation mutation(num_features, nweights, max_mutation_depth, mutation_probability);
+    DefaultCrossover crossover(1.0);
+    FitnessProportionalSelection selection;
 
-    // Current best solution
-    Expression best = 0.0;
+    // Run genetic programming
+    GeneticProgrammingIslands gp(
+        dataset, nweights, npopulation, 
+        max_initial_depth, nthreads, 
+        ngenerations, nsupergenerations, 
+        mutation, crossover, selection);
 
-    // Fit
-    #pragma omp parallel num_threads(nthreads)
-    {
-        const int threadIdx = omp_get_thread_num();
-        const int population_per_thread = npopulation / nthreads;
-
-        DefaultMutation mutation(num_features, nweights, max_mutation_depth, mutation_probability);
-        DefaultCrossover crossover(1.0);
-        FitnessProportionalSelection selection(population_per_thread);
-
-        islands[threadIdx] = new GeneticProgramming(
-            dataset, 
-            nweights, 
-            population_per_thread, 
-            max_initial_depth,
-            mutation,
-            crossover,
-            selection);
-
-        for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
-            // Iterate island
-            islands[threadIdx]->iterate(ngenerations);
-
-            // Synchronize all islands
-            #pragma omp barrier
-
-            // Migrate solutions
-            #pragma omp single
-            {
-                // Find the best solution
-                for (int i = 0; i < nthreads; ++i) {
-                    Expression new_best = islands[i]->get_best_solution();
-                    if (ExpressionComparator()(best, new_best) || (supergeneration == 0 && i == 0)) {
-                        best = new_best;
-                    }
-                }
-
-                // Forward best solution of island i to island i+1
-                std::cerr << std::endl;
-                for (int i = nthreads - 1; i >= 0; --i) {
-                    Expression new_best = islands[i]->get_best_solution();
-
-                    int next = (i + 1) % nthreads;
-                    islands[next]->insert_solution(new_best);
-
-                    // Print best result of each island
-                    std::cerr << new_best << std::endl;
-                }
-            }
-
-            // Synchronize all islands
-            #pragma omp barrier
-        }
-
-        delete islands[threadIdx];
-    }
-
-    delete[] islands;
+    gp.iterate();
 
     // Free y
     free(y);

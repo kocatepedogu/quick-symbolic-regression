@@ -31,7 +31,7 @@ GeneticProgramming::GeneticProgramming(
     runner.run(population, 10);
 
     // Get selector
-    selector = selection.get_selector();
+    selector = selection.get_selector(npopulation);
 }
 
 Expression GeneticProgramming::get_best_solution() {

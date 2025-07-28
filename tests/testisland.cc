@@ -21,7 +21,7 @@ int main(void) {
     // Genetic operators
     DefaultMutation mutation(1, 2, 3, 0.7);
     DefaultCrossover crossover(1.0);
-    FitnessProportionalSelection selection(2000);
+    FitnessProportionalSelection selection;
 
     #pragma omp parallel num_threads(10)
     {
