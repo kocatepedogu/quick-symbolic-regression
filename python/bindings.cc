@@ -59,7 +59,7 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
     Dataset dataset(X, y, num_data_points, num_features);
 
     // Create empty island array
-    Island **islands = new Island*[nthreads];
+    GeneticProgramming **islands = new GeneticProgramming*[nthreads];
 
     // Current best solution
     Expression best = 0.0;
@@ -69,7 +69,7 @@ void fit(py::array_t<float> numpy_X, py::array_t<float> numpy_y,
     {
         const int threadIdx = omp_get_thread_num();
 
-        islands[threadIdx] = new Island(dataset, nweights, npopulation / nthreads, 
+        islands[threadIdx] = new GeneticProgramming(dataset, nweights, npopulation / nthreads, 
             max_initial_depth, max_mutation_depth, mutation_probability);
 
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {

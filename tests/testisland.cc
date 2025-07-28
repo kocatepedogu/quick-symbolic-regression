@@ -18,7 +18,7 @@ int main(void) {
     #pragma omp parallel num_threads(10)
     {
         // Create island
-        Island island(dataset, 2, 2000);
+        GeneticProgramming island(dataset, 2, 2000);
 
         // Iterate island
         island.iterate(10);

@@ -9,9 +9,9 @@
 #include "selection/fitness_proportional_selection.hpp"
 
 
-class Island {
+class GeneticProgramming {
 public:
-    Island(const Dataset& dataset, 
+    GeneticProgramming(const Dataset& dataset, 
            const int nweights, 
            const int npopulation, 
            const int max_initial_depth = 3, 

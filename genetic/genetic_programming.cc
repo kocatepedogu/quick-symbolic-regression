@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-Island::Island(const Dataset& dataset, 
+GeneticProgramming::GeneticProgramming(const Dataset& dataset, 
                int nweights, 
                int npopulation, 
                int max_initial_depth, 
@@ -38,7 +38,7 @@ Island::Island(const Dataset& dataset,
     std::sort(population.begin(), population.end(), ExpressionComparator());
 }
 
-Expression Island::get_best_solution() {
+Expression GeneticProgramming::get_best_solution() {
     int max_index = -1;
     float max_fitness = -1e30;
     for (int i = 0; i < npopulation; ++i) {
@@ -52,11 +52,11 @@ Expression Island::get_best_solution() {
     return population[max_index];
 }
 
-void Island::insert_solution(Expression e) {
+void GeneticProgramming::insert_solution(Expression e) {
     population[npopulation - 2] = e;
 }
 
-void Island::iterate(int niters) noexcept {
+void GeneticProgramming::iterate(int niters) noexcept {
     for (int iter = 0; iter < niters; ++iter)
     {
         Expression best = get_best_solution();
