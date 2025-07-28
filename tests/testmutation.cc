@@ -14,7 +14,7 @@ int main(void) {
 
     Expression f = w0 + w1*Cos(x) + w2*Sin(y);
 
-    Mutation mutation(2, 3, 3, 1.0);
+    DefaultMutation mutation(2, 3, 3, 1.0);
 
     for (int i = 0; i < 1000; ++i) {
         std::cout << mutation.mutate(f) << std::endl;

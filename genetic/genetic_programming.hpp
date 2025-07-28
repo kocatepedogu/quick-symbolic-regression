@@ -31,8 +31,8 @@ private:
     std::vector<Expression> population;
     std::vector<float> probabilities;
 
-    Mutation mutator;
-    Crossover crossover;
+    DefaultMutation mutator;
+    DefaultCrossover crossover;
     FitnessProportionalSelection fps;
 
     inter_individual::Runner runner;

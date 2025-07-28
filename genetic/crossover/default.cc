@@ -28,7 +28,7 @@ Expression reorganize(const Expression& e) {
     }
 }
 
-std::tuple<Expression, Expression> Crossover::crossover(Expression e1, Expression e2) noexcept {
+std::tuple<Expression, Expression> DefaultCrossover::crossover(Expression e1, Expression e2) noexcept {
     if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > crossover_probability) {
         return std::make_tuple(e1, e2);
     }

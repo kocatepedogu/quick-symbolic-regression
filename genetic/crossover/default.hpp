@@ -6,9 +6,9 @@
 #include "../../expressions/expression.hpp"
 #include "../expression_picker.hpp"
 
-class Crossover {
+class DefaultCrossover {
 public:
-    constexpr Crossover(float crossover_probability) :
+    constexpr DefaultCrossover(float crossover_probability) :
         crossover_probability(crossover_probability), expression_picker() {}
 
     std::tuple<Expression, Expression> crossover(Expression e1, Expression e2) noexcept;

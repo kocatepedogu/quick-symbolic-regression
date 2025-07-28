@@ -5,9 +5,9 @@
 #include "../crossover/default.hpp"
 #include "../expression_generator.hpp"
 
-class Mutation {
+class DefaultMutation {
 public:
-    constexpr Mutation(int nvars, int nweights, int max_depth, float mutation_probability)  :
+    constexpr DefaultMutation(int nvars, int nweights, int max_depth, float mutation_probability)  :
         expression_generator(nvars, nweights, max_depth), 
         crossover(mutation_probability) {}
 
@@ -16,7 +16,7 @@ public:
 private:
     ExpressionGenerator expression_generator;
 
-    Crossover crossover;
+    DefaultCrossover crossover;
 };
 
 #endif

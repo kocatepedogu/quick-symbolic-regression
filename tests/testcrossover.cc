@@ -15,7 +15,7 @@ int main(void) {
     Expression f1 = x * x + w0;
     Expression f2 = Sin(w1 * x);
 
-    Crossover crossover(1.0);
+    DefaultCrossover crossover(1.0);
 
     for (int i = 0; i < 1000; ++i) {
         auto offspring = crossover.crossover(f1, f2);
