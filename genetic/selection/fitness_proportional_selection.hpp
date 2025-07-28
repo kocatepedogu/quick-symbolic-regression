@@ -4,8 +4,9 @@
 #include <vector>
 
 #include "../../expressions/expression.hpp"
+#include "base.hpp"
 
-class FitnessProportionalSelection {
+class FitnessProportionalSelection : public BaseSelection {
 public:
     constexpr FitnessProportionalSelection(int npopulation) :
         npopulation(npopulation), probabilities(npopulation) {}

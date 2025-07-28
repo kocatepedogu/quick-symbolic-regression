@@ -4,8 +4,9 @@
 #include "../../expressions/expression.hpp"
 #include "../crossover/default.hpp"
 #include "../expression_generator.hpp"
+#include "base.hpp"
 
-class DefaultMutation {
+class DefaultMutation : public BaseMutation {
 public:
     constexpr DefaultMutation(int nvars, int nweights, int max_depth, float mutation_probability)  :
         expression_generator(nvars, nweights, max_depth), 

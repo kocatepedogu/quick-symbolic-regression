@@ -5,8 +5,9 @@
 
 #include "../../expressions/expression.hpp"
 #include "../expression_picker.hpp"
+#include "base.hpp"
 
-class DefaultCrossover {
+class DefaultCrossover : public BaseCrossover {
 public:
     constexpr DefaultCrossover(float crossover_probability) :
         crossover_probability(crossover_probability), expression_picker() {}
