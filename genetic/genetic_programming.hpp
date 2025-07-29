@@ -3,7 +3,7 @@
 
 #include "../dataset/dataset.hpp"
 #include "../expressions/expression.hpp"
-#include "../inter-individual/runner.hpp"
+#include "../runners/inter-individual/runner.hpp"
 
 #include "crossover/base.hpp"
 #include "initializer/base.hpp"

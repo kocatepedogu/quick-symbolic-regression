@@ -8,7 +8,7 @@
 #include "../expressions/unary.hpp"
 
 #include "../dataset/dataset.hpp"
-#include "../intra-individual/runner.hpp"
+#include "../runners/intra-individual/runner.hpp"
 
 #include <cmath>
 #include <iostream>

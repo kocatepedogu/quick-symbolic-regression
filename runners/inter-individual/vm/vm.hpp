@@ -4,8 +4,8 @@
 #ifndef INTER_VM_HPP
 #define INTER_VM_HPP
 
-#include "../../vm/vm_types.hpp"
-#include "../../dataset/dataset.hpp"
+#include "../../../vm/vm_types.hpp"
+#include "../../../dataset/dataset.hpp"
 #include "../program/program.hpp"
 
 #include <hip/hip_runtime.h>

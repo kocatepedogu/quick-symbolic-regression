@@ -1,11 +1,11 @@
 #include <hip/hip_runtime.h>
 #include "vm.hpp"
 
-#include "../../vm/vm_debug.hpp"
-#include "../../vm/vm_types.hpp"
-#include "../../vm/vm_control.hpp"
+#include "../../../vm/vm_debug.hpp"
+#include "../../../vm/vm_types.hpp"
+#include "../../../vm/vm_control.hpp"
 
-#include "../../util/hip.hpp"
+#include "../../../util/hip.hpp"
 
 namespace inter_individual {
     constexpr int max_stack_depth = 128;

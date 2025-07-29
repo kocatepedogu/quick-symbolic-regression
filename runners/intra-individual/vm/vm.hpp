@@ -4,12 +4,12 @@
 #ifndef INTRA_VM_HPP
 #define INTRA_VM_HPP
 
-#include "../../dataset/dataset.hpp"
+#include "../../../dataset/dataset.hpp"
 
 #include <hip/hip_runtime.h>
 #include </usr/lib/clang/20/include/omp.h>
 
-#include "../../vm/vm_types.hpp"
+#include "../../../vm/vm_types.hpp"
 
 namespace intra_individual {
     class VirtualMachine {

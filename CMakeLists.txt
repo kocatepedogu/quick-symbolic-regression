@@ -43,12 +43,13 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/util
     ${CMAKE_CURRENT_SOURCE_DIR}/python
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/inter-individual
-    ${CMAKE_CURRENT_SOURCE_DIR}/inter-individual/program
-    ${CMAKE_CURRENT_SOURCE_DIR}/inter-individual/vm
-    ${CMAKE_CURRENT_SOURCE_DIR}/intra-individual
-    ${CMAKE_CURRENT_SOURCE_DIR}/intra-individual/program
-    ${CMAKE_CURRENT_SOURCE_DIR}/intra-individual/vm
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners/inter-individual
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners/inter-individual/program
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners/inter-individual/vm
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners/intra-individual
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners/intra-individual/program
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners/intra-individual/vm
 )
 
 # Collect all source files

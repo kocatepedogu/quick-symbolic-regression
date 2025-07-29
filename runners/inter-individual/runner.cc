@@ -3,7 +3,7 @@
 #include "./program/program.hpp"
 #include "./vm/vm.hpp"
 
-#include "../util/hip.hpp"
+#include "../../util/hip.hpp"
 #include <hip/hip_runtime.h>
 
 namespace inter_individual {

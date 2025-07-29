@@ -1,9 +1,9 @@
 #ifndef INTER_RUNNER_HPP
 #define INTER_RUNNER_HPP
 
-#include "../expressions/expression.hpp"
-#include "../dataset/dataset.hpp"
-#include "vm/vm.hpp"
+#include "../../expressions/expression.hpp"
+#include "../../dataset/dataset.hpp"
+#include "./vm/vm.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
 

@@ -4,8 +4,8 @@
 #ifndef INTER_PROGRAMPOPULATION_HPP
 #define INTER_PROGRAMPOPULATION_HPP
 
-#include "../../compiler/ir.hpp"
-#include "../../expressions/expression.hpp"
+#include "../../../compiler/ir.hpp"
+#include "../../../expressions/expression.hpp"
 
 #include <vector>
 
