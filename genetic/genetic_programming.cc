@@ -3,6 +3,9 @@
 #include "../expressions/expression.hpp"
 
 #include "initializer/base.hpp"
+#include "learning_history.hpp"
+
+#include <iostream>
 
 GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
@@ -48,7 +51,10 @@ void GeneticProgramming::insert_solution(Expression e) {
     population[npopulation - 2] = e;
 }
 
-void GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
+LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
+    // Create empty learning history
+    LearningHistory history;
+
     // Compute initial fitnesses
     runner->run(population, nepochs, learning_rate);
 
@@ -79,5 +85,10 @@ void GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate)
 
         // Preserve previous best
         population[0] = best;
+
+        // Append to learning history
+        history.add_to_history(best);
     }
+
+    return history;
 }

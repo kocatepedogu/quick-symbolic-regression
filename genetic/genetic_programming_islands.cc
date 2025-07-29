@@ -4,9 +4,11 @@
 
 #include "expression_comparator.hpp"
 #include "initializer/base.hpp"
+#include "learning_history.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
 #include <memory>
+#include <ostream>
 
 GeneticProgrammingIslands::GeneticProgrammingIslands (
     std::shared_ptr<Dataset> dataset, 
@@ -38,10 +40,16 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
     delete[] islands;
 }
 
-std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, 
+std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, 
                                            int nepochs, float learning_rate, bool verbose) noexcept {
     // Current best solution
     Expression best = 0.0;
+
+    // Global learning history
+    LearningHistory global_history;
+
+    // Local learning histories
+    auto local_histories = new LearningHistory[nislands];
 
     // Fit
     #pragma omp parallel num_threads(nislands)
@@ -63,7 +71,7 @@ std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergeneratio
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Iterate island
-            islands[threadIdx]->fit(ngenerations, nepochs, learning_rate);
+            local_histories[threadIdx] = islands[threadIdx]->fit(ngenerations, nepochs, learning_rate);
 
             // Synchronize all islands
             #pragma omp barrier
@@ -71,6 +79,15 @@ std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergeneratio
             // Migrate solutions
             #pragma omp single
             {
+                // Combine learning histories
+                LearningHistory history_per_supergeneration;
+                for (int i = 0; i < nislands; ++i) {
+                    history_per_supergeneration = history_per_supergeneration.combine_with(local_histories[i]);
+                }
+
+                // Append to global learning history
+                global_history = global_history.concatenate_with(history_per_supergeneration);
+
                 // Find the best solution
                 for (int i = 0; i < nislands; ++i) {
                     Expression new_best = islands[i]->get_best_solution();
@@ -103,8 +120,13 @@ std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergeneratio
         delete islands[threadIdx];
     }
 
-    // Convert best to string
+    // Get total learning history
+    auto hist = global_history.get_learning_history();
+
+    // Get best solution as string
     std::ostringstream oss;
     oss << best;
-    return oss.str();
+
+    // Return tuple of best solution and learning history
+    return std::make_tuple(oss.str(), hist);
 }

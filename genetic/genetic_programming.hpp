@@ -11,6 +11,8 @@
 #include "selection/base.hpp"
 #include "selection/selector/base.hpp"
 
+#include "learning_history.hpp"
+
 class GeneticProgramming {
 public:
     GeneticProgramming(std::shared_ptr<const Dataset> dataset, 
@@ -22,7 +24,7 @@ public:
                        std::shared_ptr<BaseSelection> selection,
                        std::shared_ptr<BaseRunner> runner) noexcept;
 
-    void fit(int ngenerations, int nepochs, float learning_rate) noexcept;
+    LearningHistory fit(int ngenerations, int nepochs, float learning_rate) noexcept;
 
     void insert_solution(Expression e);
 
