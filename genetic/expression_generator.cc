@@ -33,7 +33,7 @@ static thread_local std::discrete_distribution<> depth_two_distribution({
     10  /*EXPONENTIAL*/
 });
 
-int ExpressionGenerator::random_operation(int max_depth) noexcept 
+int ExpressionGenerator::random_operation(int max_depth) const noexcept 
 {
     // If the requested max depth is one, the only possible operations
     // are the ones that create leaf nodes: variables and weights.
@@ -57,7 +57,7 @@ int ExpressionGenerator::random_operation(int max_depth) noexcept
     }
 }
 
-Expression ExpressionGenerator::generate(int max_depth) noexcept {
+Expression ExpressionGenerator::generate(int max_depth) const noexcept {
     int operation = random_operation(max_depth);
 
     #define _RANDOM_EXPR_CALL(i) \
@@ -83,6 +83,6 @@ Expression ExpressionGenerator::generate(int max_depth) noexcept {
     abort();
 }
 
-Expression ExpressionGenerator::generate() noexcept {
+Expression ExpressionGenerator::generate() const noexcept {
     return generate(this->max_depth);
 }
