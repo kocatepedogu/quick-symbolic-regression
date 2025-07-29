@@ -38,7 +38,8 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
     delete[] islands;
 }
 
-std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, int nepochs, float learning_rate) noexcept {
+std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, 
+                                           int nepochs, float learning_rate, bool verbose) noexcept {
     // Current best solution
     Expression best = 0.0;
 
@@ -79,15 +80,19 @@ std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergeneratio
                 }
 
                 // Forward best solution of island i to island i+1
-                std::cerr << std::endl;
                 for (int i = nislands - 1; i >= 0; --i) {
                     Expression new_best = islands[i]->get_best_solution();
 
                     int next = (i + 1) % nislands;
                     islands[next]->insert_solution(new_best);
 
-                    // Print best result of each island
-                    std::cerr << new_best << std::endl;
+                    // Print best result of each island if in verbose mode
+                    if (verbose) {
+                        std::cout << new_best << std::endl;
+                    }
+                }
+                if (verbose) {
+                    std::cout << std::endl;
                 }
             }
 

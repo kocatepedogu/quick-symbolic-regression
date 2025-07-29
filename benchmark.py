@@ -30,5 +30,5 @@ model = GeneticProgrammingIslands(
     runner_generator=IntraIndividualRunnerGenerator()
 )
 
-solution = model.fit(ngenerations=1, nsupergenerations=5)
+solution = model.fit(ngenerations=1, nsupergenerations=5, verbose=True)
 print("Best solution: {}".format(solution))

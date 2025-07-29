@@ -107,5 +107,6 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("ngenerations"),
             py::arg("nsupergenerations"),
             py::arg("nepochs") = 1,
-            py::arg("learning_rate") = 1e-3);
+            py::arg("learning_rate") = 1e-3,
+            py::arg("verbose") = false);
 }
