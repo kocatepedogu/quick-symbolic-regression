@@ -102,5 +102,7 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("crossover"),
             py::arg("selection"),
             py::arg("runner_generator"))
-        .def("fit", &GeneticProgrammingIslands::fit);
+        .def("fit", &GeneticProgrammingIslands::fit,
+            py::arg("nepochs") = 1,
+            py::arg("learning_rate") = 1e-3);
 }

@@ -42,7 +42,7 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
     delete[] islands;
 }
 
-std::string GeneticProgrammingIslands::fit() noexcept {
+std::string GeneticProgrammingIslands::fit(int nepochs, float learning_rate) noexcept {
     // Current best solution
     Expression best = 0.0;
 
@@ -66,7 +66,7 @@ std::string GeneticProgrammingIslands::fit() noexcept {
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Iterate island
-            islands[threadIdx]->fit(ngenerations);
+            islands[threadIdx]->fit(ngenerations, nepochs, learning_rate);
 
             // Synchronize all islands
             #pragma omp barrier

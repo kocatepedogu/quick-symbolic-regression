@@ -20,7 +20,7 @@ namespace inter_individual {
     public:
         Runner(std::shared_ptr<Dataset> dataset, int nweights);
 
-        void run(std::vector<Expression>& population, int epochs = 500, float learning_rate = 1e-3) override;
+        void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
 
         hipStream_t stream;
 

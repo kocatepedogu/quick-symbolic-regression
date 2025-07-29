@@ -22,7 +22,7 @@ public:
                        std::shared_ptr<BaseSelection> selection,
                        std::shared_ptr<BaseRunner> runner) noexcept;
 
-    void fit(int ngenerations) noexcept;
+    void fit(int ngenerations, int nepochs, float learning_rate) noexcept;
 
     void insert_solution(Expression e);
 

@@ -43,7 +43,7 @@ int main(void) {
     // Fit expressions
     intra_individual::Runner runner(dataset, 3);
     for (int i = 0; i < 60; ++i) {
-        runner.run(expression_pop, 10);
+        runner.run(expression_pop, 10, 1e-3);
     }
 
     // Print losses

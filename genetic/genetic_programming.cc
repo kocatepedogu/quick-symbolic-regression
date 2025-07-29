@@ -26,9 +26,6 @@ GeneticProgramming::GeneticProgramming(
     // Initialize island with a population of random expressions
     initializer->initialize(population);
 
-    // Compute initial fitnesses
-    runner->run(population, 10, 1e-3);
-
     // Get selector
     selector = selection->get_selector(npopulation);
 }
@@ -51,7 +48,11 @@ void GeneticProgramming::insert_solution(Expression e) {
     population[npopulation - 2] = e;
 }
 
-void GeneticProgramming::fit(int ngenerations) noexcept {
+void GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
+    // Compute initial fitnesses
+    runner->run(population, nepochs, learning_rate);
+
+    // Iterate for ngenerations
     for (int generation = 0; generation < ngenerations; ++generation)
     {
         Expression best = get_best_solution();
@@ -74,7 +75,7 @@ void GeneticProgramming::fit(int ngenerations) noexcept {
         population = offspring;
 
         // Compute fitnesses
-        runner->run(population, 2, 1e-3);
+        runner->run(population, nepochs, learning_rate);
 
         // Preserve previous best
         population[0] = best;
