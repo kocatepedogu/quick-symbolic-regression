@@ -13,8 +13,6 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
     int nislands, 
     int nweights, 
     int npopulation, 
-    int ngenerations,
-    int nsupergenerations,
     std::shared_ptr<BaseInitializer> initializer, 
     std::shared_ptr<BaseMutation> mutation, 
     std::shared_ptr<BaseCrossover> crossover, 
@@ -28,9 +26,7 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         runner_generator(runner_generator),
         nweights(nweights),
         nislands(nislands),
-        npopulation(npopulation),
-        ngenerations(ngenerations),
-        nsupergenerations(nsupergenerations)
+        npopulation(npopulation)
 {
     // Create empty island array
     islands = new GeneticProgramming*[nislands];
@@ -42,7 +38,7 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
     delete[] islands;
 }
 
-std::string GeneticProgrammingIslands::fit(int nepochs, float learning_rate) noexcept {
+std::string GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, int nepochs, float learning_rate) noexcept {
     // Current best solution
     Expression best = 0.0;
 

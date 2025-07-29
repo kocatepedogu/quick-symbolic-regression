@@ -23,8 +23,6 @@ model = GeneticProgrammingIslands(
     nislands=8, 
     nweights=NWEIGHTS, 
     npopulation=NPOPULATION, 
-    ngenerations=1,
-    nsupergenerations=5,
     initializer=DefaultInitializer(nvars=NVARS, nweights=NWEIGHTS, npopulation=NPOPULATION//8),
     mutation=DefaultMutation(nvars=NVARS, nweights=NWEIGHTS),
     crossover=DefaultCrossover(),
@@ -32,5 +30,5 @@ model = GeneticProgrammingIslands(
     runner_generator=IntraIndividualRunnerGenerator()
 )
 
-solution = model.fit()
+solution = model.fit(ngenerations=1, nsupergenerations=5)
 print("Best solution: {}".format(solution))

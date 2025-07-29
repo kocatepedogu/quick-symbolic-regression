@@ -16,8 +16,6 @@ public:
                               int nislands, 
                               int nweights, 
                               int npopulation, 
-                              int ngenerations,
-                              int nsupergenerations,
                               std::shared_ptr<BaseInitializer> initializer,
                               std::shared_ptr<BaseMutation> mutation,
                               std::shared_ptr<BaseCrossover> crossover,
@@ -26,7 +24,7 @@ public:
 
     ~GeneticProgrammingIslands() noexcept;
 
-    std::string fit(int nepochs, float learning_rate) noexcept;
+    std::string fit(int ngenerations, int nsupergenerations, int nepochs, float learning_rate) noexcept;
 
 private:
     /// Dataset shared by all islands
@@ -46,12 +44,6 @@ private:
 
     /// Runner generator shared by all islands
     std::shared_ptr<BaseRunnerGenerator> runner_generator;
-
-    /// Number of iterations per supergeneration
-    const int ngenerations;
-
-    /// Number of supergenerations
-    const int nsupergenerations;
 
     /// Properties of solutions
     const int nweights;

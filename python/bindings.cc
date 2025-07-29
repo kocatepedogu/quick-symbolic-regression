@@ -83,9 +83,10 @@ PYBIND11_MODULE(libquicksr, m) {
     /* Genetic Programming Algorithm Classes */
 
     py::class_<GeneticProgrammingIslands>(m, "GeneticProgrammingIslands")
+        // Constructor
         .def(py::init<
             std::shared_ptr<Dataset>, 
-            int, int, int, int, int,
+            int, int, int,
             std::shared_ptr<BaseInitializer>,
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseCrossover>,
@@ -95,14 +96,16 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("nislands"),
             py::arg("nweights"),
             py::arg("npopulation"),
-            py::arg("ngenerations"),
-            py::arg("nsupergenerations"),
             py::arg("initializer"),
             py::arg("mutation"),
             py::arg("crossover"),
             py::arg("selection"),
             py::arg("runner_generator"))
+
+        // Fit method
         .def("fit", &GeneticProgrammingIslands::fit,
+            py::arg("ngenerations"),
+            py::arg("nsupergenerations"),
             py::arg("nepochs") = 1,
             py::arg("learning_rate") = 1e-3);
 }
