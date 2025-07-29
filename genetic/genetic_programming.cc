@@ -11,22 +11,23 @@ GeneticProgramming::GeneticProgramming(
                std::shared_ptr<BaseInitializer> initializer,
                std::shared_ptr<BaseMutation> mutator,
                std::shared_ptr<BaseCrossover> crossover,
-               std::shared_ptr<BaseSelection> selection) noexcept : 
+               std::shared_ptr<BaseSelection> selection,
+               std::shared_ptr<BaseRunner> runner) noexcept : 
                dataset(dataset), 
                nvars(dataset->n), 
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
-               runner(*dataset.get(), nweights), 
                initializer(initializer),
                mutator(mutator),
                crossover(crossover),
-               selection(selection)
+               selection(selection),
+               runner(runner)
 {
     // Initialize island with a population of random expressions
     initializer->initialize(population);
 
     // Compute initial fitnesses
-    runner.run(population, 10);
+    runner->run(population, 10, 1e-3);
 
     // Get selector
     selector = selection->get_selector(npopulation);
@@ -73,7 +74,7 @@ void GeneticProgramming::iterate(int niters) noexcept {
         population = offspring;
 
         // Compute fitnesses
-        runner.run(population, 2);
+        runner->run(population, 2, 1e-3);
 
         // Preserve previous best
         population[0] = best;

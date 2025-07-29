@@ -8,6 +8,7 @@
 #include "initializer/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
+#include "../runners/runner_generator_base.hpp"
 
 class GeneticProgrammingIslands {
 public:
@@ -20,7 +21,8 @@ public:
                               std::shared_ptr<BaseInitializer> initializer,
                               std::shared_ptr<BaseMutation> mutation,
                               std::shared_ptr<BaseCrossover> crossover,
-                              std::shared_ptr<BaseSelection> selection) noexcept;
+                              std::shared_ptr<BaseSelection> selection,
+                              std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept;
 
     ~GeneticProgrammingIslands() noexcept;
 
@@ -41,6 +43,9 @@ private:
 
     /// Selection operator shared by all islands
     std::shared_ptr<BaseSelection> selection;
+
+    /// Runner generator shared by all islands
+    std::shared_ptr<BaseRunnerGenerator> runner_generator;
 
     /// Number of iterations per supergeneration
     const int ngenerations;

@@ -8,7 +8,7 @@
 #include "../expressions/unary.hpp"
 
 #include "../dataset/dataset.hpp"
-#include "../inter-individual/runner.hpp"
+#include "../runners/inter-individual/runner.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -22,7 +22,7 @@ int main(void) {
     });
 
     // Create dataset
-    Dataset dataset(X, y, test_data_length, 1);
+    auto dataset = std::make_shared<Dataset>(X, y, test_data_length, 1);
 
     // Input feature
     Expression x = Var(0);

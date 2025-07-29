@@ -78,7 +78,7 @@ namespace inter_individual {
         }
     }
 
-    VirtualMachine::VirtualMachine(const Dataset& dataset, int nweights, hipStream_t &stream) :
+    VirtualMachine::VirtualMachine(std::shared_ptr<Dataset> dataset, int nweights, hipStream_t &stream) :
         dataset(dataset), nweights(nweights), stream(stream)
     {
         HIP_CALL(hipGetDevice(&device_id));
@@ -145,7 +145,7 @@ namespace inter_individual {
             program.bytecode, 
             program.max_num_of_instructions, 
             program.num_of_individuals,
-            dataset.m, dataset.X_d, dataset.y_d,
+            dataset->m, dataset->X_d, dataset->y_d,
             stack_d, intermediate_d,
             weights_d, weights_grad_d, nweights,
             epochs, learning_rate, loss_d);

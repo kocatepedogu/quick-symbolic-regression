@@ -6,7 +6,7 @@
 #include "../../util/hip.hpp"
 
 namespace intra_individual {
-    Runner::Runner(const Dataset& dataset, const int nweights) : dataset(dataset) {
+    Runner::Runner(std::shared_ptr<Dataset> dataset, const int nweights) : dataset(dataset) {
         omp_init_lock(&lock);
         omp_init_lock(&print_lock);
 
@@ -71,7 +71,7 @@ namespace intra_individual {
                     // Compute total loss
                     float total_loss = 0;
                     #pragma omp simd reduction(+:total_loss)
-                    for (int i = 0; i < dataset.m; ++i) {
+                    for (int i = 0; i < dataset->m; ++i) {
                         total_loss += vms[tid]->loss_d[i];
                     }
                     population[program_idx].loss = total_loss;

@@ -3,7 +3,7 @@
 
 #include "../dataset/dataset.hpp"
 #include "../expressions/expression.hpp"
-#include "../runners/inter-individual/runner.hpp"
+#include "../runners/base.hpp"
 
 #include "crossover/base.hpp"
 #include "initializer/base.hpp"
@@ -19,7 +19,8 @@ public:
                        std::shared_ptr<BaseInitializer> initializer,
                        std::shared_ptr<BaseMutation> mutator,
                        std::shared_ptr<BaseCrossover> crossover,
-                       std::shared_ptr<BaseSelection> selection) noexcept;
+                       std::shared_ptr<BaseSelection> selection,
+                       std::shared_ptr<BaseRunner> runner) noexcept;
 
     void iterate(int niters) noexcept;
 
@@ -37,8 +38,7 @@ private:
     std::shared_ptr<BaseCrossover> crossover;
     std::shared_ptr<BaseSelection> selection;
     std::shared_ptr<BaseSelector> selector;
-
-    inter_individual::Runner runner;
+    std::shared_ptr<BaseRunner> runner;
 
     const int nvars;
     const int nweights;

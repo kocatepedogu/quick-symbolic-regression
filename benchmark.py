@@ -28,7 +28,8 @@ model = GeneticProgrammingIslands(
     initializer=DefaultInitializer(nvars=NVARS, nweights=NWEIGHTS, npopulation=NPOPULATION//8),
     mutation=DefaultMutation(nvars=NVARS, nweights=NWEIGHTS),
     crossover=DefaultCrossover(),
-    selection=FitnessProportionalSelection()
+    selection=FitnessProportionalSelection(),
+    runner_generator=IntraIndividualRunnerGenerator()
 )
 
 solution = model.iterate()

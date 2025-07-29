@@ -5,6 +5,9 @@
 #include "expression_comparator.hpp"
 #include "initializer/base.hpp"
 
+#include </usr/lib/clang/20/include/omp.h>
+#include <memory>
+
 GeneticProgrammingIslands::GeneticProgrammingIslands (
     std::shared_ptr<Dataset> dataset, 
     int nislands, 
@@ -15,12 +18,14 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
     std::shared_ptr<BaseInitializer> initializer, 
     std::shared_ptr<BaseMutation> mutation, 
     std::shared_ptr<BaseCrossover> crossover, 
-    std::shared_ptr<BaseSelection> selection) noexcept :
+    std::shared_ptr<BaseSelection> selection,
+    std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
         dataset(dataset),
         initializer(initializer),
         mutation(mutation),
         crossover(crossover),
         selection(selection),
+        runner_generator(runner_generator),
         nweights(nweights),
         nislands(nislands),
         npopulation(npopulation),
@@ -47,6 +52,8 @@ std::string GeneticProgrammingIslands::iterate() noexcept {
         const int threadIdx = omp_get_thread_num();
         const int population_per_island = npopulation / nislands;
 
+        auto runner = runner_generator->generate(dataset, nweights);
+
         islands[threadIdx] = new GeneticProgramming(
             dataset, 
             nweights, 
@@ -54,7 +61,8 @@ std::string GeneticProgrammingIslands::iterate() noexcept {
             initializer,
             mutation,
             crossover,
-            selection);
+            selection,
+            runner);
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Iterate island

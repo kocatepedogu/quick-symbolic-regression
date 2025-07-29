@@ -91,7 +91,7 @@ namespace intra_individual {
         vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
     }
 
-    VirtualMachine::VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
+    VirtualMachine::VirtualMachine(std::shared_ptr<Dataset> dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
         dataset(dataset), stream(stream), nweights(nweights), print_lock(print_lock)
     {
         HIP_CALL(hipGetDevice(&device_id));
@@ -106,8 +106,8 @@ namespace intra_individual {
         * - Excess threads are later masked inside kernel with if (tid < m).
         */
 
-        const int threadsPerBlock = min(dataset.m, props.maxThreadsPerBlock);
-        const int blocks = (dataset.m + threadsPerBlock - 1) / threadsPerBlock;
+        const int threadsPerBlock = min(dataset->m, props.maxThreadsPerBlock);
+        const int blocks = (dataset->m + threadsPerBlock - 1) / threadsPerBlock;
 
         gridDim = dim3(blocks);
         blockDim = dim3(threadsPerBlock);
@@ -118,7 +118,7 @@ namespace intra_individual {
         *   sequentially summed to produce the final sum for each weight.
         */
 
-        int reduction_blocks_per_grid = (dataset.m + reduction_threads_per_block - 1) / 
+        int reduction_blocks_per_grid = (dataset->m + reduction_threads_per_block - 1) / 
             reduction_threads_per_block;
 
         reduction_grid_dim = dim3(reduction_blocks_per_grid);
@@ -132,14 +132,14 @@ namespace intra_individual {
         * - Consecutive threads should access consecutive locations in the stack.
         *   The dimensions of the stack are [max_stack_depth][num_threads]
         */
-        init_arr_2d(stack_d, max_stack_depth, dataset.m);
+        init_arr_2d(stack_d, max_stack_depth, dataset->m);
 
         /*
         * Allocate array intermediate_d to store intermediate calculation 
         * results for later use in backpropagation. The dimensions of 
         * intermediate_d is the same as stack_d.
         */
-        init_arr_2d(intermediate_d, max_stack_depth, dataset.m);
+        init_arr_2d(intermediate_d, max_stack_depth, dataset->m);
 
         /* Allocate weights */
         init_arr_1d(weights_d, nweights);
@@ -150,13 +150,13 @@ namespace intra_individual {
         *   computed from different data points.
         * - weights_grad_d is an array of arrays with dimensions [nweights][num_threads]
         */
-        init_arr_2d(weights_grad_d, nweights, dataset.m);
+        init_arr_2d(weights_grad_d, nweights, dataset->m);
 
         // Allocate memory for block sums
         init_arr_2d(weights_grad_reduced_sum_d, nweights, reduction_blocks_per_grid);
 
         // Allocate memory for loss
-        init_arr_1d(loss_d, dataset.m);
+        init_arr_1d(loss_d, dataset->m);
     }
 
     void VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
@@ -171,7 +171,7 @@ namespace intra_individual {
             hipLaunchKernelGGL(
                 vm, gridDim, blockDim, 0, stream,
                 code, code_length, 
-                dataset.m, dataset.X_d, dataset.y_d,
+                dataset->m, dataset->X_d, dataset->y_d,
                 stack_d, intermediate_d,
                 weights_d, weights_grad_d, nweights, loss_d);
 
@@ -180,7 +180,7 @@ namespace intra_individual {
             for (int i = 0; i < nweights; ++i) {
                 hipLaunchKernelGGL(
                     weight_update, reduction_grid_dim, reduction_block_dim, 0, stream, 
-                    weights_grad_d[i], &weights_d[i], dataset.m, learning_rate);
+                    weights_grad_d[i], &weights_d[i], dataset->m, learning_rate);
             }
         }
 

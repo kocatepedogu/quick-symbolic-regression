@@ -13,12 +13,12 @@
 namespace inter_individual {
     class VirtualMachine {
     public:
-        VirtualMachine(const Dataset& dataset, int nweights, hipStream_t &stream);
+        VirtualMachine(std::shared_ptr<Dataset> dataset, int nweights, hipStream_t &stream);
 
         void fit(const Program& program, real_1d loss_d, int epochs, float learning_rate);
 
     private:
-        const Dataset& dataset;
+        std::shared_ptr<Dataset> dataset;
         const int nweights;
 
         int device_id;

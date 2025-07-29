@@ -14,7 +14,7 @@
 namespace intra_individual {
     class VirtualMachine {
     public:
-        VirtualMachine(const Dataset& dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock);
+        VirtualMachine(std::shared_ptr<Dataset> dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock);
 
         void fit(c_inst_1d code, int code_length, int epochs, float learning_rate);
 
@@ -23,7 +23,7 @@ namespace intra_individual {
         real_1d_mut loss_d;
 
     private:
-        const Dataset& dataset;
+        std::shared_ptr<Dataset> dataset;
         const int nweights;
 
         int device_id;

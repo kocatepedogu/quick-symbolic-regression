@@ -7,7 +7,7 @@
 #include <hip/hip_runtime.h>
 
 namespace inter_individual {
-    Runner::Runner(const Dataset& dataset, int nweights) :
+    Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) 
     {
         // Create stream

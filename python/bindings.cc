@@ -13,6 +13,8 @@
 #include "../genetic/mutation/default.hpp"
 #include "../genetic/crossover/default.hpp"
 #include "../genetic/selection/fitness_proportional_selection.hpp"
+#include "../runners/inter-individual/runner_generator.hpp"
+#include "../runners/intra-individual/runner_generator.hpp"
 
 namespace py = pybind11;
 
@@ -67,6 +69,17 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("X"),
             py::arg("y"));
 
+    /* Runner Generator Classes */
+
+    py::class_<BaseRunnerGenerator, std::shared_ptr<BaseRunnerGenerator>>(m, "BaseRunnerGenerator")
+        .def(py::init<>());
+
+    py::class_<inter_individual::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<inter_individual::RunnerGenerator>>(m, "InterIndividualRunnerGenerator")
+        .def(py::init<>());
+        
+    py::class_<intra_individual::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<intra_individual::RunnerGenerator>>(m, "IntraIndividualRunnerGenerator")
+        .def(py::init<>());
+
     /* Genetic Programming Algorithm Classes */
 
     py::class_<GeneticProgrammingIslands>(m, "GeneticProgrammingIslands")
@@ -76,7 +89,8 @@ PYBIND11_MODULE(libquicksr, m) {
             std::shared_ptr<BaseInitializer>,
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseCrossover>,
-            std::shared_ptr<BaseSelection>>(),
+            std::shared_ptr<BaseSelection>,
+            std::shared_ptr<BaseRunnerGenerator>>(),
             py::arg("dataset"),
             py::arg("nislands"),
             py::arg("nweights"),
@@ -86,6 +100,7 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("initializer"),
             py::arg("mutation"),
             py::arg("crossover"),
-            py::arg("selection"))
+            py::arg("selection"),
+            py::arg("runner_generator"))
         .def("iterate", &GeneticProgrammingIslands::iterate);
 }
