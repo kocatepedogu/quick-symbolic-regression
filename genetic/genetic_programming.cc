@@ -51,8 +51,8 @@ void GeneticProgramming::insert_solution(Expression e) {
     population[npopulation - 2] = e;
 }
 
-void GeneticProgramming::iterate(int niters) noexcept {
-    for (int iter = 0; iter < niters; ++iter)
+void GeneticProgramming::fit(int ngenerations) noexcept {
+    for (int generation = 0; generation < ngenerations; ++generation)
     {
         Expression best = get_best_solution();
 

@@ -26,7 +26,7 @@ public:
 
     ~GeneticProgrammingIslands() noexcept;
 
-    std::string iterate() noexcept;
+    std::string fit() noexcept;
 
 private:
     /// Dataset shared by all islands

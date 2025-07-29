@@ -102,5 +102,5 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("crossover"),
             py::arg("selection"),
             py::arg("runner_generator"))
-        .def("iterate", &GeneticProgrammingIslands::iterate);
+        .def("fit", &GeneticProgrammingIslands::fit);
 }
