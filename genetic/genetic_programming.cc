@@ -34,17 +34,10 @@ GeneticProgramming::GeneticProgramming(
 }
 
 Expression GeneticProgramming::get_best_solution() {
-    int max_index = -1;
-    float max_fitness = -1e30;
-    for (int i = 0; i < npopulation; ++i) {
-        float fitness = -population[i].loss;
-        if (fitness > max_fitness) {
-            max_fitness = fitness;
-            max_index = i;
-        }
-    }
-
-    return population[max_index];
+    return *std::min_element(population.begin(), population.end(), 
+    [](const Expression& a, const Expression& b) {
+        return a.loss < b.loss;
+    });
 }
 
 void GeneticProgramming::insert_solution(Expression e) {
