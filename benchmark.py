@@ -32,7 +32,7 @@ model = GeneticProgrammingIslands(
     mutation=DefaultMutation(nvars=NVARS, nweights=NWEIGHTS),
     crossover=DefaultCrossover(),
     selection=FitnessProportionalSelection(),
-    runner_generator=IntraIndividualRunnerGenerator()
+    runner_generator=InterIndividualRunnerGenerator()
 )
 
 # Fit model
