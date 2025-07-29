@@ -29,6 +29,7 @@ endif()
 
 # Define source directories
 set(SOURCE_DIRS 
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/compiler
     ${CMAKE_CURRENT_SOURCE_DIR}/dataset
     ${CMAKE_CURRENT_SOURCE_DIR}/expressions
@@ -102,7 +103,6 @@ add_executable(testinter ${CMAKE_CURRENT_SOURCE_DIR}/tests/testinter.cc)
 add_executable(testexprgen ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprgen.cc)
 add_executable(testmutation ${CMAKE_CURRENT_SOURCE_DIR}/tests/testmutation.cc)
 add_executable(testcrossover ${CMAKE_CURRENT_SOURCE_DIR}/tests/testcrossover.cc)
-add_executable(testisland ${CMAKE_CURRENT_SOURCE_DIR}/tests/testisland.cc)
 add_executable(testexprpick ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprpick.cc)
 
 target_compile_options(testintra PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
@@ -110,7 +110,6 @@ target_compile_options(testinter PRIVATE -O3 -march=native -fopenmp ${SANITIZER_
 target_compile_options(testexprgen PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testmutation PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testcrossover PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
-target_compile_options(testisland PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testexprpick PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 
 target_link_libraries(testintra ${SANITIZER_LINKER_FLAGS} quicksr)
@@ -118,5 +117,4 @@ target_link_libraries(testinter ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testexprgen ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testmutation ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testcrossover ${SANITIZER_LINKER_FLAGS} quicksr)
-target_link_libraries(testisland ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testexprpick ${SANITIZER_LINKER_FLAGS} quicksr)
