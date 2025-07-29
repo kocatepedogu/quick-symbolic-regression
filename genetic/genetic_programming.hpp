@@ -13,13 +13,13 @@
 
 class GeneticProgramming {
 public:
-    GeneticProgramming(const Dataset& dataset, 
+    GeneticProgramming(std::shared_ptr<const Dataset> dataset, 
                        int nweights, 
                        int npopulation, 
-                       BaseInitializer& initializer,
-                       BaseMutation& mutator,
-                       BaseCrossover& crossover,
-                       BaseSelection& selection) noexcept;
+                       std::shared_ptr<BaseInitializer> initializer,
+                       std::shared_ptr<BaseMutation> mutator,
+                       std::shared_ptr<BaseCrossover> crossover,
+                       std::shared_ptr<BaseSelection> selection) noexcept;
 
     void iterate(int niters) noexcept;
 
@@ -27,18 +27,16 @@ public:
 
     Expression get_best_solution();
 
-    ~GeneticProgramming();
-
 private:
-    const Dataset& dataset;
+    std::shared_ptr<const Dataset> dataset;
 
     std::vector<Expression> population;
 
-    BaseInitializer &initializer;
-    BaseMutation &mutator;
-    BaseCrossover &crossover;
-    BaseSelection &selection;
-    BaseSelector *selector;
+    std::shared_ptr<BaseInitializer> initializer;
+    std::shared_ptr<BaseMutation> mutator;
+    std::shared_ptr<BaseCrossover> crossover;
+    std::shared_ptr<BaseSelection> selection;
+    std::shared_ptr<BaseSelector> selector;
 
     inter_individual::Runner runner;
 

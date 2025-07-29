@@ -11,36 +11,36 @@
 
 class GeneticProgrammingIslands {
 public:
-    GeneticProgrammingIslands(const Dataset& dataset, 
+    GeneticProgrammingIslands(std::shared_ptr<Dataset> dataset, 
+                              int nislands, 
                               int nweights, 
                               int npopulation, 
-                              int nislands, 
                               int ngenerations,
                               int nsupergenerations,
-                              BaseInitializer& initializer,
-                              BaseMutation& mutation,
-                              BaseCrossover& crossover,
-                              BaseSelection& selection) noexcept;
+                              std::shared_ptr<BaseInitializer> initializer,
+                              std::shared_ptr<BaseMutation> mutation,
+                              std::shared_ptr<BaseCrossover> crossover,
+                              std::shared_ptr<BaseSelection> selection) noexcept;
 
     ~GeneticProgrammingIslands() noexcept;
 
-    Expression iterate() noexcept;
+    std::string iterate() noexcept;
 
 private:
     /// Dataset shared by all islands
-    const Dataset& dataset;
+    std::shared_ptr<Dataset> dataset;
 
     /// Population initializer shared by all islands
-    BaseInitializer &initializer;
+    std::shared_ptr<BaseInitializer> initializer;
 
     /// Mutation operator shared by all islands
-    BaseMutation &mutation;
+    std::shared_ptr<BaseMutation> mutation;
 
     /// Crossover operator shared by all islands
-    BaseCrossover &crossover;
+    std::shared_ptr<BaseCrossover> crossover;
 
     /// Selection operator shared by all islands
-    BaseSelection &selection;
+    std::shared_ptr<BaseSelection> selection;
 
     /// Number of iterations per supergeneration
     const int ngenerations;

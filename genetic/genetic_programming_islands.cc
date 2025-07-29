@@ -6,23 +6,23 @@
 #include "initializer/base.hpp"
 
 GeneticProgrammingIslands::GeneticProgrammingIslands (
-    const Dataset& dataset, 
-    int nweights, 
-    int npopulation,
+    std::shared_ptr<Dataset> dataset, 
     int nislands, 
-    int ngenerations, 
+    int nweights, 
+    int npopulation, 
+    int ngenerations,
     int nsupergenerations,
-    BaseInitializer& initializer, 
-    BaseMutation& mutation, 
-    BaseCrossover& crossover, 
-    BaseSelection& selection) noexcept :
+    std::shared_ptr<BaseInitializer> initializer, 
+    std::shared_ptr<BaseMutation> mutation, 
+    std::shared_ptr<BaseCrossover> crossover, 
+    std::shared_ptr<BaseSelection> selection) noexcept :
         dataset(dataset),
         initializer(initializer),
         mutation(mutation),
         crossover(crossover),
         selection(selection),
-        nislands(nislands),
         nweights(nweights),
+        nislands(nislands),
         npopulation(npopulation),
         ngenerations(ngenerations),
         nsupergenerations(nsupergenerations)
@@ -37,7 +37,7 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
     delete[] islands;
 }
 
-Expression GeneticProgrammingIslands::iterate() noexcept {
+std::string GeneticProgrammingIslands::iterate() noexcept {
     // Current best solution
     Expression best = 0.0;
 
@@ -55,7 +55,7 @@ Expression GeneticProgrammingIslands::iterate() noexcept {
             mutation,
             crossover,
             selection);
-
+        
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Iterate island
             islands[threadIdx]->iterate(ngenerations);
@@ -94,5 +94,8 @@ Expression GeneticProgrammingIslands::iterate() noexcept {
         delete islands[threadIdx];
     }
 
-    return best;
+    // Convert best to string
+    std::ostringstream oss;
+    oss << best;
+    return oss.str();
 }

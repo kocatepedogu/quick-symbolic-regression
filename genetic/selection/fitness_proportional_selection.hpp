@@ -6,7 +6,7 @@
 
 class FitnessProportionalSelection : public BaseSelection {
 public:
-    BaseSelector *get_selector(int npopulation) noexcept;
+    std::shared_ptr<BaseSelector> get_selector(int npopulation) noexcept;
 };
 
 #endif

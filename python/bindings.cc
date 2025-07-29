@@ -3,10 +3,9 @@
 
 #include </usr/lib/clang/20/include/omp.h>
 
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include <sstream> 
-#include <string>
 
 #include "../genetic/genetic_programming_islands.hpp"
 
@@ -17,86 +16,76 @@
 
 namespace py = pybind11;
 
-std::string fit(Dataset *dataset, 
-        int nweights,
-        int npopulation, 
-        int ngenerations, 
-        int nsupergenerations,
-        int nislands,
-        BaseInitializer *initializer,
-        BaseMutation *mutation,
-        BaseCrossover *crossover,
-        BaseSelection *selection) 
-{
-    // Construct genetic programming islands
-    GeneticProgrammingIslands gp(
-        *dataset, nweights, npopulation, nislands, 
-        ngenerations, nsupergenerations, 
-        *initializer, 
-        *mutation, 
-        *crossover, 
-        *selection);
-
-    // Find solution
-    const auto &result = gp.iterate();
-
-    // Return as string
-    std::stringstream ss;
-    ss << result;
-    return ss.str();
-}
-
 PYBIND11_MODULE(libquicksr, m) {
     m.doc() = "pybind11 libquicksr plugin";
 
-    m.def("fit", &fit, "Fits a symbolic expression to given feature matrix X and target vector y",
-        py::arg("dataset"),                         // Required argument
-        py::arg("nweights") = 2,                    // Optional argument with default value
-        py::arg("npopulation") = 1000,              // Optional argument with default value
-        py::arg("ngenerations") = 10,               // Optional argument with default value
-        py::arg("nsupergenerations") = 2,           // Optional argument with default value
-        py::arg("nislands") = 1,                    // Optional argument with default value
-        py::arg("initializer"),                     // Required argument
-        py::arg("mutation"),                        // Required argument
-        py::arg("crossover"),                       // Required argument
-        py::arg("selection")                        // Required argument
-    );
+    /* Mutation Classes */
 
-    py::class_<BaseMutation>(m, "BaseMutation")
+    py::class_<BaseMutation, std::shared_ptr<BaseMutation>>(m, "BaseMutation")
         .def(py::init<>());
 
-    py::class_<DefaultMutation, BaseMutation>(m, "DefaultMutation")
+    py::class_<DefaultMutation, BaseMutation, std::shared_ptr<DefaultMutation>>(m, "DefaultMutation")
         .def(py::init<int, int, int, float>(),
             py::arg("nvars"), 
             py::arg("nweights"), 
             py::arg("max_depth") = 3, 
             py::arg("mutation_probability") = 0.7);
 
-    py::class_<BaseCrossover>(m, "BaseCrossover")
+    /* Crossover Classes */
+
+    py::class_<BaseCrossover, std::shared_ptr<BaseCrossover>>(m, "BaseCrossover")
         .def(py::init<>());
 
-    py::class_<DefaultCrossover, BaseCrossover>(m, "DefaultCrossover")
+    py::class_<DefaultCrossover, BaseCrossover, std::shared_ptr<DefaultCrossover>>(m, "DefaultCrossover")
         .def(py::init<float>(), 
              py::arg("crossover_probability") = 0.8);
 
-    py::class_<BaseSelection>(m, "BaseSelection")
+    /* Selection Classes */
+
+    py::class_<BaseSelection, std::shared_ptr<BaseSelection>>(m, "BaseSelection")
         .def(py::init<>());
 
-    py::class_<FitnessProportionalSelection, BaseSelection>(m, "FitnessProportionalSelection")
+    py::class_<FitnessProportionalSelection, BaseSelection, std::shared_ptr<FitnessProportionalSelection>>(m, "FitnessProportionalSelection")
         .def(py::init<>());
 
-    py::class_<BaseInitializer>(m, "BaseInitializer")
+    /* Initialization Classes */
+
+    py::class_<BaseInitializer, std::shared_ptr<BaseInitializer>>(m, "BaseInitializer")
         .def(py::init<>());
 
-    py::class_<DefaultInitializer, BaseInitializer>(m, "DefaultInitializer")
+    py::class_<DefaultInitializer, BaseInitializer, std::shared_ptr<DefaultInitializer>>(m, "DefaultInitializer")
         .def(py::init<int, int, int, int>(),
              py::arg("nvars"),
              py::arg("nweights"),
              py::arg("max_depth") = 1,
              py::arg("npopulation"));
 
-    py::class_<Dataset>(m, "Dataset")
+    /* Dataset Class */
+
+    py::class_<Dataset, std::shared_ptr<Dataset>>(m, "Dataset")
         .def(py::init<py::array_t<float>, py::array_t<float>>(),
             py::arg("X"),
             py::arg("y"));
+
+    /* Genetic Programming Algorithm Classes */
+
+    py::class_<GeneticProgrammingIslands>(m, "GeneticProgrammingIslands")
+        .def(py::init<
+            std::shared_ptr<Dataset>, 
+            int, int, int, int, int,
+            std::shared_ptr<BaseInitializer>,
+            std::shared_ptr<BaseMutation>,
+            std::shared_ptr<BaseCrossover>,
+            std::shared_ptr<BaseSelection>>(),
+            py::arg("dataset"),
+            py::arg("nislands"),
+            py::arg("nweights"),
+            py::arg("npopulation"),
+            py::arg("ngenerations"),
+            py::arg("nsupergenerations"),
+            py::arg("initializer"),
+            py::arg("mutation"),
+            py::arg("crossover"),
+            py::arg("selection"))
+        .def("iterate", &GeneticProgrammingIslands::iterate);
 }

@@ -3,9 +3,11 @@
 
 #include "selector/base.hpp"
 
+#include <memory>
+
 class BaseSelection {
 public:
-    virtual BaseSelector *get_selector(int npopulation);
+    virtual std::shared_ptr<BaseSelector> get_selector(int npopulation);
 };
 
 #endif

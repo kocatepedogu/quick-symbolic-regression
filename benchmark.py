@@ -18,7 +18,7 @@ for x0 in np.linspace(-5, 5, 64):
 y = [x0*np.exp(x0 + x1) + np.sin(x1) 
      for x0, x1 in X]
 
-solution = libquicksr.fit(
+model = GeneticProgrammingIslands(
     Dataset(X, y), 
     nislands=8, 
     nweights=NWEIGHTS, 
@@ -31,4 +31,5 @@ solution = libquicksr.fit(
     selection=FitnessProportionalSelection()
 )
 
+solution = model.iterate()
 print("Best solution: {}".format(solution))

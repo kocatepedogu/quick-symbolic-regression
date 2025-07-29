@@ -5,31 +5,31 @@
 #include "initializer/base.hpp"
 
 GeneticProgramming::GeneticProgramming(
-               const Dataset& dataset, 
+               std::shared_ptr<const Dataset> dataset, 
                int nweights, 
                int npopulation, 
-               BaseInitializer& initializer,
-               BaseMutation& mutator,
-               BaseCrossover& crossover,
-               BaseSelection& selection) noexcept : 
+               std::shared_ptr<BaseInitializer> initializer,
+               std::shared_ptr<BaseMutation> mutator,
+               std::shared_ptr<BaseCrossover> crossover,
+               std::shared_ptr<BaseSelection> selection) noexcept : 
                dataset(dataset), 
-               nvars(dataset.n), 
+               nvars(dataset->n), 
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
-               runner(dataset, nweights), 
+               runner(*dataset.get(), nweights), 
                initializer(initializer),
                mutator(mutator),
                crossover(crossover),
                selection(selection)
 {
     // Initialize island with a population of random expressions
-    initializer.initialize(population);
+    initializer->initialize(population);
 
     // Compute initial fitnesses
     runner.run(population, 10);
 
     // Get selector
-    selector = selection.get_selector(npopulation);
+    selector = selection->get_selector(npopulation);
 }
 
 Expression GeneticProgramming::get_best_solution() {
@@ -62,11 +62,11 @@ void GeneticProgramming::iterate(int niters) noexcept {
         for (int i = 0; i < npopulation / 2; ++i) {
             const auto &parent1 = selector->select(&population[0]);
             const auto &parent2 = selector->select(&population[0]);
-            const auto &children = crossover.crossover(parent1, parent2);
+            const auto &children = crossover->crossover(parent1, parent2);
             const auto &child1 = get<0>(children);
             const auto &child2 = get<1>(children);
-            offspring.push_back(mutator.mutate(child1));
-            offspring.push_back(mutator.mutate(child2));
+            offspring.push_back(mutator->mutate(child1));
+            offspring.push_back(mutator->mutate(child2));
         }
 
         // Replace current population with offspring
@@ -78,8 +78,4 @@ void GeneticProgramming::iterate(int niters) noexcept {
         // Preserve previous best
         population[0] = best;
     }
-}
-
-GeneticProgramming::~GeneticProgramming() {
-    delete selector;
 }
