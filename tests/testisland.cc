@@ -1,6 +1,8 @@
 #include "common/testdata.hpp"
 
 #include "../genetic/genetic_programming.hpp"
+
+#include "../genetic/initializer/default.hpp"
 #include "../genetic/mutation/default.hpp"
 #include "../genetic/crossover/default.hpp"
 #include "../genetic/selection/fitness_proportional_selection.hpp"
@@ -19,6 +21,7 @@ int main(void) {
     Dataset dataset(X, y, test_data_length, 1);
 
     // Genetic operators
+    DefaultInitializer initializer(1, 2, 3, 2000);
     DefaultMutation mutation(1, 2, 3, 0.7);
     DefaultCrossover crossover(1.0);
     FitnessProportionalSelection selection;
@@ -27,7 +30,13 @@ int main(void) {
     {
         // Create island
         GeneticProgramming genetic_programming(
-            dataset, 2, 2000, 4, mutation, crossover, selection);
+            dataset, 
+            2, 
+            2000, 
+            initializer, 
+            mutation, 
+            crossover, 
+            selection);
 
         // Iterate island
         genetic_programming.iterate(10);

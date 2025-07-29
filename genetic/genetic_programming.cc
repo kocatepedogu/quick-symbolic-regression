@@ -2,13 +2,13 @@
 
 #include "../expressions/expression.hpp"
 
-#include "expression_generator.hpp"
+#include "initializer/base.hpp"
 
 GeneticProgramming::GeneticProgramming(
                const Dataset& dataset, 
                int nweights, 
                int npopulation, 
-               int max_initial_depth, 
+               BaseInitializer& initializer,
                BaseMutation& mutator,
                BaseCrossover& crossover,
                BaseSelection& selection) noexcept : 
@@ -17,15 +17,13 @@ GeneticProgramming::GeneticProgramming(
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
                runner(dataset, nweights), 
+               initializer(initializer),
                mutator(mutator),
                crossover(crossover),
                selection(selection)
 {
     // Initialize island with a population of random expressions
-    ExpressionGenerator initial_expression_generator(nvars, nweights, max_initial_depth);
-    for (int i = 0; i < npopulation; ++i) {
-        population.push_back(initial_expression_generator.generate());
-    }
+    initializer.initialize(population);
 
     // Compute initial fitnesses
     runner.run(population, 10);

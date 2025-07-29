@@ -5,6 +5,7 @@
 
 #include "crossover/base.hpp"
 #include "genetic_programming.hpp"
+#include "initializer/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
 
@@ -13,10 +14,10 @@ public:
     GeneticProgrammingIslands(const Dataset& dataset, 
                               int nweights, 
                               int npopulation, 
-                              int max_initial_depth, 
                               int nislands, 
                               int ngenerations,
                               int nsupergenerations,
+                              BaseInitializer& initializer,
                               BaseMutation& mutation,
                               BaseCrossover& crossover,
                               BaseSelection& selection) noexcept;
@@ -29,6 +30,9 @@ private:
     /// Dataset shared by all islands
     const Dataset& dataset;
 
+    /// Population initializer shared by all islands
+    BaseInitializer &initializer;
+
     /// Mutation operator shared by all islands
     BaseMutation &mutation;
 
@@ -37,9 +41,6 @@ private:
 
     /// Selection operator shared by all islands
     BaseSelection &selection;
-
-    /// Initialization parameters shared by all islands
-    const int max_initial_depth;
 
     /// Number of iterations per supergeneration
     const int ngenerations;

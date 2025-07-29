@@ -6,6 +6,7 @@
 #include "../inter-individual/runner.hpp"
 
 #include "crossover/base.hpp"
+#include "initializer/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
 #include "selection/selector/base.hpp"
@@ -15,7 +16,7 @@ public:
     GeneticProgramming(const Dataset& dataset, 
                        int nweights, 
                        int npopulation, 
-                       int max_initial_depth, 
+                       BaseInitializer& initializer,
                        BaseMutation& mutator,
                        BaseCrossover& crossover,
                        BaseSelection& selection) noexcept;
@@ -33,6 +34,7 @@ private:
 
     std::vector<Expression> population;
 
+    BaseInitializer &initializer;
     BaseMutation &mutator;
     BaseCrossover &crossover;
     BaseSelection &selection;

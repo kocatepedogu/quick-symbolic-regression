@@ -3,12 +3,21 @@
 #include <iostream>
 
 #include "expression_comparator.hpp"
+#include "initializer/base.hpp"
 
 GeneticProgrammingIslands::GeneticProgrammingIslands (
-    const Dataset& dataset, int nweights, int npopulation, int max_initial_depth, 
-    int nislands, int ngenerations, int nsupergenerations,
-    BaseMutation& mutation, BaseCrossover& crossover, BaseSelection& selection) noexcept :
+    const Dataset& dataset, 
+    int nweights, 
+    int npopulation,
+    int nislands, 
+    int ngenerations, 
+    int nsupergenerations,
+    BaseInitializer& initializer, 
+    BaseMutation& mutation, 
+    BaseCrossover& crossover, 
+    BaseSelection& selection) noexcept :
         dataset(dataset),
+        initializer(initializer),
         mutation(mutation),
         crossover(crossover),
         selection(selection),
@@ -16,8 +25,7 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         nweights(nweights),
         npopulation(npopulation),
         ngenerations(ngenerations),
-        nsupergenerations(nsupergenerations),
-        max_initial_depth(max_initial_depth)
+        nsupergenerations(nsupergenerations)
 {
     // Create empty island array
     islands = new GeneticProgramming*[nislands];
@@ -43,7 +51,7 @@ Expression GeneticProgrammingIslands::iterate() noexcept {
             dataset, 
             nweights, 
             population_per_island, 
-            max_initial_depth,
+            initializer,
             mutation,
             crossover,
             selection);

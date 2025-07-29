@@ -10,6 +10,7 @@
 
 #include "../genetic/genetic_programming_islands.hpp"
 
+#include "../genetic/initializer/default.hpp"
 #include "../genetic/mutation/default.hpp"
 #include "../genetic/crossover/default.hpp"
 #include "../genetic/selection/fitness_proportional_selection.hpp"
@@ -19,19 +20,22 @@ namespace py = pybind11;
 std::string fit(Dataset *dataset, 
         int nweights,
         int npopulation, 
-        int ngenerations, int nsupergenerations,
-        int max_initial_depth,
-        int nthreads,
+        int ngenerations, 
+        int nsupergenerations,
+        int nislands,
+        BaseInitializer *initializer,
         BaseMutation *mutation,
         BaseCrossover *crossover,
         BaseSelection *selection) 
 {
     // Construct genetic programming islands
     GeneticProgrammingIslands gp(
-        *dataset, nweights, npopulation, 
-        max_initial_depth, nthreads, 
+        *dataset, nweights, npopulation, nislands, 
         ngenerations, nsupergenerations, 
-        *mutation, *crossover, *selection);
+        *initializer, 
+        *mutation, 
+        *crossover, 
+        *selection);
 
     // Find solution
     const auto &result = gp.iterate();
@@ -51,8 +55,8 @@ PYBIND11_MODULE(libquicksr, m) {
         py::arg("npopulation") = 1000,              // Optional argument with default value
         py::arg("ngenerations") = 10,               // Optional argument with default value
         py::arg("nsupergenerations") = 2,           // Optional argument with default value
-        py::arg("max_initial_depth") = 3,           // Optional argument with default value
-        py::arg("nthreads") = 1,                    // Optional argument with default value
+        py::arg("nislands") = 1,                    // Optional argument with default value
+        py::arg("initializer"),                     // Required argument
         py::arg("mutation"),                        // Required argument
         py::arg("crossover"),                       // Required argument
         py::arg("selection")                        // Required argument
@@ -73,13 +77,23 @@ PYBIND11_MODULE(libquicksr, m) {
 
     py::class_<DefaultCrossover, BaseCrossover>(m, "DefaultCrossover")
         .def(py::init<float>(), 
-             py::arg("crossover_probability") = 0.7);
+             py::arg("crossover_probability") = 0.8);
 
     py::class_<BaseSelection>(m, "BaseSelection")
         .def(py::init<>());
 
     py::class_<FitnessProportionalSelection, BaseSelection>(m, "FitnessProportionalSelection")
         .def(py::init<>());
+
+    py::class_<BaseInitializer>(m, "BaseInitializer")
+        .def(py::init<>());
+
+    py::class_<DefaultInitializer, BaseInitializer>(m, "DefaultInitializer")
+        .def(py::init<int, int, int, int>(),
+             py::arg("nvars"),
+             py::arg("nweights"),
+             py::arg("max_depth") = 1,
+             py::arg("npopulation"));
 
     py::class_<Dataset>(m, "Dataset")
         .def(py::init<py::array_t<float>, py::array_t<float>>(),

@@ -33,6 +33,7 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/dataset
     ${CMAKE_CURRENT_SOURCE_DIR}/expressions
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic
+    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/initializer
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/crossover
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/mutation
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/selection

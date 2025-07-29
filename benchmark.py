@@ -6,6 +6,7 @@ import numpy as np
 
 from libquicksr import *
 
+NPOPULATION=11200
 NVARS=2
 NWEIGHTS=1
 
@@ -19,13 +20,14 @@ y = [x0*np.exp(x0 + x1) + np.sin(x1)
 
 solution = libquicksr.fit(
     Dataset(X, y), 
-    nthreads=8, 
+    nislands=8, 
     nweights=NWEIGHTS, 
-    npopulation=11200, 
+    npopulation=NPOPULATION, 
     ngenerations=1,
     nsupergenerations=5,
+    initializer=DefaultInitializer(nvars=NVARS, nweights=NWEIGHTS, npopulation=NPOPULATION//8),
     mutation=DefaultMutation(nvars=NVARS, nweights=NWEIGHTS),
-    crossover=DefaultCrossover(crossover_probability=0.8),
+    crossover=DefaultCrossover(),
     selection=FitnessProportionalSelection()
 )
 
