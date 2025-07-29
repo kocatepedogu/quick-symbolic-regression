@@ -41,7 +41,10 @@ Expression GeneticProgramming::get_best_solution() {
 }
 
 void GeneticProgramming::insert_solution(Expression e) {
-    population[npopulation - 2] = e;
+    *std::max_element(population.begin(), population.end(), 
+    [](const Expression& a, const Expression& b) {
+        return a.loss < b.loss;
+    }) = e;
 }
 
 LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
