@@ -42,7 +42,7 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
 std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, 
                                            int nepochs, float learning_rate, bool verbose) noexcept {
     // Current best solution
-    Expression best = 0.0;
+    Expression global_best = 0.0;
 
     // Global learning history
     LearningHistory global_history;
@@ -87,11 +87,19 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
                 // Append to global learning history
                 global_history = global_history.concatenate_with(history_per_supergeneration);
 
-                // Find the best solution
+                // Find the global best solution
                 for (int i = 0; i < nislands; ++i) {
-                    Expression new_best = islands[i]->get_best_solution();
-                    if (new_best.loss < best.loss || (supergeneration == 0 && i == 0)) {
-                        best = new_best;
+                    Expression local_best = islands[i]->get_best_solution();
+                    if (local_best.loss < global_best.loss || (supergeneration == 0 && i == 0)) {
+                        global_best = local_best;
+                    }
+
+                    // Print best result of each island if in verbose mode
+                    if (verbose) {
+                        std::cout << local_best << std::endl;
+                        if (i == nislands - 1) {
+                            std::cout << std::endl;
+                        }
                     }
                 }
 
@@ -101,14 +109,6 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
 
                     int next = (i + 1) % nislands;
                     islands[next]->insert_solution(new_best);
-
-                    // Print best result of each island if in verbose mode
-                    if (verbose) {
-                        std::cout << new_best << std::endl;
-                    }
-                }
-                if (verbose) {
-                    std::cout << std::endl;
                 }
             }
 
@@ -124,7 +124,7 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
 
     // Get best solution as string
     std::ostringstream oss;
-    oss << best;
+    oss << global_best;
 
     // Return tuple of best solution and learning history
     return std::make_tuple(oss.str(), hist);
