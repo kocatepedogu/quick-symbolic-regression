@@ -1,7 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 project(QuickSR LANGUAGES CXX)
 
+# Options
 set(ENABLE_SANITIZERS OFF)
+
+# Find HIP package
+find_package(HIP REQUIRED)
+
+# Find Python3 Development Package
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+# Set the HIP language
+enable_language(HIP)
 
 # Set the HIP compiler
 set(CMAKE_CXX_COMPILER hipcc)
@@ -9,12 +19,6 @@ set(CMAKE_CXX_COMPILER hipcc)
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Find HIP package
-find_package(HIP REQUIRED)
-
-# Find Python3 Development Package
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
 # Configuration for Address Sanitizer and Undefined Behavior Sanitizer
 if(ENABLE_SANITIZERS)
@@ -56,6 +60,7 @@ set(SOURCE_DIRS
 set(SOURCES)
 foreach(DIR ${SOURCE_DIRS})
     file(GLOB DIR_SOURCES 
+        "${DIR}/*.hip"
         "${DIR}/*.cc"
     )
     list(APPEND SOURCES ${DIR_SOURCES})

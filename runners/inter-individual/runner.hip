@@ -1,16 +1,21 @@
-#include <cstdlib>
+#include "runner.hpp"
+
 #include <hip/hip_runtime.h>
-#include <memory>
-#include "vm.hpp"
 
 #include "../../../vm/vm_debug.hpp"
 #include "../../../vm/vm_types.hpp"
 #include "../../../vm/vm_control.hpp"
-
-#include "../../../util/hip.hpp"
 #include "../../../util/rng.hpp"
+#include "../../../util/hip.hpp"
+
+#include "./program/program.hpp"
+
+#include <hip/hip_runtime.h>
 
 namespace inter_individual {
+    Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
+        dataset(dataset), nweights(nweights) {}
+
     constexpr int max_stack_depth = 128;
 
     __global__
@@ -58,7 +63,11 @@ namespace inter_individual {
 
                     // Forward propagate and evaluate loss
                     vm_debug_print(tid, "Forward propagation");
-                    vm_control<FORWARD, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, datapoint_idx, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+                    vm_control<FORWARD, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(
+                        tid, datapoint_idx, bytecode, max_num_of_instructions, 
+                        m, X_d, y_d, 
+                        s, program_counter, 
+                        weights_d, weights_grad_d);
 
                     // Print an empty line in between forward propagation output and backpropagation output
                     vm_debug_print(tid, "");
@@ -68,7 +77,11 @@ namespace inter_individual {
 
                     // Backpropagate
                     vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(tid, datapoint_idx, bytecode, max_num_of_instructions, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+                    vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(
+                        tid, datapoint_idx, bytecode, max_num_of_instructions, 
+                        m, X_d, y_d, 
+                        s, program_counter, 
+                        weights_d, weights_grad_d);
                 }
 
                 // Apply weight updates (gradient descent)
@@ -81,67 +94,27 @@ namespace inter_individual {
         }
     }
 
-    VirtualMachine::VirtualMachine(std::shared_ptr<Dataset> dataset, int nweights, hipStream_t &stream) :
-        dataset(dataset), nweights(nweights), stream(stream)
-    {
-        HIP_CALL(hipGetDevice(&device_id));
-        HIP_CALL(hipGetDeviceProperties(&props, device_id));
-    }
-
-    VirtualMachineResult VirtualMachine::fit(const Program &program, int epochs, float learning_rate) {
-        /* 
-        * Decide number of blocks and threads for computation
-        * - The total number of threads must be greater than or equal to 
-        *   the number of individuals
-        * - Each block will have the maximum number of threads supported by
-        *   the device (probably 1024).
-        * - Excess threads are later masked inside kernel with if (tid < program.num_of_individuals).
-        */
-
-        const int threadsPerBlock = min(program.num_of_individuals, props.maxThreadsPerBlock);
+    VirtualMachineResult Runner::run(const Program &program, int epochs, float learning_rate) {
+        const int threadsPerBlock = min(program.num_of_individuals, config.props.maxThreadsPerBlock);
         const int blocks = (program.num_of_individuals + threadsPerBlock - 1) / threadsPerBlock;
 
         dim3 gridDim(blocks);
         dim3 blockDim(threadsPerBlock);
 
-        // Create array to store loss of each function
         auto loss_d = std::make_unique<Array1D<float>>(program.num_of_individuals);
-
-        /* 
-        * Allocate array stack_d as stack memory for bytecode virtual machine.
-        * - Each thread accesses its own stack. 
-        *   The dimensions of the stack are [max_stack_depth][num_threads]
-        */
         auto stack_d = std::make_unique<Array2D<float>>(max_stack_depth, program.num_of_individuals);
-
-        /*
-        * Allocate array intermediate_d to store intermediate calculation 
-        * results for later use in backpropagation. The dimensions of 
-        * intermediate_d is the same as stack_d.
-        */
         auto intermediate_d = std::make_unique<Array2D<float>>(max_stack_depth, program.num_of_individuals);
-
-        /*
-        * Allocate array weights_d.
-        * - Each thread fits a different expression and has a different set of weight values.
-        * - The array has dimensions [nweights][num_threads].
-        */
         auto weights_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
+        auto weights_grad_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
+
         for (int i = 0; i < nweights; ++i) {
             for (int j = 0; j < program.num_of_individuals; ++j) {
                 weights_d->ptr[i][j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
             }
         }
 
-        /*
-        * Allocate array weights_grad_d.
-        * - The array has the same dimensions as weights_d: [nweights][num_threads]. 
-        * - i'th weight gradient of the j'th expression is (sequentially) accumulated in weights_grad_d[i][j]
-        */
-        auto weights_grad_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
-
         hipLaunchKernelGGL(
-            vm, gridDim, blockDim, 0, stream,
+            vm, gridDim, blockDim, 0, config.stream,
             program.bytecode, 
             program.max_num_of_instructions, 
             program.num_of_individuals,
@@ -150,7 +123,7 @@ namespace inter_individual {
             weights_d->ptr, weights_grad_d->ptr, nweights,
             epochs, learning_rate, loss_d->ptr);
 
-        HIP_CALL(hipStreamSynchronize(stream));
+        HIP_CALL(hipStreamSynchronize(config.stream));
 
         // Return learned weights and loss for each expression
         return VirtualMachineResult {
@@ -158,4 +131,29 @@ namespace inter_individual {
             std::move(loss_d)
         };
     }
-};
+
+    void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
+        // Convert symbolic expression to bytecode program
+        Program program_pop;
+        program_create(&program_pop, population);
+
+        // Run virtual machine
+        auto result = run(program_pop, epochs, learning_rate);
+
+        // Destroy programs
+        program_destroy(program_pop);
+
+        // Write loss values to the original expressions
+        for (int i = 0; i < population.size(); ++i) {
+            population[i].loss = result.loss_d->ptr[i];
+        }
+
+        // Write weight values to the original expressions
+        for (int i = 0; i < population.size(); ++i) {
+            population[i].weights.resize(nweights);
+            for (int j = 0; j < nweights; ++j) {
+                population[i].weights[j] = result.weights_d->ptr[j][i];
+            }
+        }
+    }
+}
