@@ -115,11 +115,6 @@ namespace intra_individual {
     }
 
     void Runner::run(c_inst_1d code, int code_length, int epochs, float learning_rate) {
-        // Randomly initialize weights with values between -1.0 and 1.0
-        for (int i = 0; i < nweights; ++i) {
-            weights_d->ptr[i] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
-        }
-
         for (int i = 0; i < epochs; ++i) {
             // Run forward propagation and backpropagation to compute
             // weight gradients for each weight and for each data point
@@ -150,8 +145,21 @@ namespace intra_individual {
         // Parallel region to exploit remaining resources with inter-individual parallelism
         for (int i = 0; i < population.size(); ++i)
         {
-            c_inst_1d code = program_pop.bytecode[i];
-            const int code_length = program_pop.num_of_instructions[i];
+            auto code = program_pop.bytecode[i];
+            auto code_length = program_pop.num_of_instructions[i];
+
+            // If the expression has no weights yet, initialize them randomly
+            if (population[i].weights.empty()) {
+                for (int j = 0; j < nweights; ++j) {
+                    weights_d->ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+                }
+            } 
+            // If the expression already has weights, use them
+            else {
+                for (int j = 0; j < nweights; ++j) {
+                    weights_d->ptr[j] = population[i].weights[j];
+                }
+            }
 
             // Do the work
             run(code, code_length, epochs, learning_rate);
