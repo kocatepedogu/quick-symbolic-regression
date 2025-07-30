@@ -66,15 +66,23 @@ namespace intra_individual {
                     omp_unset_lock(&lock);
 
                     // Do the work
-                    vms[tid]->fit(code, code_length, epochs, learning_rate);
+                    auto result = vms[tid]->fit(code, code_length, epochs, learning_rate);
 
                     // Compute total loss
                     float total_loss = 0;
                     #pragma omp simd reduction(+:total_loss)
                     for (int i = 0; i < dataset->m; ++i) {
-                        total_loss += vms[tid]->loss_d->ptr[i];
+                        total_loss += result.loss_d->ptr[i];
                     }
+
+                    // Save loss value to the original expression
                     population[program_idx].loss = total_loss;
+
+                    // Save weights to the original expression
+                    population[program_idx].weights.resize(result.weights_d->dim1);
+                    for (int i = 0; i < result.weights_d->dim1; ++i) {
+                        population[program_idx].weights[i] = result.weights_d->ptr[i];
+                    }
                 }
             }
         }

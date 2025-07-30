@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include <string>
 #include <vector>
 #include <cassert>
 
@@ -19,42 +20,51 @@ Expression::Expression(operation_t operation, const Expression& e1, const Expres
     num_of_nodes(e1.num_of_nodes + e2.num_of_nodes + 1) {}
 
 
-std::ostream& operator<<(std::ostream& os, const Expression& e) noexcept
-{
-    switch (e.operation) {
+static std::string to_string(const Expression& node, const Expression& root) {
+    std::string result;
+
+    switch (node.operation) {
         case CONSTANT:
-            os << e.value;
+            result = std::to_string(node.value);
             break;
         case IDENTITY:
-            os << "x" << e.argindex << "";
+            result = "x" + std::to_string(node.argindex);
             break;
         case PARAMETER:
-            os << "w" << e.argindex << "";
+            result = "w" + std::to_string(node.argindex);
+            if (!root.weights.empty())
+                result += "=" + std::to_string(root.weights[node.argindex]);
             break;
         case ADDITION:
-            os << "(" << e.operands[0] << ") + (" << e.operands[1] << ")";
+            result = "(" + to_string(node.operands[0], root) + ") + (" + to_string(node.operands[1], root) + ")";
             break;
         case SUBTRACTION:
-            os << "(" << e.operands[0] << ") - (" << e.operands[1] << ")";
+            result = "(" + to_string(node.operands[0], root) + ") - (" + to_string(node.operands[1], root) + ")";
             break;
         case MULTIPLICATION:
-            os << "(" << e.operands[0] << ") * (" << e.operands[1] << ")";
+            result = "(" + to_string(node.operands[0], root) + ") * (" + to_string(node.operands[1], root) + ")";
             break;
         case DIVISION:
-            os << "(" << e.operands[0] << ") / (" << e.operands[1] << ")";
+            result = "(" + to_string(node.operands[0], root) + ") / (" + to_string(node.operands[1], root) + ")";
             break;
         case SINE:
-            os << "sin(" << e.operands[0] << ")";
+            result = "sin(" + to_string(node.operands[0], root) + ")";
             break;
         case COSINE:
-            os << "cos(" << e.operands[0] << ")";
+            result = "cos(" + to_string(node.operands[0], root) + ")";
             break;
         case EXPONENTIAL:
-            os << "exp(" << e.operands[0] << ")";
+            result = "exp(" + to_string(node.operands[0], root) + ")";
             break;
     }
 
-    return os;
+    return result;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const Expression& e) noexcept
+{
+    return os << to_string(e, e);
 }
 
 bool operator == (const Expression& left_operand, const Expression& right_operand) noexcept {

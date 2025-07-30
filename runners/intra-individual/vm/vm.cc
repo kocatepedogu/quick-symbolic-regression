@@ -159,7 +159,7 @@ namespace intra_individual {
         loss_d = std::make_shared<Array1D<float>>(dataset->m);
     }
 
-    void VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
+    VirtualMachineResult VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
         // Randomly initialize weights with values between -1.0 and 1.0
         for (int i = 0; i < nweights; ++i) {
             weights_d->ptr[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;
@@ -185,5 +185,10 @@ namespace intra_individual {
         }
 
         HIP_CALL(hipStreamSynchronize(stream));
+
+        return VirtualMachineResult {
+            weights_d,
+            loss_d
+        };
     }
 }

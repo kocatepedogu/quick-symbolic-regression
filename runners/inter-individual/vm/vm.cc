@@ -86,7 +86,7 @@ namespace inter_individual {
         HIP_CALL(hipGetDeviceProperties(&props, device_id));
     }
 
-    void VirtualMachine::fit(const Program &program, real_1d loss_d, int epochs, float learning_rate) {
+    VirtualMachineResult VirtualMachine::fit(const Program &program, int epochs, float learning_rate) {
         /* 
         * Decide number of blocks and threads for computation
         * - The total number of threads must be greater than or equal to 
@@ -101,6 +101,9 @@ namespace inter_individual {
 
         dim3 gridDim(blocks);
         dim3 blockDim(threadsPerBlock);
+
+        // Create array to store loss of each function
+        auto loss_d = std::make_unique<Array1D<float>>(program.num_of_individuals);
 
         /* 
         * Allocate array stack_d as stack memory for bytecode virtual machine.
@@ -143,8 +146,14 @@ namespace inter_individual {
             dataset->m, dataset->X_d, dataset->y_d,
             stack_d->ptr, intermediate_d->ptr,
             weights_d->ptr, weights_grad_d->ptr, nweights,
-            epochs, learning_rate, loss_d);
+            epochs, learning_rate, loss_d->ptr);
 
         HIP_CALL(hipStreamSynchronize(stream));
+
+        // Return learned weights and loss for each expression
+        return VirtualMachineResult {
+            std::move(weights_d),
+            std::move(loss_d)
+        };
     }
 };

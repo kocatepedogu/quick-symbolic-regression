@@ -22,23 +22,24 @@ namespace inter_individual {
         Program program_pop;
         program_create(&program_pop, population);
 
-        // Create array to store loss of each function
-        float *loss_d;
-        init_arr_1d(loss_d, population.size());
-
         // Virtual machine of the thread
-        vm->fit(program_pop, loss_d, epochs, learning_rate);
+        auto result = vm->fit(program_pop, epochs, learning_rate);
 
         // Destroy programs
         program_destroy(program_pop);
 
         // Write loss values to the original expressions
         for (int i = 0; i < population.size(); ++i) {
-            population[i].loss = loss_d[i];
+            population[i].loss = result.loss_d->ptr[i];
         }
 
-        // Destroy loss array
-        del_arr_1d(loss_d);
+        // Write weight values to the original expressions
+        for (int i = 0; i < population.size(); ++i) {
+            population[i].weights.resize(nweights);
+            for (int j = 0; j < nweights; ++j) {
+                population[i].weights[j] = result.weights_d->ptr[j][i];
+            }
+        }
     }
 
     Runner::~Runner() {

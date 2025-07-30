@@ -92,6 +92,9 @@ struct Expression
 
     /// Training loss (MSE on dataset)
     float loss;
+
+    /// Learned weights
+    std::vector<float> weights;
 };
 
 /**
