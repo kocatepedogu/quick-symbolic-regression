@@ -1,5 +1,6 @@
 #include "runner.hpp"
 
+#include <cmath>
 #include <hip/hip_runtime.h>
 
 #include "../../../vm/vm_debug.hpp"
@@ -11,6 +12,7 @@
 #include "./program/program.hpp"
 
 #include <hip/hip_runtime.h>
+#include <memory>
 
 namespace inter_individual {
     Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
@@ -94,24 +96,17 @@ namespace inter_individual {
         }
     }
 
-    VirtualMachineResult Runner::run(const Program &program, int epochs, float learning_rate) {
+    void Runner::run(const Program &program, int epochs, float learning_rate, 
+                     Array1D<float> &loss_d, Array2D<float> &weights_d) {
         const int threadsPerBlock = min(program.num_of_individuals, config.props.maxThreadsPerBlock);
         const int blocks = (program.num_of_individuals + threadsPerBlock - 1) / threadsPerBlock;
 
         dim3 gridDim(blocks);
         dim3 blockDim(threadsPerBlock);
 
-        auto loss_d = std::make_unique<Array1D<float>>(program.num_of_individuals);
-        auto stack_d = std::make_unique<Array2D<float>>(max_stack_depth, program.num_of_individuals);
-        auto intermediate_d = std::make_unique<Array2D<float>>(max_stack_depth, program.num_of_individuals);
-        auto weights_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
-        auto weights_grad_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
-
-        for (int i = 0; i < nweights; ++i) {
-            for (int j = 0; j < program.num_of_individuals; ++j) {
-                weights_d->ptr[i][j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
-            }
-        }
+        Array2D<float> stack_d(max_stack_depth, program.num_of_individuals);
+        Array2D<float> intermediate_d(max_stack_depth, program.num_of_individuals);
+        Array2D<float> weights_grad_d(nweights, program.num_of_individuals);
 
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, config.stream,
@@ -119,17 +114,11 @@ namespace inter_individual {
             program.max_num_of_instructions, 
             program.num_of_individuals,
             dataset->m, dataset->X_d, dataset->y_d,
-            stack_d->ptr, intermediate_d->ptr,
-            weights_d->ptr, weights_grad_d->ptr, nweights,
-            epochs, learning_rate, loss_d->ptr);
+            stack_d.ptr, intermediate_d.ptr,
+            weights_d.ptr, weights_grad_d.ptr, nweights,
+            epochs, learning_rate, loss_d.ptr);
 
         HIP_CALL(hipStreamSynchronize(config.stream));
-
-        // Return learned weights and loss for each expression
-        return VirtualMachineResult {
-            std::move(weights_d),
-            std::move(loss_d)
-        };
     }
 
     void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
@@ -137,22 +126,45 @@ namespace inter_individual {
         Program program_pop;
         program_create(&program_pop, population);
 
+        // Initialize weights
+        Array2D<float> weights_d(nweights, population.size());
+        for (int i = 0; i < nweights; ++i) {
+            for (int j = 0; j < population.size(); ++j) {
+                const auto &expression = population[j];
+
+                // If the expression has no weights yet, initialize them randomly
+                if (expression.weights.empty()) {
+                    weights_d.ptr[i][j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+                } 
+                // If the expression already has weights, use them
+                else {
+                    weights_d.ptr[i][j] = expression.weights[i];
+                }   
+            }
+        }
+
+        // Initialize loss array with NaN's
+        Array1D<float> loss_d(population.size());
+        for (int j = 0; j < population.size(); ++j) {
+            loss_d.ptr[j] = std::numeric_limits<float>::quiet_NaN();
+        }
+
         // Run virtual machine
-        auto result = run(program_pop, epochs, learning_rate);
+        run(program_pop, epochs, learning_rate, loss_d, weights_d);
 
         // Destroy programs
         program_destroy(program_pop);
 
         // Write loss values to the original expressions
         for (int i = 0; i < population.size(); ++i) {
-            population[i].loss = result.loss_d->ptr[i];
+            population[i].loss = loss_d.ptr[i];
         }
 
         // Write weight values to the original expressions
         for (int i = 0; i < population.size(); ++i) {
             population[i].weights.resize(nweights);
             for (int j = 0; j < nweights; ++j) {
-                population[i].weights[j] = result.weights_d->ptr[j][i];
+                population[i].weights[j] = weights_d.ptr[j][i];
             }
         }
     }
