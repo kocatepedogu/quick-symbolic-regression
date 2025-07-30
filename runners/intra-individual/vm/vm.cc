@@ -132,17 +132,17 @@ namespace intra_individual {
         * - Consecutive threads should access consecutive locations in the stack.
         *   The dimensions of the stack are [max_stack_depth][num_threads]
         */
-        init_arr_2d(stack_d, max_stack_depth, dataset->m);
+        stack_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
 
         /*
         * Allocate array intermediate_d to store intermediate calculation 
         * results for later use in backpropagation. The dimensions of 
         * intermediate_d is the same as stack_d.
         */
-        init_arr_2d(intermediate_d, max_stack_depth, dataset->m);
+        intermediate_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
 
         /* Allocate weights */
-        init_arr_1d(weights_d, nweights);
+        weights_d = std::make_shared<Array1D<float>>(nweights);
 
         /*
         * Allocate array weights_grad_d.
@@ -150,19 +150,19 @@ namespace intra_individual {
         *   computed from different data points.
         * - weights_grad_d is an array of arrays with dimensions [nweights][num_threads]
         */
-        init_arr_2d(weights_grad_d, nweights, dataset->m);
+        weights_grad_d = std::make_shared<Array2D<float>>(nweights, dataset->m);
 
         // Allocate memory for block sums
-        init_arr_2d(weights_grad_reduced_sum_d, nweights, reduction_blocks_per_grid);
+        weights_grad_reduced_sum_d = std::make_shared<Array2D<float>>(nweights, reduction_blocks_per_grid);
 
         // Allocate memory for loss
-        init_arr_1d(loss_d, dataset->m);
+        loss_d = std::make_shared<Array1D<float>>(dataset->m);
     }
 
     void VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
         // Randomly initialize weights with values between -1.0 and 1.0
         for (int i = 0; i < nweights; ++i) {
-            weights_d[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;
+            weights_d->ptr[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;
         }
 
         for (int i = 0; i < epochs; ++i) {
@@ -172,38 +172,18 @@ namespace intra_individual {
                 vm, gridDim, blockDim, 0, stream,
                 code, code_length, 
                 dataset->m, dataset->X_d, dataset->y_d,
-                stack_d, intermediate_d,
-                weights_d, weights_grad_d, nweights, loss_d);
+                stack_d->ptr, intermediate_d->ptr,
+                weights_d->ptr, weights_grad_d->ptr, nweights, loss_d->ptr);
 
             // For every weight, sum gradient contributions from all data points using reduction
             // Apply gradient descent rule
             for (int i = 0; i < nweights; ++i) {
                 hipLaunchKernelGGL(
                     weight_update, reduction_grid_dim, reduction_block_dim, 0, stream, 
-                    weights_grad_d[i], &weights_d[i], dataset->m, learning_rate);
+                    weights_grad_d->ptr[i], &weights_d->ptr[i], dataset->m, learning_rate);
             }
         }
 
         HIP_CALL(hipStreamSynchronize(stream));
-    }
-
-    VirtualMachine::~VirtualMachine() {
-        // Deallocate memory for loss
-        del_arr_1d(loss_d);
-
-        // Deallocate array for block sums
-        del_arr_2d(weights_grad_reduced_sum_d, nweights);
-
-        // Deallocate array weights_grad_d.
-        del_arr_2d(weights_grad_d, nweights);
-
-        // Deallocate array weights_d
-        del_arr_1d(weights_d);
-
-        // Deallocate array intermediate_d.
-        del_arr_2d(intermediate_d, max_stack_depth);
-
-        // Deallocate array stack_d
-        del_arr_2d(stack_d, max_stack_depth);
     }
 }

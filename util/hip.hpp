@@ -22,8 +22,6 @@
         } \
     } while(0)
 
-#endif
-
 template <typename T>
 static inline void init_arr_1d(T *&ptr, int dim1) {
     HIP_CALL(hipMallocManaged(&ptr, sizeof(T) * dim1));
@@ -49,3 +47,36 @@ static inline void del_arr_2d(T **ptr, int dim1) {
     }
     HIP_CALL(hipFree(ptr));
 }
+
+template <typename T>
+struct Array1D {
+    T *ptr;
+
+    Array1D(int dim1) : dim1(dim1) {
+        init_arr_1d(ptr, dim1);
+    }
+
+    ~Array1D() {
+        HIP_CALL(hipFree(ptr));
+    }
+
+    int dim1;
+};
+
+template <typename T>
+struct Array2D {
+    T **ptr;
+    
+    Array2D(int dim1, int dim2) : dim1(dim1), dim2(dim2) {
+        init_arr_2d(ptr, dim1, dim2);
+    }
+
+    ~Array2D() {
+        del_arr_2d(ptr, dim1);
+    }
+
+    int dim1;
+    int dim2;
+};
+
+#endif

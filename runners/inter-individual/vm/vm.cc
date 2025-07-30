@@ -1,4 +1,5 @@
 #include <hip/hip_runtime.h>
+#include <memory>
 #include "vm.hpp"
 
 #include "../../../vm/vm_debug.hpp"
@@ -86,12 +87,6 @@ namespace inter_individual {
     }
 
     void VirtualMachine::fit(const Program &program, real_1d loss_d, int epochs, float learning_rate) {
-        real_2d_mut stack_d;
-        real_2d_mut intermediate_d;
-
-        real_2d_mut weights_d;
-        real_2d_mut weights_grad_d;
-
         /* 
         * Decide number of blocks and threads for computation
         * - The total number of threads must be greater than or equal to 
@@ -112,24 +107,24 @@ namespace inter_individual {
         * - Each thread accesses its own stack. 
         *   The dimensions of the stack are [max_stack_depth][num_threads]
         */
-        init_arr_2d(stack_d, max_stack_depth, program.num_of_individuals);
+        auto stack_d = std::make_unique<Array2D<float>>(max_stack_depth, program.num_of_individuals);
 
         /*
         * Allocate array intermediate_d to store intermediate calculation 
         * results for later use in backpropagation. The dimensions of 
         * intermediate_d is the same as stack_d.
         */
-        init_arr_2d(intermediate_d, max_stack_depth, program.num_of_individuals);
+        auto intermediate_d = std::make_unique<Array2D<float>>(max_stack_depth, program.num_of_individuals);
 
         /*
         * Allocate array weights_d.
         * - Each thread fits a different expression and has a different set of weight values.
         * - The array has dimensions [nweights][num_threads].
         */
-        init_arr_2d(weights_d, nweights, program.num_of_individuals);
+        auto weights_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
         for (int i = 0; i < nweights; ++i) {
             for (int j = 0; j < program.num_of_individuals; ++j) {
-                weights_d[i][j] = 0.5;
+                weights_d->ptr[i][j] = 0.5;
             }
         }
 
@@ -138,7 +133,7 @@ namespace inter_individual {
         * - The array has the same dimensions as weights_d: [nweights][num_threads]. 
         * - i'th weight gradient of the j'th expression is (sequentially) accumulated in weights_grad_d[i][j]
         */
-        init_arr_2d(weights_grad_d, nweights, program.num_of_individuals);
+        auto weights_grad_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
 
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, stream,
@@ -146,22 +141,10 @@ namespace inter_individual {
             program.max_num_of_instructions, 
             program.num_of_individuals,
             dataset->m, dataset->X_d, dataset->y_d,
-            stack_d, intermediate_d,
-            weights_d, weights_grad_d, nweights,
+            stack_d->ptr, intermediate_d->ptr,
+            weights_d->ptr, weights_grad_d->ptr, nweights,
             epochs, learning_rate, loss_d);
 
         HIP_CALL(hipStreamSynchronize(stream));
-
-        // Deallocate array intermediate_d.
-        del_arr_2d(intermediate_d, max_stack_depth);
-
-        // Deallocate array stack_d
-        del_arr_2d(stack_d, max_stack_depth);
-
-        // Deallocate array weights_d
-        del_arr_2d(weights_d, nweights);
-
-        // Deallocate array weights_grad_d
-        del_arr_2d(weights_grad_d, nweights);
     }
 };

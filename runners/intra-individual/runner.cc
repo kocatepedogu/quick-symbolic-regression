@@ -72,7 +72,7 @@ namespace intra_individual {
                     float total_loss = 0;
                     #pragma omp simd reduction(+:total_loss)
                     for (int i = 0; i < dataset->m; ++i) {
-                        total_loss += vms[tid]->loss_d[i];
+                        total_loss += vms[tid]->loss_d->ptr[i];
                     }
                     population[program_idx].loss = total_loss;
                 }

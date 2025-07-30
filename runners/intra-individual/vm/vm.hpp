@@ -10,6 +10,7 @@
 #include </usr/lib/clang/20/include/omp.h>
 
 #include "../../../vm/vm_types.hpp"
+#include "../../../util/hip.hpp"
 
 namespace intra_individual {
     class VirtualMachine {
@@ -18,9 +19,7 @@ namespace intra_individual {
 
         void fit(c_inst_1d code, int code_length, int epochs, float learning_rate);
 
-        ~VirtualMachine();
-
-        real_1d_mut loss_d;
+        std::shared_ptr<Array1D<float>> loss_d;
 
     private:
         std::shared_ptr<Dataset> dataset;
@@ -36,11 +35,11 @@ namespace intra_individual {
         dim3 reduction_grid_dim;
         dim3 reduction_block_dim;
 
-        real_2d_mut stack_d;
-        real_2d_mut intermediate_d;
-        real_1d_mut weights_d;
-        real_2d_mut weights_grad_d;
-        real_2d_mut weights_grad_reduced_sum_d;
+        std::shared_ptr<Array2D<float>> stack_d;
+        std::shared_ptr<Array2D<float>> intermediate_d;
+        std::shared_ptr<Array1D<float>> weights_d;
+        std::shared_ptr<Array2D<float>> weights_grad_d;
+        std::shared_ptr<Array2D<float>> weights_grad_reduced_sum_d;
 
         omp_lock_t &print_lock;
     };
