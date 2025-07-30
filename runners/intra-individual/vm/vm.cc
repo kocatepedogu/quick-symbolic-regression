@@ -11,6 +11,7 @@
 #include "../../vm/vm_types.hpp"
 
 #include "../../util/hip.hpp"
+#include "../../../util/rng.hpp"
 
 namespace intra_individual {
     constexpr int max_stack_depth = 128;
@@ -162,7 +163,7 @@ namespace intra_individual {
     VirtualMachineResult VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
         // Randomly initialize weights with values between -1.0 and 1.0
         for (int i = 0; i < nweights; ++i) {
-            weights_d->ptr[i] = 0.5; //2.0 * rand() / (float)RAND_MAX - 1.0;
+            weights_d->ptr[i] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
         }
 
         for (int i = 0; i < epochs; ++i) {

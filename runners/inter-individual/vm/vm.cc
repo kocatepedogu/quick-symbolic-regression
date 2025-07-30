@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <hip/hip_runtime.h>
 #include <memory>
 #include "vm.hpp"
@@ -7,6 +8,7 @@
 #include "../../../vm/vm_control.hpp"
 
 #include "../../../util/hip.hpp"
+#include "../../../util/rng.hpp"
 
 namespace inter_individual {
     constexpr int max_stack_depth = 128;
@@ -127,7 +129,7 @@ namespace inter_individual {
         auto weights_d = std::make_unique<Array2D<float>>(nweights, program.num_of_individuals);
         for (int i = 0; i < nweights; ++i) {
             for (int j = 0; j < program.num_of_individuals; ++j) {
-                weights_d->ptr[i][j] = 0.5;
+                weights_d->ptr[i][j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
             }
         }
 
