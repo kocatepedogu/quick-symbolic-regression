@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "expression_comparator.hpp"
 #include "initializer/base.hpp"
 #include "learning_history.hpp"
 
@@ -91,7 +90,7 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
                 // Find the best solution
                 for (int i = 0; i < nislands; ++i) {
                     Expression new_best = islands[i]->get_best_solution();
-                    if (ExpressionComparator()(best, new_best) || (supergeneration == 0 && i == 0)) {
+                    if (new_best.loss < best.loss || (supergeneration == 0 && i == 0)) {
                         best = new_best;
                     }
                 }
