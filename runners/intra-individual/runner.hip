@@ -115,7 +115,7 @@ namespace intra_individual {
     }
 
     void Runner::run(c_inst_1d code, int code_length, int epochs, float learning_rate) {
-        for (int i = 0; i < epochs; ++i) {
+        for (int epoch = 0; epoch < epochs + 1; ++epoch) {
             // Run forward propagation and backpropagation to compute
             // weight gradients for each weight and for each data point
             hipLaunchKernelGGL(
@@ -127,10 +127,12 @@ namespace intra_individual {
 
             // For every weight, sum gradient contributions from all data points using reduction
             // Apply gradient descent rule
-            for (int i = 0; i < nweights; ++i) {
-                hipLaunchKernelGGL(
-                    weight_update, reduction_grid_dim, reduction_block_dim, 0, hipState.stream, 
-                    weights_grad_d->ptr[i], &weights_d->ptr[i], dataset->m, learning_rate);
+            if (epoch < epochs) {
+                for (int i = 0; i < nweights; ++i) {
+                    hipLaunchKernelGGL(
+                        weight_update, reduction_grid_dim, reduction_block_dim, 0, hipState.stream, 
+                        weights_grad_d->ptr[i], &weights_d->ptr[i], dataset->m, learning_rate);
+                }
             }
         }
 

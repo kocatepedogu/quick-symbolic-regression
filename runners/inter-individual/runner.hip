@@ -41,7 +41,7 @@ namespace inter_individual {
         if (tid < num_of_individuals) {
             float total_loss = 0;
 
-            for (int epoch = 0; epoch < nepochs; ++epoch) {
+            for (int epoch = 0; epoch < nepochs + 1; ++epoch) {
                 // Reset weight gradients
                 for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
                     weights_grad_d[weight_idx][tid] = 0;
@@ -78,17 +78,21 @@ namespace inter_individual {
                     total_loss += powf(stack_d[0][tid], 2);
 
                     // Backpropagate
-                    vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(
-                        tid, datapoint_idx, bytecode, max_num_of_instructions, 
-                        m, X_d, y_d, 
-                        s, program_counter, 
-                        weights_d, weights_grad_d);
+                    if (epoch < nepochs) {
+                        vm_debug_print(tid, "Backpropagation");
+                        vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(
+                            tid, datapoint_idx, bytecode, max_num_of_instructions, 
+                            m, X_d, y_d, 
+                            s, program_counter, 
+                            weights_d, weights_grad_d);
+                    }
                 }
 
                 // Apply weight updates (gradient descent)
-                for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
-                    weights_d[weight_idx][tid] -= learning_rate * weights_grad_d[weight_idx][tid];
+                if (epoch < nepochs) {
+                    for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+                        weights_d[weight_idx][tid] -= learning_rate * weights_grad_d[weight_idx][tid];
+                    }
                 }
             }
 
