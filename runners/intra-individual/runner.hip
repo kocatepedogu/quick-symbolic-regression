@@ -1,17 +1,11 @@
-// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
-// SPDX-License-Identifier: GPL-3.0-or-later
+#include "runner.hpp"
 
-#include <hip/hip_runtime.h>
-#include </usr/lib/clang/20/include/omp.h>
+#include "./program/program.hpp"
 
-#include "vm.hpp"
-
-#include "../../vm/vm_control.hpp"
 #include "../../vm/vm_debug.hpp"
-#include "../../vm/vm_types.hpp"
+#include "../../vm/vm_control.hpp"
 
-#include "../../util/hip.hpp"
-#include "../../../util/rng.hpp"
+#include "../../util/rng.hpp"
 
 namespace intra_individual {
     constexpr int max_stack_depth = 128;
@@ -79,7 +73,10 @@ namespace intra_individual {
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
+            tid, tid, bytecode, bytecode_length, 
+            m, X_d, y_d, 
+            s, program_counter, weights_d, weights_grad_d);
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
@@ -89,35 +86,19 @@ namespace intra_individual {
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(tid, tid, bytecode, bytecode_length, m, X_d, y_d, s, program_counter, weights_d, weights_grad_d);
+        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
+            tid, tid, bytecode, bytecode_length, 
+            m, X_d, y_d, 
+            s, program_counter, 
+            weights_d, weights_grad_d);
     }
 
-    VirtualMachine::VirtualMachine(std::shared_ptr<Dataset> dataset, hipStream_t& stream, int nweights, omp_lock_t& print_lock) :
-        dataset(dataset), stream(stream), nweights(nweights), print_lock(print_lock)
-    {
-        HIP_CALL(hipGetDevice(&device_id));
-        HIP_CALL(hipGetDeviceProperties(&props, device_id));
-
-        /* 
-        * Decide number of blocks and threads for computation
-        * - The total number of threads must be greater than or equal to 
-        *   the number of data points (batch size = m).
-        * - Each block will have the maximum number of threads supported by
-        *   the device (probably 1024).
-        * - Excess threads are later masked inside kernel with if (tid < m).
-        */
-
-        const int threadsPerBlock = min(dataset->m, props.maxThreadsPerBlock);
+    Runner::Runner(std::shared_ptr<Dataset> dataset, const int nweights) : dataset(dataset), nweights(nweights) {
+        const int threadsPerBlock = min(dataset->m, hipState.props.maxThreadsPerBlock);
         const int blocks = (dataset->m + threadsPerBlock - 1) / threadsPerBlock;
 
         gridDim = dim3(blocks);
         blockDim = dim3(threadsPerBlock);
-
-        /* 
-        * Decide number of blocks for reduce sum
-        * - Each block will produce a separate block sum. These block sums are then
-        *   sequentially summed to produce the final sum for each weight.
-        */
 
         int reduction_blocks_per_grid = (dataset->m + reduction_threads_per_block - 1) / 
             reduction_threads_per_block;
@@ -125,42 +106,15 @@ namespace intra_individual {
         reduction_grid_dim = dim3(reduction_blocks_per_grid);
         reduction_block_dim = dim3(reduction_threads_per_block);
 
-        /* 
-        * Allocate array stack_d as stack memory for bytecode virtual machine.
-        * - Each thread accesses its own stack. 
-        * - The stack pointer is the same for each thread at any given point in time.
-        *   There are no instructions that can lead to divergent control flow.
-        * - Consecutive threads should access consecutive locations in the stack.
-        *   The dimensions of the stack are [max_stack_depth][num_threads]
-        */
         stack_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
-
-        /*
-        * Allocate array intermediate_d to store intermediate calculation 
-        * results for later use in backpropagation. The dimensions of 
-        * intermediate_d is the same as stack_d.
-        */
         intermediate_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
-
-        /* Allocate weights */
         weights_d = std::make_shared<Array1D<float>>(nweights);
-
-        /*
-        * Allocate array weights_grad_d.
-        * - For each weight, there is an array of gradients, whose elements are gradients 
-        *   computed from different data points.
-        * - weights_grad_d is an array of arrays with dimensions [nweights][num_threads]
-        */
         weights_grad_d = std::make_shared<Array2D<float>>(nweights, dataset->m);
-
-        // Allocate memory for block sums
         weights_grad_reduced_sum_d = std::make_shared<Array2D<float>>(nweights, reduction_blocks_per_grid);
-
-        // Allocate memory for loss
         loss_d = std::make_shared<Array1D<float>>(dataset->m);
     }
 
-    VirtualMachineResult VirtualMachine::fit(c_inst_1d code, int code_length, int epochs, float learning_rate) {
+    void Runner::run(c_inst_1d code, int code_length, int epochs, float learning_rate) {
         // Randomly initialize weights with values between -1.0 and 1.0
         for (int i = 0; i < nweights; ++i) {
             weights_d->ptr[i] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
@@ -170,7 +124,7 @@ namespace intra_individual {
             // Run forward propagation and backpropagation to compute
             // weight gradients for each weight and for each data point
             hipLaunchKernelGGL(
-                vm, gridDim, blockDim, 0, stream,
+                vm, gridDim, blockDim, 0, hipState.stream,
                 code, code_length, 
                 dataset->m, dataset->X_d, dataset->y_d,
                 stack_d->ptr, intermediate_d->ptr,
@@ -180,16 +134,46 @@ namespace intra_individual {
             // Apply gradient descent rule
             for (int i = 0; i < nweights; ++i) {
                 hipLaunchKernelGGL(
-                    weight_update, reduction_grid_dim, reduction_block_dim, 0, stream, 
+                    weight_update, reduction_grid_dim, reduction_block_dim, 0, hipState.stream, 
                     weights_grad_d->ptr[i], &weights_d->ptr[i], dataset->m, learning_rate);
             }
         }
 
-        HIP_CALL(hipStreamSynchronize(stream));
+        HIP_CALL(hipStreamSynchronize(hipState.stream));
+    }
 
-        return VirtualMachineResult {
-            weights_d,
-            loss_d
-        };
+    void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
+        // Convert symbolic expressions to bytecode program
+        Program program_pop;
+        program_create(&program_pop, population);
+
+        // Parallel region to exploit remaining resources with inter-individual parallelism
+        for (int i = 0; i < population.size(); ++i)
+        {
+            c_inst_1d code = program_pop.bytecode[i];
+            const int code_length = program_pop.num_of_instructions[i];
+
+            // Do the work
+            run(code, code_length, epochs, learning_rate);
+
+            // Compute total loss
+            float total_loss = 0;
+            #pragma omp simd reduction(+:total_loss)
+            for (int i = 0; i < dataset->m; ++i) {
+                total_loss += loss_d->ptr[i];
+            }
+
+            // Save loss value to the original expression
+            population[i].loss = total_loss;
+
+            // Save weights to the original expression
+            population[i].weights.resize(weights_d->dim1);
+            for (int j = 0; j < weights_d->dim1; ++j) {
+                population[i].weights[j] = weights_d->ptr[j];
+            }
+        }
+
+        // Destroy bytecode program
+        program_destroy(program_pop);
     }
 }
