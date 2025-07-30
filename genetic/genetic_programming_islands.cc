@@ -96,7 +96,7 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
 
                     // Print best result of each island if in verbose mode
                     if (verbose) {
-                        std::cout << local_best << std::endl;
+                        std::cout << local_best << " loss=" << local_best.loss << std::endl;
                         if (i == nislands - 1) {
                             std::cout << std::endl;
                         }
