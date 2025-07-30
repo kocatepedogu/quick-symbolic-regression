@@ -4,6 +4,7 @@
 
 #include "initializer/base.hpp"
 #include "learning_history.hpp"
+#include <cmath>
 
 GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
@@ -31,18 +32,35 @@ GeneticProgramming::GeneticProgramming(
     selector = selection->get_selector(npopulation);
 }
 
+static auto expression_comparator = [](const Expression& a, const Expression& b) {
+    // Return true if a is better (more fit/has less loss) than b
+
+    if (std::isnan(a.loss) && std::isnan(b.loss)) {
+        // Return false to be consistent with NaN < NaN, but the result does not actually matter
+        return false;
+    } 
+    else if (std::isnan(a.loss) && !std::isnan(b.loss)) {
+        // a is NaN, b is non-NaN; a is worse
+        return false;
+    }
+    else if (!std::isnan(a.loss) && std::isnan(b.loss)) {
+        // a is non-NaN, b is NaN; so a is better
+        return true;
+    } 
+    else {
+        // Neither is NaN, compare the actual loss values
+        return a.loss < b.loss;
+    }
+};
+
 Expression *GeneticProgramming::get_best_solution() {
     return std::min_element(population.begin(), population.end(), 
-    [](const Expression& a, const Expression& b) {
-        return a.loss < b.loss;
-    }).base();
+    expression_comparator).base();
 }
 
 Expression *GeneticProgramming::get_worst_solution() {
     return std::max_element(population.begin(), population.end(), 
-    [](const Expression& a, const Expression& b) {
-        return a.loss < b.loss;
-    }).base();
+    expression_comparator).base();
 }
 
 LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
