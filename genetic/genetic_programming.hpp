@@ -28,7 +28,8 @@ public:
 
     void insert_solution(Expression e);
 
-    Expression get_best_solution();
+    Expression *get_best_solution();
+    Expression *get_worst_solution();
 
 private:
     std::shared_ptr<const Dataset> dataset;

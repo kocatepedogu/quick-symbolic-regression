@@ -41,11 +41,15 @@ solution, history = model.fit(ngenerations=1, nsupergenerations=5, verbose=True)
 # Print best solution
 print("Best solution: {}".format(solution))
 
+# Print learning history
+print("Learning history: {}".format(history))
+
 # Plot learning history
 plt.figure(figsize=(10, 6))
 plt.plot(history)
 plt.xlabel('Generation')
 plt.ylabel('Loss (MSE)')
 plt.title('Learning History - {}'.format(solution))
+plt.xticks(np.arange(0, len(history), 1.0))
 plt.grid()
 plt.savefig('benchmark_learning_history.png')

@@ -5,8 +5,6 @@
 #include "initializer/base.hpp"
 #include "learning_history.hpp"
 
-#include <iostream>
-
 GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
                int nweights, 
@@ -33,18 +31,18 @@ GeneticProgramming::GeneticProgramming(
     selector = selection->get_selector(npopulation);
 }
 
-Expression GeneticProgramming::get_best_solution() {
-    return *std::min_element(population.begin(), population.end(), 
+Expression *GeneticProgramming::get_best_solution() {
+    return std::min_element(population.begin(), population.end(), 
     [](const Expression& a, const Expression& b) {
         return a.loss < b.loss;
-    });
+    }).base();
 }
 
-void GeneticProgramming::insert_solution(Expression e) {
-    *std::max_element(population.begin(), population.end(), 
+Expression *GeneticProgramming::get_worst_solution() {
+    return std::max_element(population.begin(), population.end(), 
     [](const Expression& a, const Expression& b) {
         return a.loss < b.loss;
-    }) = e;
+    }).base();
 }
 
 LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
@@ -57,8 +55,10 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
     // Iterate for ngenerations
     for (int generation = 0; generation < ngenerations; ++generation)
     {
-        Expression best = get_best_solution();
+        // Get the best solution
+        const Expression prev_best = *get_best_solution();
 
+        // Update selection probabilities
         selector->update(&population[0]);
 
         /* Offspring Generation */
@@ -79,11 +79,16 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
         // Compute fitnesses
         runner->run(population, nepochs, learning_rate);
 
-        // Preserve previous best
-        population[0] = best;
+        // Find new best
+        const Expression new_best = *get_best_solution();
+
+        // Preserve previous best if it is better than the new best
+        if (prev_best.loss < new_best.loss) {
+            *get_worst_solution() = prev_best;
+        }
 
         // Append to learning history
-        history.add_to_history(best);
+        history.add_to_history(prev_best.loss < new_best.loss ? prev_best : new_best);
     }
 
     return history;

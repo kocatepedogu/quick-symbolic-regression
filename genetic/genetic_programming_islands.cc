@@ -89,7 +89,7 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
 
                 // Find the global best solution
                 for (int i = 0; i < nislands; ++i) {
-                    Expression local_best = islands[i]->get_best_solution();
+                    const Expression local_best = *islands[i]->get_best_solution();
                     if (local_best.loss < global_best.loss || (supergeneration == 0 && i == 0)) {
                         global_best = local_best;
                     }
@@ -105,10 +105,10 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
 
                 // Forward best solution of island i to island i+1
                 for (int i = nislands - 1; i >= 0; --i) {
-                    Expression new_best = islands[i]->get_best_solution();
+                    const Expression new_best = *islands[i]->get_best_solution();
 
-                    int next = (i + 1) % nislands;
-                    islands[next]->insert_solution(new_best);
+                    // Replace worst solution of island i+1 with best solution of island i
+                    *(islands[(i + 1) % nislands]->get_worst_solution()) = new_best;
                 }
             }
 
