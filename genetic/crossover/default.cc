@@ -7,6 +7,7 @@
 #include "../expression_picker.hpp"
 
 #include <tuple>
+#include <cassert>
 
 Expression reorganize(const Expression& e) {
     #define _REORGANIZE_CALL(i) \
@@ -33,6 +34,13 @@ std::tuple<Expression, Expression> DefaultCrossover::crossover(Expression e1, Ex
         return std::make_tuple(e1, e2);
     }
 
+    // Get original weights from both expressions
+
+    const std::vector<float> weights1 = e1.weights;
+    const std::vector<float> weights2 = e2.weights;
+
+    // Exchange subtrees
+
     Expression &sub1 = expression_picker.pick(e1);
     Expression copy_sub_1(sub1);
 
@@ -42,5 +50,44 @@ std::tuple<Expression, Expression> DefaultCrossover::crossover(Expression e1, Ex
     sub1 = copy_sub_2;
     sub2 = copy_sub_1;
 
-    return std::make_tuple(reorganize(e1), reorganize(e2));
+    // Update number of nodes in each tree and apply optimizations
+
+    Expression e1_reorg = reorganize(e1);
+    Expression e2_reorg = reorganize(e2);
+
+    // If both trees have weights, apply whole arithmetic crossover to weights
+
+    if (!weights1.empty() && !weights2.empty()) {
+        assert(weights1.size() == weights2.size());
+
+        e1_reorg.weights.resize(weights1.size());
+        e2_reorg.weights.resize(weights2.size());
+
+        for (int i = 0; i < weights1.size(); i++) {
+            float alpha = (thread_local_rng() % RAND_MAX) / (float)RAND_MAX;
+
+            float w1 = alpha * weights1[i] + (1 - alpha) * weights2[i];
+            float w2 = alpha * weights2[i] + (1 - alpha) * weights1[i];
+
+            e1_reorg.weights[i] = w1;
+            e2_reorg.weights[i] = w2;
+        }
+    }
+
+    // If one tree has weights and the other does not, copy the weights from
+    // the tree which has weights
+
+    if (!weights1.empty() && weights2.empty()) {
+        e1_reorg.weights = weights1;
+        e2_reorg.weights = weights1;
+    }
+    
+    if (weights1.empty() && !weights2.empty()) {
+        e1_reorg.weights = weights2;
+        e2_reorg.weights = weights2;
+    }
+
+    // Make a pair of expressions (may become parents)
+
+    return std::make_tuple(e1_reorg, e2_reorg);
 }
