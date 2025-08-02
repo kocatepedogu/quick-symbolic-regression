@@ -46,6 +46,8 @@ private:
     const int nvars;
     const int nweights;
     const int npopulation;
+
+    bool initialized;
 };
 
 #endif

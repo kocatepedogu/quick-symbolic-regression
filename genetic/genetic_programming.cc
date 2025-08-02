@@ -30,6 +30,9 @@ GeneticProgramming::GeneticProgramming(
 
     // Get selector
     selector = selection->get_selector(npopulation);
+
+    // Fitnesses have never been computed yet
+    initialized = false;
 }
 
 static auto expression_comparator = [](const Expression& a, const Expression& b) {
@@ -67,8 +70,11 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
     // Create empty learning history
     LearningHistory history;
 
-    // Compute initial fitnesses
-    runner->run(population, nepochs, learning_rate);
+    // Compute initial fitnesses if not initialized
+    if (!initialized) {
+        runner->run(population, nepochs, learning_rate);
+        initialized = true;
+    }
 
     // Iterate for ngenerations
     for (int generation = 0; generation < ngenerations; ++generation)
