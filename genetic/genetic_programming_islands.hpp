@@ -24,7 +24,7 @@ public:
 
     ~GeneticProgrammingIslands() noexcept;
 
-    std::tuple<std::string,std::vector<float>> fit(int ngenerations, int nsupergenerations, int nepochs, float learning_rate, bool verbose = false) noexcept;
+    std::tuple<Expression,std::vector<float>> fit(int ngenerations, int nsupergenerations, int nepochs, float learning_rate, bool verbose = false) noexcept;
 
 private:
     /// Dataset shared by all islands

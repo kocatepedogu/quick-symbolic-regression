@@ -39,7 +39,7 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept
     delete[] islands;
 }
 
-std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, 
+std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int ngenerations, int nsupergenerations, 
                                            int nepochs, float learning_rate, bool verbose) noexcept {
     // Current best solution
     Expression global_best = 0.0;
@@ -124,10 +124,6 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
     // Get total learning history
     auto hist = global_history.get_learning_history();
 
-    // Get best solution as string
-    std::ostringstream oss;
-    oss << global_best;
-
     // Return tuple of best solution and learning history
-    return std::make_tuple(oss.str(), hist);
+    return std::make_tuple(global_best, hist);
 }

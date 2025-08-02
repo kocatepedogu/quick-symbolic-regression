@@ -110,4 +110,32 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("nepochs") = 1,
             py::arg("learning_rate") = 1e-3,
             py::arg("verbose") = false);
+
+    /* Expression Class */
+
+    py::enum_<operation_t>(m, "Operation")
+        .value("CONSTANT", operation_t::CONSTANT)
+        .value("PARAMETER", operation_t::PARAMETER)
+        .value("IDENTITY", operation_t::IDENTITY)
+        .value("ADDITION", operation_t::ADDITION)
+        .value("SUBTRACTION", operation_t::SUBTRACTION)
+        .value("MULTIPLICATION", operation_t::MULTIPLICATION)
+        .value("DIVISION", operation_t::DIVISION)
+        .value("SINE", operation_t::SINE)
+        .value("COSINE", operation_t::COSINE)
+        .value("EXPONENTIAL", operation_t::EXPONENTIAL);
+
+    py::class_<Expression>(m, "Expression")
+        .def_readwrite("operation", &Expression::operation)
+        .def_readwrite("value", &Expression::value)
+        .def_readwrite("argindex", &Expression::argindex)
+        .def_readwrite("operands", &Expression::operands)
+        .def_readwrite("num_of_nodes", &Expression::num_of_nodes)
+        .def_readwrite("loss", &Expression::loss)
+        .def_readwrite("weights", &Expression::weights)
+        
+        .def("__repr__", [](const Expression& expr) {
+            std::ostringstream oss; oss << expr;
+            return oss.str();
+        });
 }
