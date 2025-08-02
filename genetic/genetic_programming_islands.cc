@@ -104,11 +104,13 @@ std::tuple<std::string,std::vector<float>> GeneticProgrammingIslands::fit(int ng
                 }
 
                 // Forward best solution of island i to island i+1
-                for (int i = nislands - 1; i >= 0; --i) {
-                    const Expression new_best = *islands[i]->get_best_solution();
+                if (nislands > 1) {
+                    for (int i = nislands - 1; i >= 0; --i) {
+                        const Expression new_best = *islands[i]->get_best_solution();
 
-                    // Replace worst solution of island i+1 with best solution of island i
-                    *(islands[(i + 1) % nislands]->get_worst_solution()) = new_best;
+                        // Replace worst solution of island i+1 with best solution of island i
+                        *(islands[(i + 1) % nislands]->get_worst_solution()) = new_best;
+                    }
                 }
             }
 
