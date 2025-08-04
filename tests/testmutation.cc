@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "../genetic/mutation/default.hpp"
 #include "../expressions/unary.hpp"
 #include "../expressions/binary.hpp"

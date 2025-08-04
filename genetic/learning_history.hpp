@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef LEARNING_RESULT_HPP
 #define LEARNING_RESULT_HPP
 

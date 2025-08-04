@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef EXPRESSION_GENERATOR_HPP
 #define EXPRESSION_GENERATOR_HPP
 

@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef INTRA_PROGRAM_HPP
 #define INTRA_PROGRAM_HPP
 
-#include "../../compiler/ir.hpp"
-#include "../../expressions/expression.hpp"
+#include "../../../compiler/ir.hpp"
+#include "../../../expressions/expression.hpp"
 
 #include <vector>
 
