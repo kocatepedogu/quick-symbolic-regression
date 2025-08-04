@@ -22,6 +22,8 @@
         } \
     } while(0)
 
+namespace qsr {
+
 template <typename T>
 static inline void init_arr_1d(T *&ptr, int dim1) {
     HIP_CALL(hipMallocManaged(&ptr, sizeof(T) * dim1));
@@ -97,5 +99,7 @@ struct HIPState {
         HIP_CALL(hipStreamDestroy(stream));
     }
 };
+
+}
 
 #endif

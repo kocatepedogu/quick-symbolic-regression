@@ -8,6 +8,8 @@
 #include "dataset.hpp"
 #include "../util/hip.hpp"
 
+namespace qsr {
+
 Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept : 
     m(m), n(n) {
     /*
@@ -92,3 +94,4 @@ Dataset::~Dataset() noexcept {
     del_arr_2d(X_d, n);
 }
 
+}

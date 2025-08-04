@@ -8,9 +8,13 @@
 
 #include <vector>
 
+namespace qsr {
+
 class BaseRunner {
 public:
     virtual void run(std::vector<Expression>& population, int epochs, float learning_rate);
 };
+
+}
 
 #endif

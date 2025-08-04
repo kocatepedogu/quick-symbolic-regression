@@ -6,6 +6,8 @@
 #include "../util/rng.hpp"
 #include "../util/macro.hpp"
 
+namespace qsr {
+
 Expression& ExpressionPicker::pick(Expression &expr) noexcept {
     int target = thread_local_rng() % expr.num_of_nodes;
     int current = 0;
@@ -37,4 +39,6 @@ void ExpressionPicker::pick(Expression *node, Expression **result, int& current,
         VOID_UNARY_OP_CASE(COSINE, _PICK_CALL);
         VOID_UNARY_OP_CASE(EXPONENTIAL, _PICK_CALL);
     }
+}
+
 }

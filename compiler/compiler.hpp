@@ -7,6 +7,10 @@
 #include "../expressions/expression.hpp"
 #include "ir.hpp"
 
+namespace qsr {
+
 IntermediateRepresentation compile(const Expression& e) noexcept;
+
+}
 
 #endif

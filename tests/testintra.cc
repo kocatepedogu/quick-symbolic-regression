@@ -13,6 +13,8 @@
 #include <cmath>
 #include <iostream>
 
+using namespace qsr;
+
 int main(void) {
     float **X, *y;
 

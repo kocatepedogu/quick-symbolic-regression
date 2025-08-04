@@ -9,6 +9,7 @@
 
 #include <hip/hip_runtime.h>
 
+namespace qsr {
 namespace intra_individual {
     void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop) {
         const int num_of_individuals = exp_pop.size();
@@ -42,4 +43,5 @@ namespace intra_individual {
         // Delete array for storing number of instructions in each program
         del_arr_1d(prog_pop.num_of_instructions);
     }
+}
 }

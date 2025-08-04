@@ -6,11 +6,15 @@
 
 #include <functional>
 
+namespace qsr {
+
 // Number of data points
 constexpr int test_data_length = 128;
 
 void generate_test_data(float **&X, float *&y, std::function<float(float&)> ground_truth);
 
 void delete_test_data(float **&X, float *&y);
+
+}
 
 #endif

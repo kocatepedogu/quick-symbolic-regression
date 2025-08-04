@@ -3,6 +3,10 @@
 
 #include <random>
 
+namespace qsr {
+
 constexpr int random_seed = 42;
 
 thread_local std::mt19937 thread_local_rng(random_seed);
+
+}

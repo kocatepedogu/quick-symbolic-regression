@@ -19,6 +19,8 @@
 
 namespace py = pybind11;
 
+namespace qsr {
+
 PYBIND11_MODULE(libquicksr, m) {
     m.doc() = "pybind11 libquicksr plugin";
 
@@ -138,4 +140,6 @@ PYBIND11_MODULE(libquicksr, m) {
             std::ostringstream oss; oss << expr;
             return oss.str();
         });
+}
+
 }

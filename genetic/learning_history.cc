@@ -6,6 +6,8 @@
 #include <cassert>
 #include <cmath>
 
+namespace qsr {
+
 void LearningHistory::add_to_history(const Expression& expression) {
     history.push_back(expression.loss);
 }
@@ -57,4 +59,6 @@ LearningHistory LearningHistory::concatenate_with(LearningHistory other) {
     concatenated.history.insert(concatenated.history.end(), other.history.begin(), other.history.end());
 
     return concatenated;
+}
+
 }

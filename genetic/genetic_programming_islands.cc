@@ -12,6 +12,8 @@
 #include <memory>
 #include <ostream>
 
+namespace qsr {
+
 GeneticProgrammingIslands::GeneticProgrammingIslands (
     std::shared_ptr<Dataset> dataset, 
     int nislands, 
@@ -129,4 +131,6 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
 
     // Return tuple of best solution and learning history
     return std::make_tuple(global_best, hist);
+}
+
 }

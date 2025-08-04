@@ -7,6 +7,7 @@
 
 #include "expression.hpp"
 
+namespace qsr {
 
 Expression::Expression(operation_t operation, const Expression& e) noexcept :
     operation(operation), 
@@ -93,4 +94,6 @@ bool operator == (const Expression& left_operand, const Expression& right_operan
 
 bool operator != (const Expression& left_operand, const Expression& right_operand) noexcept {
     return !(left_operand == right_operand);
+}
+
 }

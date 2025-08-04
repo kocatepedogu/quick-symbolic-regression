@@ -16,6 +16,8 @@
 
 #include "learning_history.hpp"
 
+namespace qsr {
+
 class GeneticProgramming {
 public:
     GeneticProgramming(std::shared_ptr<const Dataset> dataset, 
@@ -52,5 +54,7 @@ private:
 
     bool initialized;
 };
+
+}
 
 #endif

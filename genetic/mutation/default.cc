@@ -3,6 +3,8 @@
 
 #include "default.hpp"
 
+namespace qsr {
+
 Expression DefaultMutation::mutate(const Expression &expr) noexcept {
     const auto &random_expr = expression_generator.generate();
     const auto &result_pair = crossover.crossover(expr, random_expr);
@@ -25,3 +27,4 @@ Expression DefaultMutation::mutate(const Expression &expr) noexcept {
     return result;
 }
 
+}

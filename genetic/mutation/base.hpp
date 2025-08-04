@@ -6,11 +6,15 @@
 
 #include "../../expressions/expression.hpp"
 
+namespace qsr {
+
 class BaseMutation {
 public:
     virtual Expression mutate(const Expression &expr) noexcept;
 
     virtual ~BaseMutation() = default;
 };
+
+}
 
 #endif

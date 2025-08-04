@@ -8,9 +8,13 @@
 
 #include <memory>
 
+namespace qsr {
+
 class BaseSelection {
 public:
     virtual std::shared_ptr<BaseSelector> get_selector(int npopulation);
 };
+
+}
 
 #endif

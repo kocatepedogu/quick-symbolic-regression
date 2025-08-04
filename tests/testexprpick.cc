@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+using namespace qsr;
+
 int main(void) {
     ExpressionPicker expression_picker;
 

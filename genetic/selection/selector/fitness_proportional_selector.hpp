@@ -8,6 +8,8 @@
 
 #include "base.hpp"
 
+namespace qsr {
+
 class FitnessProportionalSelector : public BaseSelector {
 public:
     constexpr FitnessProportionalSelector(int npopulation) : 
@@ -22,5 +24,7 @@ private:
 
     std::vector<float> probabilities;
 };
+
+}
 
 #endif

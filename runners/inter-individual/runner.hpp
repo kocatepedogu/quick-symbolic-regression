@@ -15,6 +15,7 @@
 
 #include </usr/lib/clang/20/include/omp.h>
 
+namespace qsr {
 namespace inter_individual {
     class Runner : public BaseRunner {
     private:
@@ -31,6 +32,7 @@ namespace inter_individual {
 
         void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
     };
+}
 }
 
 #endif

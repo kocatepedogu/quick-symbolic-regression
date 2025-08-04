@@ -7,6 +7,8 @@
 #include "vm_types.hpp"
 #include <hip/hip_runtime.h>
 
+namespace qsr {
+
 __device__
 static inline void grad_add(c_real_1d &i, real_1d &o) {
     o[0] = 1;
@@ -44,6 +46,8 @@ static inline void grad_cos(c_real_1d &i, real_1d &o) {
 __device__
 static inline void grad_exp(c_real_1d &i, real_1d &o) {
     o[0] = exp(i[0]);
+}
+
 }
 
 #endif

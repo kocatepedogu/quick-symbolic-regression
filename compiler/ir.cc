@@ -6,6 +6,8 @@
 #include <cmath>
 #include <iomanip>
 
+namespace qsr {
+
 IntermediateRepresentation::IntermediateRepresentation(int length) : bytecode(length) {
     for (int i = 0; i < length; ++i) {
         bytecode[i] = Instruction();
@@ -73,4 +75,6 @@ std::ostream& operator << (std::ostream& os, const IntermediateRepresentation& p
     }
 
     return os;
+}
+
 }

@@ -8,6 +8,8 @@
 
 #include "../expression_generator.hpp"
 
+namespace qsr {
+
 class DefaultInitializer : public BaseInitializer {
 public:
     constexpr DefaultInitializer(int nvars, int nweights, int max_depth, int npopulation) :
@@ -20,5 +22,7 @@ private:
 
     const ExpressionGenerator generator;
 };
+
+}
 
 #endif

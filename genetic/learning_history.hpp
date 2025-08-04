@@ -8,6 +8,8 @@
 
 #include "../expressions/expression.hpp"
 
+namespace qsr {
+
 class LearningHistory {
 public:
     // Adds a fitness value to the learning history
@@ -29,5 +31,7 @@ public:
 private:
     std::vector<float> history;
 };
+
+}
 
 #endif

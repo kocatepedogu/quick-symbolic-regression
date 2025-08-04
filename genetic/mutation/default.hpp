@@ -9,6 +9,8 @@
 #include "../expression_generator.hpp"
 #include "base.hpp"
 
+namespace qsr {
+
 class DefaultMutation : public BaseMutation {
 public:
     constexpr DefaultMutation(int nvars, int nweights, int max_depth, float mutation_probability)  :
@@ -22,5 +24,7 @@ private:
 
     DefaultCrossover crossover;
 };
+
+}
 
 #endif

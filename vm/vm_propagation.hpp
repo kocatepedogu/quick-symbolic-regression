@@ -12,6 +12,8 @@
 
 #include "../compiler/ir.hpp"
 
+namespace qsr {
+
 __device__
 static inline void push_stack(const StackState &s, int tid, float value) {
     s.stack_d[s.stack_pointer++][tid] = value;
@@ -123,6 +125,8 @@ static inline void propagate(int tid, F operation, G gradient, const StackState&
             push_stack(s, tid, local_grad[k]);
         }
     }
+}
+
 }
 
 #endif

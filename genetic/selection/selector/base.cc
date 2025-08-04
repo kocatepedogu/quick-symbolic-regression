@@ -3,4 +3,8 @@
 
 #include "base.hpp"
 
+namespace qsr {
+
 BaseSelector::~BaseSelector() {}
+
+}

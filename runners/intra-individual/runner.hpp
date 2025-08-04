@@ -14,6 +14,7 @@
 #include "../../util/hip.hpp"
 #include "../../vm/vm_types.hpp"
 
+namespace qsr {
 namespace intra_individual {
     struct VirtualMachineResult {
         std::shared_ptr<Array1D<float>> weights_d;
@@ -47,6 +48,7 @@ namespace intra_individual {
 
         void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
     };
+}
 }
 
 #endif

@@ -9,6 +9,7 @@
 
 #include <vector>
 
+namespace qsr {
 namespace inter_individual {
     struct Program {
         /// Programs
@@ -24,6 +25,7 @@ namespace inter_individual {
     void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop);
 
     void program_destroy(Program &prog_pop);
+}
 }
 
 #endif

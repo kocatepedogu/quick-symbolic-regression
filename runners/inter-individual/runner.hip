@@ -17,6 +17,7 @@
 #include <hip/hip_runtime.h>
 #include <memory>
 
+namespace qsr {
 namespace inter_individual {
     Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
@@ -175,4 +176,5 @@ namespace inter_individual {
             }
         }
     }
+}
 }

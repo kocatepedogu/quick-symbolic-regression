@@ -6,6 +6,8 @@
 
 #include "../compiler/ir.hpp"
 
+namespace qsr {
+
 typedef Instruction *inst_1d_mut;
 typedef Instruction *const __restrict__ inst_1d;
 typedef const Instruction *const __restrict__ c_inst_1d;
@@ -48,5 +50,7 @@ struct StackState {
         stack_pointer(stack_pointer), 
         intermediate_pointer(intermediate_pointer) {}
 };
+
+}
 
 #endif

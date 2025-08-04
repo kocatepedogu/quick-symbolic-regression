@@ -9,9 +9,13 @@
 
 #include <memory>
 
+namespace qsr {
+
 class BaseRunnerGenerator {
 public:
     virtual std::shared_ptr<BaseRunner> generate(std::shared_ptr<Dataset> dataset, int nweights);
 };
+
+}
 
 #endif

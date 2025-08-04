@@ -5,6 +5,8 @@
 
 #include <random>
 
+namespace qsr {
+
 void FitnessProportionalSelector::update(const Expression population[]) {
     // Step 1: Calculate the total fitness
     float totalFitness = 0.0f;
@@ -33,4 +35,6 @@ const Expression& FitnessProportionalSelector::select(const Expression populatio
     // Select an expression based on the probabilities
     size_t selectedIndex = distribution(gen);
     return population[selectedIndex];
+}
+
 }

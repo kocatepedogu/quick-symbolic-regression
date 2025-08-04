@@ -6,6 +6,10 @@
 
 #include <random>
 
+namespace qsr {
+
 extern thread_local std::mt19937 thread_local_rng;
+
+}
 
 #endif

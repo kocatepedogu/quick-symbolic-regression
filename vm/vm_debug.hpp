@@ -7,6 +7,8 @@
 #include <hip/hip_runtime.h>
 #include "vm_types.hpp"
 
+namespace qsr {
+
 /// Whether to print debug messages or not
 constexpr bool vm_debug_messages = false;
 
@@ -44,6 +46,8 @@ static inline void vm_debug_print_stack(const int& tid, const StackState& s) {
             printf("\n");
         }
     }
+}
+
 }
 
 #endif

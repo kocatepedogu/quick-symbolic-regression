@@ -17,6 +17,8 @@
 #define UNARY_OP_CASE(case_name, operand, operator_token) \
     case case_name: return operator_token(operand(0))
 
+namespace qsr {
+
 typedef enum {
     CONSTANT = 0,
     PARAMETER = 1,
@@ -124,6 +126,8 @@ static inline Expression Var(int argindex) {
   */
 static inline Expression Parameter(int argindex) {  
     return Expression(PARAMETER, argindex); 
+}
+
 }
 
 #endif

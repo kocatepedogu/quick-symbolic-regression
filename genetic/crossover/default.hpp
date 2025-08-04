@@ -10,6 +10,8 @@
 #include "../expression_picker.hpp"
 #include "base.hpp"
 
+namespace qsr {
+
 class DefaultCrossover : public BaseCrossover {
 public:
     constexpr DefaultCrossover(float crossover_probability) :
@@ -22,5 +24,7 @@ private:
 
     float crossover_probability;
 };
+
+}
 
 #endif

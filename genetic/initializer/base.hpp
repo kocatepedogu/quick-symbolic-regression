@@ -7,11 +7,16 @@
 #include "../../expressions/expression.hpp"
 
 #include <vector>
+
+namespace qsr {
+
 class BaseInitializer {
 public:
     virtual void initialize(std::vector<Expression>& population);
 
     virtual ~BaseInitializer() = default;
 };
+
+}
 
 #endif

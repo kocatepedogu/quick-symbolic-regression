@@ -6,6 +6,8 @@
 
 #include "../expressions/expression.hpp"
 
+namespace qsr {
+
 class ExpressionPicker {
 public:
     Expression& pick(Expression &expr) noexcept;
@@ -13,5 +15,7 @@ public:
 private:
     void pick(Expression *node, Expression **result, int& current, int target) noexcept;
 };
+
+}
 
 #endif

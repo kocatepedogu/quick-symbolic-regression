@@ -7,9 +7,13 @@
 #include "base.hpp"
 #include "selector/base.hpp"
 
+namespace qsr {
+
 class FitnessProportionalSelection : public BaseSelection {
 public:
     std::shared_ptr<BaseSelector> get_selector(int npopulation) noexcept;
 };
+
+}
 
 #endif

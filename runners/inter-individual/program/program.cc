@@ -8,6 +8,7 @@
 #include "../../../compiler/compiler.hpp"
 #include "../../../util/hip.hpp"
 
+namespace qsr {
 namespace inter_individual {
     void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop) {
         const int num_of_individuals = exp_pop.size();
@@ -55,4 +56,5 @@ namespace inter_individual {
     void program_destroy(Program &prog_pop) {
         del_arr_2d(prog_pop.bytecode, prog_pop.max_num_of_instructions);
     }
+}
 }

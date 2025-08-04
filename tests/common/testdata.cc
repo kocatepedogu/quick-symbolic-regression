@@ -3,6 +3,8 @@
 
 #include "testdata.hpp"
 
+namespace qsr {
+
 void generate_test_data(float **&X, float *&y, std::function<float(float&)> ground_truth) {
     // Allocate two dimensional feature matrix
     X = new float*[test_data_length];
@@ -38,4 +40,6 @@ void delete_test_data(float **&X, float *&y) {
         delete[] X[i];
     }
     delete[] X;
+}
+
 }

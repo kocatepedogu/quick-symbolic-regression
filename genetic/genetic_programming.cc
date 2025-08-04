@@ -9,6 +9,8 @@
 #include "learning_history.hpp"
 #include <cmath>
 
+namespace qsr {
+
 GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
                int nweights, 
@@ -119,4 +121,6 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
     }
 
     return history;
+}
+
 }

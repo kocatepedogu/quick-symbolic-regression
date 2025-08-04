@@ -4,6 +4,8 @@
 #include "compiler.hpp"
 #include "ir.hpp"
 
+namespace qsr {
+
 
 // Intermediate compiler state
 struct CompilerState {
@@ -118,4 +120,6 @@ IntermediateRepresentation compile(const Expression& e) noexcept {
     IntermediateRepresentation p(2*e.num_of_nodes + 1);
     compile(e, &p);
     return p;
+}
+
 }

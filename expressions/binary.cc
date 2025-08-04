@@ -46,6 +46,7 @@
 #define PARAMETER_PROPAGATION(OPERATION, OP) \
     PROPAGATION_TEMPLATE(OPERATION, OP, PARAMETER)
 
+namespace qsr {
     
 Expression operator + (const Expression& left_operand, const Expression& right_operand) noexcept {
     if (right_operand.operation == CONSTANT && right_operand.value == 0) {
@@ -208,4 +209,6 @@ Expression operator / (const Expression& left_operand, const Expression& right_o
     }
 
     return Expression(DIVISION, left_operand, right_operand);
+}
+
 }

@@ -7,6 +7,8 @@
 #include <ostream>
 #include <vector>
 
+namespace qsr {
+
 enum Opcode {
     PUSH_IMMEDIATE,
     PUSH_VARIABLE,
@@ -72,5 +74,7 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
   * @brief Yields text representation of a program
   */
 std::ostream& operator << (std::ostream& os, const IntermediateRepresentation& program) noexcept;
+
+}
 
 #endif

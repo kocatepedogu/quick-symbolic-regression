@@ -12,6 +12,8 @@
 #include "vm_propagation.hpp"
 #include "vm_types.hpp"
 
+namespace qsr {
+
 template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights> __device__
 void vm_control(const int tid, 
                 const int datapoint_idx,
@@ -119,6 +121,8 @@ void vm_control(const int tid,
             assert(false && "Compiled program finished without encountering loss function.");
         }
     }
+}
+
 }
 
 #endif

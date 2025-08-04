@@ -6,6 +6,8 @@
 
 #include "expression.hpp"
 
+namespace qsr {
+
 static inline Expression Sin(const Expression &e) {
     // Remove unary operations involving only trainable parameters or constants
     if (e.operation == PARAMETER || e.operation == CONSTANT) {
@@ -31,6 +33,8 @@ static inline Expression Exp(const Expression &e) {
     }
 
     return Expression(EXPONENTIAL, e);
+}
+
 }
 
 #endif

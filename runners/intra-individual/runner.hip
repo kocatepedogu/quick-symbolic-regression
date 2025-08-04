@@ -10,6 +10,7 @@
 
 #include "../../util/rng.hpp"
 
+namespace qsr {
 namespace intra_individual {
     constexpr int max_stack_depth = 128;
     constexpr int reduction_threads_per_block = 32;
@@ -189,4 +190,5 @@ namespace intra_individual {
         // Destroy bytecode program
         program_destroy(program_pop);
     }
+}
 }

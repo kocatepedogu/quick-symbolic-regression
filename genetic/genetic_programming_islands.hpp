@@ -13,6 +13,8 @@
 #include "selection/base.hpp"
 #include "../runners/runner_generator_base.hpp"
 
+namespace qsr {
+
 class GeneticProgrammingIslands {
 public:
     GeneticProgrammingIslands(std::shared_ptr<Dataset> dataset, 
@@ -60,5 +62,7 @@ private:
     /// Number of islands
     const int nislands;
 };
+
+}
 
 #endif

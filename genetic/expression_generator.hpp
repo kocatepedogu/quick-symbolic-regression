@@ -6,6 +6,8 @@
 
 #include "../expressions/expression.hpp"
 
+namespace qsr {
+
 class ExpressionGenerator {
 public:
     constexpr ExpressionGenerator(int nvars, int nweights, int max_depth) : 
@@ -22,5 +24,7 @@ private:
 
     Expression generate(int max_depth) const noexcept;
 };
+
+}
 
 #endif

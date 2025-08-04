@@ -6,6 +6,8 @@
 
 #include "../../../expressions/expression.hpp"
 
+namespace qsr {
+
 class BaseSelector {
 public:
     virtual void update(const Expression population[]) = 0;
@@ -14,5 +16,7 @@ public:
 
     virtual ~BaseSelector();
 };
+
+}
 
 #endif

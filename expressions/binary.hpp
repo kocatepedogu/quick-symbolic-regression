@@ -6,6 +6,8 @@
 
 #include "expression.hpp"
 
+namespace qsr {
+
 Expression operator + (const Expression& left_operand, const Expression& right_operand) noexcept;
 
 Expression operator - (const Expression& left_operand, const Expression& right_operand) noexcept;
@@ -13,5 +15,7 @@ Expression operator - (const Expression& left_operand, const Expression& right_o
 Expression operator * (const Expression& left_operand, const Expression& right_operand) noexcept;
 
 Expression operator / (const Expression& left_operand, const Expression& right_operand) noexcept;
+
+}
 
 #endif

@@ -7,6 +7,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
+namespace qsr {
+
 struct Dataset {
     /**
       * @brief Constructs a dataset on GPU from given X matrix and y vector
@@ -35,5 +37,7 @@ struct Dataset {
     /// Target variable on device memory
     float *y_d;
 };
+
+}
 
 #endif

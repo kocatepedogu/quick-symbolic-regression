@@ -7,6 +7,8 @@
 #include "vm_types.hpp"
 #include <hip/hip_runtime.h>
 
+namespace qsr {
+
 __device__
 static inline float forward_add(c_real_1d &x) {
     return x[0] + x[1];
@@ -40,6 +42,8 @@ static inline float forward_cos(c_real_1d &x) {
 __device__
 static inline float forward_exp(c_real_1d &x) {
     return exp(x[0]);
+}
+
 }
 
 #endif

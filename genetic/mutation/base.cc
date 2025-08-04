@@ -4,7 +4,11 @@
 #include "base.hpp"
 #include <cstdio>
 
+namespace qsr {
+
 Expression BaseMutation::mutate(const Expression &expr) noexcept {
     fprintf(stderr, "Unimplemented base method called.");
     abort();
+}
+
 }

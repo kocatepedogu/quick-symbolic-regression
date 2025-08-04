@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+using namespace qsr;
+
 int main(void) {
     ExpressionGenerator expression_generator(2, 3, 4);
 

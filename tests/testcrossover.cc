@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+using namespace qsr;
+
 int main(void) {
     Expression x = Var(0);
     Expression y = Var(1);

@@ -12,6 +12,8 @@
 #include <tuple>
 #include <cassert>
 
+namespace qsr {
+
 Expression reorganize(const Expression& e) {
     #define _REORGANIZE_CALL(i) \
         reorganize(e.operands[i])
@@ -93,4 +95,6 @@ std::tuple<Expression, Expression> DefaultCrossover::crossover(Expression e1, Ex
     // Make a pair of expressions (may become parents)
 
     return std::make_tuple(e1_reorg, e2_reorg);
+}
+
 }
