@@ -1,9 +1,9 @@
 # QuickSR
 Hybrid CPU/GPU implementation of symbolic regression with genetic programming, backpropagation and bytecode virtual machine
 
-<img src="./benchmark_learning_history_1d.png" width="300px">
+<img src="./benchmark_learning_history_1d.png" width="450px">
 
-<img src="./benchmark_learning_history_2d.png" width="300px">
+<img src="./benchmark_learning_history_2d.png" width="450px">
 
 ### Algorithm
 
