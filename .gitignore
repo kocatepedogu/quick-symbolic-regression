@@ -7,9 +7,13 @@ CMakeFiles
 
 testinter
 testintra
+testcpu
 testexprgen
 testmutation
 testcrossover
 testisland
 testexprpick
 libquicksr.so
+
+benchmark1d.sh
+benchmark2d.sh

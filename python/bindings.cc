@@ -16,6 +16,7 @@
 #include "../genetic/selection/fitness_proportional_selection.hpp"
 #include "../runners/inter-individual/runner_generator.hpp"
 #include "../runners/intra-individual/runner_generator.hpp"
+#include "../runners/cpu/runner_generator.hpp"
 
 namespace py = pybind11;
 
@@ -81,6 +82,9 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
         
     py::class_<intra_individual::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<intra_individual::RunnerGenerator>>(m, "IntraIndividualRunnerGenerator")
+        .def(py::init<>());
+
+    py::class_<cpu::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<cpu::RunnerGenerator>>(m, "CPURunnerGenerator")
         .def(py::init<>());
 
     /* Genetic Programming Algorithm Classes */

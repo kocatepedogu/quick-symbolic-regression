@@ -55,6 +55,9 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
     // Local learning histories
     auto local_histories = new LearningHistory[nislands];
 
+    // Enable nested parallelism
+    omp_set_max_active_levels(2);
+
     // Fit
     #pragma omp parallel num_threads(nislands)
     {
@@ -76,6 +79,12 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Iterate island
             local_histories[threadIdx] = islands[threadIdx]->fit(ngenerations, nepochs, learning_rate);
+
+            // Increase number of free cores
+            #pragma omp critical
+            {
+                std::cout << "Island " << threadIdx << " completed." << std::endl;
+            }
 
             // Synchronize all islands
             #pragma omp barrier
