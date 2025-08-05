@@ -10,6 +10,7 @@ namespace qsr {
 void FitnessProportionalSelector::update(const Expression population[]) {
     // Step 1: Calculate the total fitness
     float totalFitness = 0.0f;
+    #pragma omp simd reduction(+:totalFitness)
     for (size_t i = 0; i < npopulation; ++i) {
         // Convert loss to fitness (reciprocal)
         float fitness = 1.0f / population[i].loss;
@@ -17,6 +18,7 @@ void FitnessProportionalSelector::update(const Expression population[]) {
     }
 
     // Step 2: Normalize fitness values to get probabilities
+    #pragma omp simd
     for (size_t i = 0; i < npopulation; ++i) {
         float fitness = 1.0f / population[i].loss;
         probabilities[i] = fitness / totalFitness;
