@@ -5,7 +5,6 @@
 #define INTRA_VM_PROPAGATION_HPP
 
 #include <hip/hip_runtime.h>
-#include <type_traits>
 
 #include "vm_debug.hpp"
 #include "vm_types.hpp"
@@ -14,27 +13,27 @@
 
 namespace qsr {
 
-__device__
+__device__ __host__
 static inline void push_stack(const StackState &s, int tid, float value) {
     s.stack_d[s.stack_pointer++][tid] = value;
 }
 
-__device__
+__device__ __host__
 static inline float pop_stack(const StackState &s, int tid) {
     return s.stack_d[--s.stack_pointer][tid];
 }
 
-__device__
+__device__ __host__
 static inline void push_intermediate(const StackState &s, int tid, float value) {
     s.intermediate_d[s.intermediate_pointer++][tid] = value;
 }
 
-__device__
+__device__ __host__
 static inline float read_intermediate(const StackState &s, int tid, int index) {
     return s.intermediate_d[index][tid];
 }
 
-template <PropagationType proptype> __device__
+template <PropagationType proptype> __device__ __host__
 static inline void propagate_immediate(int tid, const float& immediate, const StackState& s) {
     if constexpr (proptype == FORWARD) {
         push_stack(s, tid, immediate);
@@ -46,12 +45,12 @@ static inline void propagate_immediate(int tid, const float& immediate, const St
     }
 }
 
-template <PropagationType proptype, typename Weight> __device__
+template <PropagationType proptype, ParallelismType paraType, typename Weight> __device__ __host__
 static inline void propagate_parameter(int tid, const int& param_index, const StackState& s,
                                     Weight weights, 
                                     real_2d weights_grad_d) {
     if constexpr (proptype == FORWARD) {
-        if constexpr (std::is_same_v<Weight, c_real_1d>) {
+        if constexpr (paraType == INTRA_INDIVIDUAL) {
             // Intra-individual
             push_stack(s, tid, weights[param_index]);
         }
@@ -71,7 +70,7 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
     }
 }
 
-template <PropagationType proptype, int opcount, typename F, typename G> __device__ 
+template <PropagationType proptype, int opcount, typename F, typename G> __device__ __host__
 static inline void propagate(int tid, F operation, G gradient, const StackState& s, const Instruction& inst) {
     if constexpr (proptype == FORWARD) {
         // Pop operands from the stack

@@ -15,7 +15,7 @@ constexpr bool vm_debug_messages = false;
 /// Which thread is going to print debug messages
 constexpr int vm_debug_tid = 2;
 
-template <typename... T> __device__ 
+template <typename... T> __device__ __host__
 static inline void vm_debug_print(const int& tid, T ...args) {
     if constexpr (vm_debug_messages) {
         if (tid == vm_debug_tid) {
@@ -25,7 +25,7 @@ static inline void vm_debug_print(const int& tid, T ...args) {
     }
 }
 
-__device__
+__device__ __host__
 static inline void vm_debug_print_stack(const int& tid, const StackState& s) {
     if constexpr (vm_debug_messages) {
         if (tid == vm_debug_tid) {

@@ -9,37 +9,37 @@
 
 namespace qsr {
 
-__device__
+__device__ __host__
 static inline float forward_add(c_real_1d &x) {
     return x[0] + x[1];
 }
 
-__device__
+__device__ __host__
 static inline float forward_sub(c_real_1d &x) {
     return x[0] - x[1];
 }
 
-__device__
+__device__ __host__
 static inline float forward_mul(c_real_1d &x) {
     return x[0] * x[1];
 }
 
-__device__
+__device__ __host__
 static inline float forward_div(c_real_1d &x) {
     return x[0] / x[1];
 }
 
-__device__
+__device__ __host__
 static inline float forward_sin(c_real_1d &x) {
     return sin(x[0]);
 }
 
-__device__
+__device__ __host__
 static inline float forward_cos(c_real_1d &x) {
     return cos(x[0]);
 }
 
-__device__
+__device__ __host__
 static inline float forward_exp(c_real_1d &x) {
     return exp(x[0]);
 }

@@ -14,7 +14,7 @@
 
 namespace qsr {
 
-template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights> __device__
+template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights> __device__ __host__
 void vm_control(const int tid, 
                 const int datapoint_idx,
                 const Code bytecode, 
@@ -53,7 +53,7 @@ void vm_control(const int tid,
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(tid, "param %d", instruction.argindex);
-                propagate_parameter<propType, Weights>(tid, instruction.argindex, s, 
+                propagate_parameter<propType, paraType, Weights>(tid, instruction.argindex, s, 
                     weights_d, weights_grad_d);
                 break;
 
