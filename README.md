@@ -1,9 +1,9 @@
 # QuickSR
 Hybrid CPU/GPU implementation of symbolic regression with genetic programming, backpropagation and bytecode virtual machine
 
-<img src="./benchmark_learning_history_1d.png" width="450px">
+<img src="./benchmark/benchmark_learning_history_1d.png" width="450px">
 
-<img src="./benchmark_learning_history_2d.png" width="450px">
+<img src="./benchmark/benchmark_learning_history_2d.png" width="450px">
 
 ### Algorithm
 
@@ -27,11 +27,11 @@ The **intra-individual GPU mode** (2) assigns each island to a separate HIP stre
 
 The **inter-individual GPU mode** (3) assigns each island to a separate HIP stream with further parallelization over individuals. At each generation, only a single kernel is launched on the stream associated with the island. Every GPU thread processes a different individual's bytecode program. When the loss computation/gradient accumulation from one data point is done, the threads move on to the next data point in a sequential loop. The loop over epochs is also moved inside the kernel, eliminating kernel launch overhead. 
 
-<img src="./benchmark_elapsed_time_vs_population_size.png" width="600px">
+<img src="./benchmark/benchmark_elapsed_time_vs_population_size.png" width="600px">
 
 The plot above shows the elapsed time of the algorithm as a function of the population size, measured by *benchmark_population_size.py* script. At the largest benchmark population size (560000), the inter-individual GPU mode achieves a speedup of 31x over the CPU mode and 46x over the intra-individual GPU mode. The dataset size is kept constant at 25 data points.
 
-<img src="./benchmark_elapsed_time_vs_dataset_size.png" width="600px">
+<img src="./benchmark/benchmark_elapsed_time_vs_dataset_size.png" width="600px">
 
 The plot above shows the elapsed time of the algorithm as a function of the dataset size, measured by *benchmark_dataset_size.py* script. At the largest benchmark dataset size (500000), the intra-individual GPU mode achieves a speedup of 1.98x over the CPU mode and 58x over the inter-individual mode. The population size is kept constant at 1000.
 

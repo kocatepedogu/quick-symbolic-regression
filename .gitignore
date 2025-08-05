@@ -15,5 +15,5 @@ testisland
 testexprpick
 libquicksr.so
 
-benchmark1d.sh
-benchmark2d.sh
+benchmark/benchmark1d.sh
+benchmark/benchmark2d.sh
