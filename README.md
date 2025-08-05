@@ -29,5 +29,11 @@ The **inter-individual GPU mode** (3) assigns each island to a separate HIP stre
 
 <img src="./benchmark_elapsed_time_vs_population_size.png" width="600px">
 
-The plot above shows the elapsed time of the algorithm as a function of the population size, measured by *benchmark__population_size.py* script. At the largest benchmark population size (560000), the inter-individual GPU mode achieves a speedup of 31x over the CPU mode and 46x over the intra-individual GPU mode. The dataset size is kept constant at 25 data points.
+The plot above shows the elapsed time of the algorithm as a function of the population size, measured by *benchmark_population_size.py* script. At the largest benchmark population size (560000), the inter-individual GPU mode achieves a speedup of 31x over the CPU mode and 46x over the intra-individual GPU mode. The dataset size is kept constant at 25 data points.
+
+<img src="./benchmark_elapsed_time_vs_dataset_size.png" width="600px">
+
+The plot above shows the elapsed time of the algorithm as a function of the dataset size, measured by *benchmark_dataset_size.py* script. At the largest benchmark dataset size (500000), the intra-individual GPU mode achieves a speedup of 1.98x over the CPU mode and 58x over the inter-individual mode. The population size is kept constant at 1000.
+
+Both benchmarks were done on an Intel Core i7 1400KF CPU (64 GB DDR5 5200 MHz RAM) and an AMD Radeon RX 9060 XT (16GB VRAM) GPU. Either with a large dataset size or a large population size, the GPU implementation significantly outperforms the CPU one. The choice of parallelism mode (inter-individual or intra-individual) is up to the user. As of now, automatic selection of the best mode based on the dataset and population size is not implemented.
 
