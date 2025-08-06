@@ -109,11 +109,11 @@ namespace qsr::intra_individual {
         reduction_grid_dim = dim3(reduction_blocks_per_grid);
         reduction_block_dim = dim3(reduction_threads_per_block);
 
-        stack_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
-        intermediate_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
-        weights_d = std::make_shared<Array1D<float>>(nweights);
-        weights_grad_d = std::make_shared<Array2D<float>>(nweights, dataset->m);
-        loss_d = std::make_shared<Array1D<float>>(dataset->m);
+        stack_d = Array2D<float>(max_stack_depth, dataset->m);
+        intermediate_d = Array2D<float>(max_stack_depth, dataset->m);
+        weights_d = Array1D<float>(nweights);
+        weights_grad_d = Array2D<float>(nweights, dataset->m);
+        loss_d = Array1D<float>(dataset->m);
     }
 
     void Runner::run(c_inst_1d code, int code_length, int epochs, float learning_rate) {
@@ -124,8 +124,8 @@ namespace qsr::intra_individual {
                 vm, gridDim, blockDim, 0, hipState.stream,
                 code, code_length, 
                 dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
-                stack_d->ptr, intermediate_d->ptr,
-                weights_d->ptr, weights_grad_d->ptr, nweights, loss_d->ptr);
+                stack_d.ptr, intermediate_d.ptr,
+                weights_d.ptr, weights_grad_d.ptr, nweights, loss_d.ptr);
 
             // For every weight, sum gradient contributions from all data points using reduction
             // Apply gradient descent rule
@@ -133,7 +133,7 @@ namespace qsr::intra_individual {
                 for (int i = 0; i < nweights; ++i) {
                     hipLaunchKernelGGL(
                         weight_update, reduction_grid_dim, reduction_block_dim, 0, hipState.stream, 
-                        weights_grad_d->ptr[i], &weights_d->ptr[i], dataset->m, learning_rate);
+                        weights_grad_d.ptr[i], &weights_d.ptr[i], dataset->m, learning_rate);
                 }
             }
         }
@@ -145,7 +145,7 @@ namespace qsr::intra_individual {
         // Convert symbolic expressions to bytecode program
         Program program_pop(population);
 
-        // Parallel region to exploit remaining resources with inter-individual parallelism
+        // Sequential loop over programs
         for (int i = 0; i < population.size(); ++i)
         {
             auto code = program_pop.bytecode.ptr[i];
@@ -154,13 +154,13 @@ namespace qsr::intra_individual {
             // If the expression has no weights yet, initialize them randomly
             if (population[i].weights.empty()) {
                 for (int j = 0; j < nweights; ++j) {
-                    weights_d->ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+                    weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
                 }
             } 
             // If the expression already has weights, use them
             else {
                 for (int j = 0; j < nweights; ++j) {
-                    weights_d->ptr[j] = population[i].weights[j];
+                    weights_d.ptr[j] = population[i].weights[j];
                 }
             }
 
@@ -171,16 +171,16 @@ namespace qsr::intra_individual {
             float total_loss = 0;
             #pragma omp simd reduction(+:total_loss)
             for (int i = 0; i < dataset->m; ++i) {
-                total_loss += loss_d->ptr[i];
+                total_loss += loss_d.ptr[i];
             }
 
             // Save loss value to the original expression
             population[i].loss = total_loss;
 
             // Save weights to the original expression
-            population[i].weights.resize(weights_d->ptr.dim1);
-            for (int j = 0; j < weights_d->ptr.dim1; ++j) {
-                population[i].weights[j] = weights_d->ptr[j];
+            population[i].weights.resize(weights_d.ptr.dim1);
+            for (int j = 0; j < weights_d.ptr.dim1; ++j) {
+                population[i].weights[j] = weights_d.ptr[j];
             }
         }
     }

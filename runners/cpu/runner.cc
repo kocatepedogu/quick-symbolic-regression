@@ -24,10 +24,10 @@ namespace cpu {
         // Convert symbolic expressions to bytecode program
         intra_individual::Program program_pop(population);
 
-        auto stack_d = std::make_unique<Array2D<float>>(max_stack_depth, dataset->m);
-        auto intermediate_d = std::make_unique<Array2D<float>>(max_stack_depth, dataset->m);
-        auto weights_d = std::make_unique<Array1D<float>>(nweights);
-        auto weights_grad_d = std::make_unique<Array2D<float>>(nweights, dataset->m);
+        Array2D<float> stack_d(max_stack_depth, dataset->m);
+        Array2D<float> intermediate_d(max_stack_depth, dataset->m);
+        Array1D<float> weights_d(nweights);
+        Array2D<float> weights_grad_d(nweights, dataset->m);
 
         // Loop over programs
         #pragma omp parallel
@@ -38,13 +38,13 @@ namespace cpu {
                 // If the expression has no weights yet, initialize them randomly
                 if (population[program_idx].weights.empty()) {
                     for (int j = 0; j < nweights; ++j) {
-                        weights_d->ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+                        weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
                     }
                 } 
                 // If the expression already has weights, use them
                 else {
                     for (int j = 0; j < nweights; ++j) {
-                        weights_d->ptr[j] = population[program_idx].weights[j];
+                        weights_d.ptr[j] = population[program_idx].weights[j];
                     }
                 }
 
@@ -55,7 +55,7 @@ namespace cpu {
                     for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
                         #pragma omp simd
                         for (int tid = 0; tid < dataset->m; ++tid) {
-                            weights_grad_d->ptr[weight_idx,tid] = 0;
+                            weights_grad_d.ptr[weight_idx,tid] = 0;
                         }
                     }
 
@@ -66,8 +66,8 @@ namespace cpu {
                         int intermediate_pointer = 0;
 
                         const StackState s(
-                            stack_d->ptr,
-                            intermediate_d->ptr,
+                            stack_d.ptr,
+                            intermediate_d.ptr,
                             stack_pointer,
                             intermediate_pointer
                         );
@@ -79,19 +79,19 @@ namespace cpu {
                         vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
                             tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
                             dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                            s, program_counter, weights_d->ptr, weights_grad_d->ptr);
+                            s, program_counter, weights_d.ptr, weights_grad_d.ptr);
 
                         // Print an empty line in between forward propagation output and backpropagation output
                         vm_debug_print(tid, "");
 
                         // Save squared difference as the loss
-                        loss += powf(stack_d->ptr[0,tid], 2);
+                        loss += powf(stack_d.ptr[0,tid], 2);
 
                         vm_debug_print(tid, "Backpropagation");
                         vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
                             tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
                             dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                            s, program_counter, weights_d->ptr, weights_grad_d->ptr);
+                            s, program_counter, weights_d.ptr, weights_grad_d.ptr);
                     }
 
                     // Write loss to the original expression
@@ -103,16 +103,16 @@ namespace cpu {
                         float total_grad = 0;
                         #pragma omp simd reduction(+:total_grad)
                         for (int tid = 0; tid < dataset->m; ++tid) {
-                            total_grad += weights_grad_d->ptr[weight_idx,tid];
+                            total_grad += weights_grad_d.ptr[weight_idx,tid];
                         }
 
                         // Apply gradient descent
-                        weights_d->ptr[weight_idx] -= learning_rate * total_grad;
+                        weights_d.ptr[weight_idx] -= learning_rate * total_grad;
                     }
                 }
 
                 // Write final weights back to the original expression
-                population[program_idx].weights = std::vector<float>(weights_d->ptr.ptr, weights_d->ptr.ptr + nweights);
+                population[program_idx].weights = std::vector<float>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
             }
         }
 
