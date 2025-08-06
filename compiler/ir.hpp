@@ -63,6 +63,9 @@ struct IntermediateRepresentation {
     
     /** @brief Creates empty program on GPU memory */
     IntermediateRepresentation(int length);
+
+    /** @brief Default constructor */
+    IntermediateRepresentation() = default;
 };
 
 /**

@@ -19,21 +19,21 @@ Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept :
     * The goal is to convert X to X_d on device, which is in structure of array form.
     * The dimensions should be X_d[n][m]
     */
-    init_arr_2d(X_d, n, m);
+    X_d = Array2DF<float>(n, m);
 
     // Copy X to X_d on device
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
-            X_d[i][j] = X[j][i];
+            X_d.ptr[i,j] = X[j][i];
         }
     }
 
     // Allocate y_d on device
-    init_arr_1d(y_d, m);
+    y_d = Array1D<float>(m);
 
     // Copy y to y_d on device
     for (int j = 0; j < m; ++j) {
-        y_d[j] = y[j];
+        y_d.ptr[j] = y[j];
     }
 }
 
@@ -67,31 +67,22 @@ Dataset::Dataset(pybind11::array_t<float> numpy_X, pybind11::array_t<float> nump
     * The goal is to convert X to X_d on device, which is in structure of array form.
     * The dimensions should be X_d[n][m]
     */
-    init_arr_2d(X_d, n, m);
+    X_d = Array2DF<float>(n, m);
 
     // Allocate y_d on device
-    init_arr_1d(y_d, m);
+    y_d = Array1D<float>(m);
 
     // Allocate and fill X
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
-            X_d[i][j] = (static_cast<float*>(numpy_X_buffer_info.ptr))[j * n + i];
+            X_d.ptr[i,j] = (static_cast<float*>(numpy_X_buffer_info.ptr))[j * n + i];
         }
     }
 
     // Allocate and fill y
     for (int j = 0; j < m; ++j) {
-        y_d[j] = (static_cast<float*>(numpy_y_buffer_info.ptr))[j];
+        y_d.ptr[j] = (static_cast<float*>(numpy_y_buffer_info.ptr))[j];
     }
-}
-
-
-Dataset::~Dataset() noexcept {
-    // Delete y_d from device
-    del_arr_1d(y_d);
-
-    // Delete X_d from device
-    del_arr_2d(X_d, n);
 }
 
 }

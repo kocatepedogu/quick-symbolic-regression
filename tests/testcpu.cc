@@ -39,10 +39,11 @@ int main(void) {
     Expression f3 = w0 * Sin(x + w2)*x + x*x - w1;
 
     // Construct a population
-    std::vector<Expression> expression_pop = {f1, f2, f3,};
+    std::vector<Expression> expression_pop = {f1, f2, f3};
 
     // Fit expressions
     cpu::Runner runner(dataset, 3);
+
     for (int i = 0; i < 60; ++i) {
         runner.run(expression_pop, 10, 1e-3);
     }

@@ -22,13 +22,12 @@ namespace cpu {
 
     void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
         // Convert symbolic expressions to bytecode program
-        intra_individual::Program program_pop;
-        program_create(&program_pop, population);
+        intra_individual::Program program_pop(population);
 
-        auto stack_d = std::make_unique<Array2D<float>>(max_stack_depth, dataset->m);
-        auto intermediate_d = std::make_unique<Array2D<float>>(max_stack_depth, dataset->m);
+        auto stack_d = std::make_unique<Array2DF<float>>(max_stack_depth, dataset->m);
+        auto intermediate_d = std::make_unique<Array2DF<float>>(max_stack_depth, dataset->m);
         auto weights_d = std::make_unique<Array1D<float>>(nweights);
-        auto weights_grad_d = std::make_unique<Array2D<float>>(nweights, dataset->m);
+        auto weights_grad_d = std::make_unique<Array2DF<float>>(nweights, dataset->m);
 
         // Loop over programs
         #pragma omp parallel
@@ -56,7 +55,7 @@ namespace cpu {
                     for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
                         #pragma omp simd
                         for (int tid = 0; tid < dataset->m; ++tid) {
-                            weights_grad_d->ptr[weight_idx][tid] = 0;
+                            weights_grad_d->ptr[weight_idx,tid] = 0;
                         }
                     }
 
@@ -78,20 +77,20 @@ namespace cpu {
                         // Forward propagate and evaluate loss
                         vm_debug_print(tid, "Forward propagation");
                         vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
-                            tid, tid, program_pop.bytecode[program_idx], program_pop.num_of_instructions[program_idx], 
-                            dataset->m, dataset->X_d, dataset->y_d, 
+                            tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
+                            dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
                             s, program_counter, weights_d->ptr, weights_grad_d->ptr);
 
                         // Print an empty line in between forward propagation output and backpropagation output
                         vm_debug_print(tid, "");
 
                         // Save squared difference as the loss
-                        loss += powf(stack_d->ptr[0][tid], 2);
+                        loss += powf(stack_d->ptr[0,tid], 2);
 
                         vm_debug_print(tid, "Backpropagation");
                         vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
-                            tid, tid, program_pop.bytecode[program_idx], program_pop.num_of_instructions[program_idx], 
-                            dataset->m, dataset->X_d, dataset->y_d, 
+                            tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
+                            dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
                             s, program_counter, weights_d->ptr, weights_grad_d->ptr);
                     }
 
@@ -104,7 +103,7 @@ namespace cpu {
                         float total_grad = 0;
                         #pragma omp simd reduction(+:total_grad)
                         for (int tid = 0; tid < dataset->m; ++tid) {
-                            total_grad += weights_grad_d->ptr[weight_idx][tid];
+                            total_grad += weights_grad_d->ptr[weight_idx,tid];
                         }
 
                         // Apply gradient descent
@@ -117,7 +116,5 @@ namespace cpu {
             }
         }
 
-        // Clean up
-        program_destroy(program_pop);
     }
 }}

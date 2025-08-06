@@ -6,19 +6,17 @@
 #include <hip/hip_runtime.h>
 
 #include "../../../compiler/compiler.hpp"
-#include "../../../util/hip.hpp"
 
-namespace qsr {
-namespace inter_individual {
-    void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop) {
+namespace qsr::inter_individual {
+    Program::Program(const std::vector<Expression>& exp_pop) {
         const int num_of_individuals = exp_pop.size();
-        prog_pop->num_of_individuals = num_of_individuals;
+        this->num_of_individuals = num_of_individuals;
 
         // Intermediate representation of each expression
         std::vector<IntermediateRepresentation> ir_list;
 
         // Largest number of instructions (to determine pad length)
-        prog_pop->max_num_of_instructions = 0;
+        this->max_num_of_instructions = 0;
 
         // Compile each expression to IR and determine the longest IR length
         for (int i = 0; i < num_of_individuals; ++i) {
@@ -27,13 +25,13 @@ namespace inter_individual {
 
             ir_list.push_back(ir);
 
-            if (num_of_instructions > prog_pop->max_num_of_instructions) {
-                prog_pop->max_num_of_instructions = num_of_instructions;
+            if (num_of_instructions > this->max_num_of_instructions) {
+                this->max_num_of_instructions = num_of_instructions;
             }
         }
 
         // Element i points to the array containing ith instructions of every program
-        init_arr_2d(prog_pop->bytecode, prog_pop->max_num_of_instructions, num_of_individuals);
+        this->bytecode = Array2DF<Instruction>(this->max_num_of_instructions, num_of_individuals);
 
         // Copy instructions to GPU memory
         for (int j = 0; j < num_of_individuals; ++j) {
@@ -41,20 +39,15 @@ namespace inter_individual {
             const IntermediateRepresentation& ir = ir_list[j];
             const int num_of_instructions = ir.bytecode.size();
             
-            for (int i = 0; i < prog_pop->max_num_of_instructions; ++i) {
+            for (int i = 0; i < this->max_num_of_instructions; ++i) {
                 if (i < num_of_instructions) {
                     // Copy from IR
-                    prog_pop->bytecode[i][j] = ir.bytecode[i];
+                    this->bytecode.ptr[i][j] = ir.bytecode[i];
                 } else {
                     // Pad with NOP at the end
-                    prog_pop->bytecode[i][j] = Instruction();
+                    this->bytecode.ptr[i][j] = Instruction();
                 }
             }
         }
     }
-
-    void program_destroy(Program &prog_pop) {
-        del_arr_2d(prog_pop.bytecode, prog_pop.max_num_of_instructions);
-    }
-}
 }

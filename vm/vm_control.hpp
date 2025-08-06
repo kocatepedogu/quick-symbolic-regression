@@ -12,20 +12,23 @@
 #include "vm_propagation.hpp"
 #include "vm_types.hpp"
 
+#include "../../../util/arrays/array2d.hpp"
+
+
 namespace qsr {
 
 template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights> __device__ __host__
 void vm_control(const int tid, 
                 const int datapoint_idx,
-                const Code bytecode, 
+                Code bytecode, 
                 const int bytecode_length,
                 const int m, 
-                c_real_2d X_d, 
+                Ptr2D<float> X_d, 
                 c_real_1d y_d,
                 const StackState& s, 
                 int& program_counter,
                 Weights weights_d,
-                real_2d weights_grad_d)
+                Ptr2D<float> weights_grad_d)
 {
     bool exit = false;
 
@@ -36,7 +39,7 @@ void vm_control(const int tid,
             instruction = bytecode[program_counter];
         }
         if constexpr (paraType == INTER_INDIVIDUAL) {
-            instruction = bytecode[program_counter][tid];
+            instruction = bytecode[program_counter,tid];
         }
         
         switch (instruction.opcode) {
@@ -49,7 +52,7 @@ void vm_control(const int tid,
             /* Operations with index operands */
             case PUSH_VARIABLE:
                 vm_debug_print(tid, "var %d", instruction.argindex);
-                propagate_immediate<propType>(tid, X_d[instruction.argindex][datapoint_idx], s);
+                propagate_immediate<propType>(tid, X_d[instruction.argindex,datapoint_idx], s);
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(tid, "param %d", instruction.argindex);
@@ -100,7 +103,7 @@ void vm_control(const int tid,
 
                 // Calculate loss and replace the value on the stack with the loss
 
-                float& stack_value = s.stack_d[0][tid];
+                float& stack_value = s.stack_d[0,tid];
 
                 const float y_predicted = stack_value;
                 const float y_target = y_d[datapoint_idx];

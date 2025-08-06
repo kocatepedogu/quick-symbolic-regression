@@ -7,6 +7,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
+#include "../util/arrays/array1d.hpp"
+#include "../util/arrays/array2d.hpp"
+
 namespace qsr {
 
 struct Dataset {
@@ -20,11 +23,6 @@ struct Dataset {
      */
     Dataset(pybind11::array_t<float> numpy_X, pybind11::array_t<float> numpy_y);
 
-    /**
-      * @brief Deletes dataset from GPU memory
-      */
-    ~Dataset() noexcept;
-
     /// Number of data points
     int m;
 
@@ -32,10 +30,10 @@ struct Dataset {
     int n;
 
     /// Input feature matrix on device memory
-    float **X_d;
+    Array2DF<float> X_d;
 
     /// Target variable on device memory
-    float *y_d;
+    Array1D<float> y_d;
 };
 
 }

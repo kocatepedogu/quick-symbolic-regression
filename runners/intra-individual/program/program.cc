@@ -9,39 +9,40 @@
 
 #include <hip/hip_runtime.h>
 
-namespace qsr {
-namespace intra_individual {
-    void program_create(Program *prog_pop, const std::vector<Expression>& exp_pop) {
+namespace qsr::intra_individual {
+   Program::Program(const std::vector<Expression>& exp_pop) {
         const int num_of_individuals = exp_pop.size();
-        prog_pop->num_of_individuals = num_of_individuals;
+        this->num_of_individuals = num_of_individuals;
 
         // Create array for storing number of instructions in each program
-        init_arr_1d(prog_pop->num_of_instructions, num_of_individuals);
+        this->num_of_instructions = Array1D<int>(num_of_individuals);
+
+        // Compile all expressions to IR
+        std::vector<IntermediateRepresentation> irs(num_of_individuals);
+        for (int i = 0; i < num_of_individuals; ++i) {
+            const auto &ir = irs[i] = compile(exp_pop[i]);
+            num_of_instructions.ptr[i] = ir.bytecode.size();
+        }
+
+        // Find the longest IR to determine the maximum number of instructions
+        int max_num_of_instructions = 0;
+        for (const auto& ir : irs) {
+            if (ir.bytecode.size() > max_num_of_instructions) {
+                max_num_of_instructions = ir.bytecode.size();
+            }
+        }
 
         // Create array for storing pointers to individual programs
-        init_arr_1d(prog_pop->bytecode, num_of_individuals);
+        this->bytecode = Array2DF<Instruction>(num_of_individuals, max_num_of_instructions);
 
         // Compile every expression to IR and copy to GPU memory
         for (int i = 0; i < num_of_individuals; ++i) {
             // Compile
-            const IntermediateRepresentation& ir = compile(exp_pop[i]);
+            const IntermediateRepresentation& ir = irs[i];
             const int num_of_instructions = ir.bytecode.size();
-
-            // Copy program size to GPU
-            prog_pop->num_of_instructions[i] = num_of_instructions;
             
             // Copy program contents to GPU
-            init_arr_1d(prog_pop->bytecode[i], num_of_instructions);
-            memcpy(prog_pop->bytecode[i], &ir.bytecode[0], num_of_instructions * sizeof ir.bytecode[0]);
+            memcpy(this->bytecode.ptr[i], ir.bytecode.data(), num_of_instructions * sizeof *ir.bytecode.data());
         }
     }
-
-    void program_destroy(Program &prog_pop) {
-        // Delete program contents from GPU memory
-        del_arr_2d(prog_pop.bytecode, prog_pop.num_of_individuals);
-
-        // Delete array for storing number of instructions in each program
-        del_arr_1d(prog_pop.num_of_instructions);
-    }
-}
 }

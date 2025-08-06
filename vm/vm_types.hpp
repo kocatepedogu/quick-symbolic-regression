@@ -6,6 +6,8 @@
 
 #include "../compiler/ir.hpp"
 
+#include "../../../util/arrays/array2d.hpp"
+
 namespace qsr {
 
 typedef Instruction *inst_1d_mut;
@@ -35,14 +37,14 @@ enum PropagationType {
 };
 
 struct StackState {
-    real_2d &stack_d;
-    real_2d &intermediate_d;
+    Ptr2D<float> &stack_d;
+    Ptr2D<float> &intermediate_d;
     int& stack_pointer;
     int& intermediate_pointer;
 
     constexpr StackState(
-        real_2d &stack_d, 
-        real_2d &intermediate_d,
+        Ptr2D<float> &stack_d, 
+        Ptr2D<float> &intermediate_d,
         int& stack_pointer, 
         int& intermediate_pointer) :
         stack_d(stack_d), 

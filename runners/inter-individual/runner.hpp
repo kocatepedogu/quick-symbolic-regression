@@ -12,6 +12,8 @@
 #include "../../dataset/dataset.hpp"
 
 #include "../../../util/hip.hpp"
+#include "../../../util/arrays/array1d.hpp"
+#include "../../../util/arrays/array2d.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
 
@@ -28,7 +30,7 @@ namespace inter_individual {
     public:
         Runner(std::shared_ptr<Dataset> dataset, int nweights);
 
-        void run(const Program &program, int epochs, float learning_rate, Array1D<float> &loss_d, Array2D<float> &weights_d);
+        void run(const Program &program, int epochs, float learning_rate, Array1D<float> &loss_d, Ptr2D<float> &weights_d);
 
         void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
     };

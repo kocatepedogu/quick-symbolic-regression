@@ -10,8 +10,7 @@
 
 #include "../../util/rng.hpp"
 
-namespace qsr {
-namespace intra_individual {
+namespace qsr::intra_individual {
     constexpr int max_stack_depth = 128;
     constexpr int reduction_threads_per_block = 32;
 
@@ -47,12 +46,12 @@ namespace intra_individual {
     void vm(c_inst_1d bytecode, 
             const int bytecode_length,
             const int m, 
-            c_real_2d X_d, 
+            Ptr2D<float> X_d, 
             c_real_1d y_d, 
-            real_2d stack_d, 
-            real_2d intermediate_d,
+            Ptr2D<float> stack_d, 
+            Ptr2D<float> intermediate_d,
             c_real_1d weights_d,
-            real_2d weights_grad_d,
+            Ptr2D<float> weights_grad_d,
             const int nweights,
             real_1d loss_d)
     {
@@ -60,7 +59,7 @@ namespace intra_individual {
 
         // Reset weight gradients that will be computed by this thread
         for (int j = 0; j < nweights; ++j) {
-            weights_grad_d[j][tid] = 0;
+            weights_grad_d[j,tid] = 0;
         }
 
         int stack_pointer = 0;
@@ -86,7 +85,7 @@ namespace intra_individual {
         vm_debug_print(tid, "");
 
         // Save squared difference as the loss
-        loss_d[tid] = powf(stack_d[0][tid], 2);
+        loss_d[tid] = powf(stack_d[0,tid], 2);
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
@@ -110,11 +109,10 @@ namespace intra_individual {
         reduction_grid_dim = dim3(reduction_blocks_per_grid);
         reduction_block_dim = dim3(reduction_threads_per_block);
 
-        stack_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
-        intermediate_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
+        stack_d = std::make_shared<Array2DF<float>>(max_stack_depth, dataset->m);
+        intermediate_d = std::make_shared<Array2DF<float>>(max_stack_depth, dataset->m);
         weights_d = std::make_shared<Array1D<float>>(nweights);
-        weights_grad_d = std::make_shared<Array2D<float>>(nweights, dataset->m);
-        weights_grad_reduced_sum_d = std::make_shared<Array2D<float>>(nweights, reduction_blocks_per_grid);
+        weights_grad_d = std::make_shared<Array2DF<float>>(nweights, dataset->m);
         loss_d = std::make_shared<Array1D<float>>(dataset->m);
     }
 
@@ -125,7 +123,7 @@ namespace intra_individual {
             hipLaunchKernelGGL(
                 vm, gridDim, blockDim, 0, hipState.stream,
                 code, code_length, 
-                dataset->m, dataset->X_d, dataset->y_d,
+                dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
                 stack_d->ptr, intermediate_d->ptr,
                 weights_d->ptr, weights_grad_d->ptr, nweights, loss_d->ptr);
 
@@ -145,14 +143,13 @@ namespace intra_individual {
 
     void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
         // Convert symbolic expressions to bytecode program
-        Program program_pop;
-        program_create(&program_pop, population);
+        Program program_pop(population);
 
         // Parallel region to exploit remaining resources with inter-individual parallelism
         for (int i = 0; i < population.size(); ++i)
         {
-            auto code = program_pop.bytecode[i];
-            auto code_length = program_pop.num_of_instructions[i];
+            auto code = program_pop.bytecode.ptr[i];
+            auto code_length = program_pop.num_of_instructions.ptr[i];
 
             // If the expression has no weights yet, initialize them randomly
             if (population[i].weights.empty()) {
@@ -186,9 +183,5 @@ namespace intra_individual {
                 population[i].weights[j] = weights_d->ptr[j];
             }
         }
-
-        // Destroy bytecode program
-        program_destroy(program_pop);
     }
-}
 }

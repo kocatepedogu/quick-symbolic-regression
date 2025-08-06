@@ -11,30 +11,31 @@
 #include "../../../vm/vm_control.hpp"
 #include "../../../util/rng.hpp"
 #include "../../../util/hip.hpp"
+#include "../../../util/arrays/array1d.hpp"
+#include "../../../util/arrays/array2d.hpp"
 
 #include "./program/program.hpp"
 
 #include <hip/hip_runtime.h>
 #include <memory>
 
-namespace qsr {
-namespace inter_individual {
+namespace qsr::inter_individual {
     Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
 
     constexpr int max_stack_depth = 128;
 
     __global__
-    void vm(c_inst_2d bytecode, 
+    void vm(Ptr2D<Instruction> bytecode, 
             const int max_num_of_instructions,
             const int num_of_individuals,
             const int m, 
-            c_real_2d X_d, 
+            Ptr2D<float> X_d, 
             c_real_1d y_d, 
-            real_2d stack_d, 
-            real_2d intermediate_d,
-            real_2d weights_d,
-            real_2d weights_grad_d,
+            Ptr2D<float> stack_d, 
+            Ptr2D<float> intermediate_d,
+            Ptr2D<float> weights_d,
+            Ptr2D<float> weights_grad_d,
             const int nweights,
             const int nepochs,
             const float learning_rate,
@@ -69,7 +70,7 @@ namespace inter_individual {
 
                     // Forward propagate and evaluate loss
                     vm_debug_print(tid, "Forward propagation");
-                    vm_control<FORWARD, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(
+                    vm_control<FORWARD, INTER_INDIVIDUAL, Ptr2D<Instruction>, Ptr2D<float>>(
                         tid, datapoint_idx, bytecode, max_num_of_instructions, 
                         m, X_d, y_d, 
                         s, program_counter, 
@@ -79,12 +80,12 @@ namespace inter_individual {
                     vm_debug_print(tid, "");
 
                     // Add squared difference to total loss
-                    total_loss += powf(stack_d[0][tid], 2);
+                    total_loss += powf(stack_d[0,tid], 2);
 
                     // Backpropagate
                     if (epoch < nepochs) {
                         vm_debug_print(tid, "Backpropagation");
-                        vm_control<BACK, INTER_INDIVIDUAL, c_inst_2d, c_real_2d>(
+                        vm_control<BACK, INTER_INDIVIDUAL, Ptr2D<Instruction>, Ptr2D<float>>(
                             tid, datapoint_idx, bytecode, max_num_of_instructions, 
                             m, X_d, y_d, 
                             s, program_counter, 
@@ -95,7 +96,7 @@ namespace inter_individual {
                 // Apply weight updates (gradient descent)
                 if (epoch < nepochs) {
                     for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
-                        weights_d[weight_idx][tid] -= learning_rate * weights_grad_d[weight_idx][tid];
+                        weights_d[weight_idx,tid] -= learning_rate * weights_grad_d[weight_idx][tid];
                     }
                 }
             }
@@ -105,25 +106,25 @@ namespace inter_individual {
     }
 
     void Runner::run(const Program &program, int epochs, float learning_rate, 
-                     Array1D<float> &loss_d, Array2D<float> &weights_d) {
+                     Array1D<float> &loss_d, Ptr2D<float> &weights_d) {
         const int threadsPerBlock = min(program.num_of_individuals, config.props.maxThreadsPerBlock);
         const int blocks = (program.num_of_individuals + threadsPerBlock - 1) / threadsPerBlock;
 
         dim3 gridDim(blocks);
         dim3 blockDim(threadsPerBlock);
 
-        Array2D<float> stack_d(max_stack_depth, program.num_of_individuals);
-        Array2D<float> intermediate_d(max_stack_depth, program.num_of_individuals);
-        Array2D<float> weights_grad_d(nweights, program.num_of_individuals);
+        Array2DF<float> stack_d(max_stack_depth, program.num_of_individuals);
+        Array2DF<float> intermediate_d(max_stack_depth, program.num_of_individuals);
+        Array2DF<float> weights_grad_d(nweights, program.num_of_individuals);
 
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, config.stream,
-            program.bytecode, 
+            program.bytecode.ptr, 
             program.max_num_of_instructions, 
             program.num_of_individuals,
-            dataset->m, dataset->X_d, dataset->y_d,
+            dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
             stack_d.ptr, intermediate_d.ptr,
-            weights_d.ptr, weights_grad_d.ptr, nweights,
+            weights_d, weights_grad_d.ptr, nweights,
             epochs, learning_rate, loss_d.ptr);
 
         HIP_CALL(hipStreamSynchronize(config.stream));
@@ -131,22 +132,21 @@ namespace inter_individual {
 
     void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
         // Convert symbolic expression to bytecode program
-        Program program_pop;
-        program_create(&program_pop, population);
+        Program program_pop(population);
 
         // Initialize weights
-        Array2D<float> weights_d(nweights, population.size());
+        Array2DF<float> weights_d(nweights, population.size());
         for (int i = 0; i < nweights; ++i) {
             for (int j = 0; j < population.size(); ++j) {
                 const auto &expression = population[j];
 
                 // If the expression has no weights yet, initialize them randomly
                 if (expression.weights.empty()) {
-                    weights_d.ptr[i][j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+                    weights_d.ptr[i,j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
                 } 
                 // If the expression already has weights, use them
                 else {
-                    weights_d.ptr[i][j] = expression.weights[i];
+                    weights_d.ptr[i,j] = expression.weights[i];
                 }   
             }
         }
@@ -158,10 +158,7 @@ namespace inter_individual {
         }
 
         // Run virtual machine
-        run(program_pop, epochs, learning_rate, loss_d, weights_d);
-
-        // Destroy programs
-        program_destroy(program_pop);
+        run(program_pop, epochs, learning_rate, loss_d, weights_d.ptr);
 
         // Write loss values to the original expressions
         for (int i = 0; i < population.size(); ++i) {
@@ -172,9 +169,8 @@ namespace inter_individual {
         for (int i = 0; i < population.size(); ++i) {
             population[i].weights.resize(nweights);
             for (int j = 0; j < nweights; ++j) {
-                population[i].weights[j] = weights_d.ptr[j][i];
+                population[i].weights[j] = weights_d.ptr[j,i];
             }
         }
     }
-}
 }

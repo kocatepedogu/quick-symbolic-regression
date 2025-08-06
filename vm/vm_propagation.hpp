@@ -15,22 +15,22 @@ namespace qsr {
 
 __device__ __host__
 static inline void push_stack(const StackState &s, int tid, float value) {
-    s.stack_d[s.stack_pointer++][tid] = value;
+    s.stack_d[s.stack_pointer++,tid] = value;
 }
 
 __device__ __host__
 static inline float pop_stack(const StackState &s, int tid) {
-    return s.stack_d[--s.stack_pointer][tid];
+    return s.stack_d[--s.stack_pointer,tid];
 }
 
 __device__ __host__
 static inline void push_intermediate(const StackState &s, int tid, float value) {
-    s.intermediate_d[s.intermediate_pointer++][tid] = value;
+    s.intermediate_d[s.intermediate_pointer++,tid] = value;
 }
 
 __device__ __host__
 static inline float read_intermediate(const StackState &s, int tid, int index) {
-    return s.intermediate_d[index][tid];
+    return s.intermediate_d[index,tid];
 }
 
 template <PropagationType proptype> __device__ __host__
@@ -48,7 +48,7 @@ static inline void propagate_immediate(int tid, const float& immediate, const St
 template <PropagationType proptype, ParallelismType paraType, typename Weight> __device__ __host__
 static inline void propagate_parameter(int tid, const int& param_index, const StackState& s,
                                     Weight weights, 
-                                    real_2d weights_grad_d) {
+                                    Ptr2D<float> weights_grad_d) {
     if constexpr (proptype == FORWARD) {
         if constexpr (paraType == INTRA_INDIVIDUAL) {
             // Intra-individual
@@ -56,7 +56,7 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
         }
         else {
             /// Inter-individual
-            push_stack(s, tid, weights[param_index][tid]);
+            push_stack(s, tid, weights[param_index,tid]);
         }
     }
 
@@ -66,7 +66,7 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
         // Add gradient to the total gradient of the associated trainable parameter
-        weights_grad_d[param_index][tid] += incoming_grad;
+        weights_grad_d[param_index,tid] += incoming_grad;
     }
 }
 
