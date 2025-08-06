@@ -13,6 +13,7 @@
 #include "vm_types.hpp"
 
 #include "../../../util/arrays/array2d.hpp"
+#include "../../../util/arrays/array1d.hpp"
 
 
 namespace qsr {
@@ -24,7 +25,7 @@ void vm_control(const int tid,
                 const int bytecode_length,
                 const int m, 
                 Ptr2D<float> X_d, 
-                c_real_1d y_d,
+                Ptr1D<float> y_d,
                 const StackState& s, 
                 int& program_counter,
                 Weights weights_d,

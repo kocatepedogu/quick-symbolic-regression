@@ -15,7 +15,7 @@
 namespace qsr::intra_individual {
     struct Program {
         /// Programs
-        Array2DF<Instruction> bytecode;
+        Array2D<Instruction> bytecode;
 
         /// Length of Programs
         Array1D<int> num_of_instructions;

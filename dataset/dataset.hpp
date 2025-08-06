@@ -30,7 +30,7 @@ struct Dataset {
     int n;
 
     /// Input feature matrix on device memory
-    Array2DF<float> X_d;
+    Array2D<float> X_d;
 
     /// Target variable on device memory
     Array1D<float> y_d;

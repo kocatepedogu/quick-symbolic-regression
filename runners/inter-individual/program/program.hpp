@@ -14,7 +14,7 @@
 namespace qsr::inter_individual {
     struct Program {
         /// Programs
-        Array2DF<Instruction> bytecode;
+        Array2D<Instruction> bytecode;
 
         /// Length of the longest program
         int max_num_of_instructions;

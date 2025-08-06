@@ -35,10 +35,10 @@ namespace intra_individual {
         dim3 reduction_block_dim;
 
         std::shared_ptr<Array1D<float>> loss_d;
-        std::shared_ptr<Array2DF<float>> stack_d;
-        std::shared_ptr<Array2DF<float>> intermediate_d;
+        std::shared_ptr<Array2D<float>> stack_d;
+        std::shared_ptr<Array2D<float>> intermediate_d;
         std::shared_ptr<Array1D<float>> weights_d;
-        std::shared_ptr<Array2DF<float>> weights_grad_d;
+        std::shared_ptr<Array2D<float>> weights_grad_d;
 
     public:
         Runner(std::shared_ptr<Dataset> dataset, const int nweights);

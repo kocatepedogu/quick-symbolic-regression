@@ -47,13 +47,13 @@ namespace qsr::intra_individual {
             const int bytecode_length,
             const int m, 
             Ptr2D<float> X_d, 
-            c_real_1d y_d, 
+            Ptr1D<float> y_d, 
             Ptr2D<float> stack_d, 
             Ptr2D<float> intermediate_d,
-            c_real_1d weights_d,
+            Ptr1D<float> weights_d,
             Ptr2D<float> weights_grad_d,
             const int nweights,
-            real_1d loss_d)
+            Ptr1D<float> loss_d)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -76,7 +76,7 @@ namespace qsr::intra_individual {
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
+        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
             tid, tid, bytecode, bytecode_length, 
             m, X_d, y_d, 
             s, program_counter, weights_d, weights_grad_d);
@@ -89,7 +89,7 @@ namespace qsr::intra_individual {
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
+        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
             tid, tid, bytecode, bytecode_length, 
             m, X_d, y_d, 
             s, program_counter, 
@@ -109,10 +109,10 @@ namespace qsr::intra_individual {
         reduction_grid_dim = dim3(reduction_blocks_per_grid);
         reduction_block_dim = dim3(reduction_threads_per_block);
 
-        stack_d = std::make_shared<Array2DF<float>>(max_stack_depth, dataset->m);
-        intermediate_d = std::make_shared<Array2DF<float>>(max_stack_depth, dataset->m);
+        stack_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
+        intermediate_d = std::make_shared<Array2D<float>>(max_stack_depth, dataset->m);
         weights_d = std::make_shared<Array1D<float>>(nweights);
-        weights_grad_d = std::make_shared<Array2DF<float>>(nweights, dataset->m);
+        weights_grad_d = std::make_shared<Array2D<float>>(nweights, dataset->m);
         loss_d = std::make_shared<Array1D<float>>(dataset->m);
     }
 
@@ -178,8 +178,8 @@ namespace qsr::intra_individual {
             population[i].loss = total_loss;
 
             // Save weights to the original expression
-            population[i].weights.resize(weights_d->dim1);
-            for (int j = 0; j < weights_d->dim1; ++j) {
+            population[i].weights.resize(weights_d->ptr.dim1);
+            for (int j = 0; j < weights_d->ptr.dim1; ++j) {
                 population[i].weights[j] = weights_d->ptr[j];
             }
         }

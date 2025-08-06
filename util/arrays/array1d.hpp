@@ -8,42 +8,52 @@
 
 namespace qsr {
     template <typename T>
-    struct Array1D {
-        T *ptr;
+    struct Ptr1D {
         int dim1;
+        T *ptr;
+
+        __host__ __device__ T &operator[](int i) {
+            return ptr[i];
+        }
+    };
+
+    template <typename T>
+    struct Array1D {
+        Ptr1D<T> ptr;
 
         Array1D() {
-            ptr = nullptr;
-            dim1 = -1;
+            ptr.ptr = nullptr;
+            ptr.dim1 = -1;
         }
 
-        Array1D(int dim1) : dim1(dim1) {
-            HIP_CALL(hipMallocManaged(&ptr, sizeof(T) * dim1));
+        Array1D(int dim1) {
+            ptr.dim1 = dim1;
+            HIP_CALL(hipMallocManaged(&ptr.ptr, sizeof(T) * ptr.dim1));
         }
 
         ~Array1D() {
-            HIP_CALL(hipFree(ptr));
+            HIP_CALL(hipFree(ptr.ptr));
         }
 
         // Copy constructor
         Array1D(const Array1D &other) {
-            HIP_CALL(hipFree(ptr));
+            HIP_CALL(hipFree(ptr.ptr));
 
-            this->dim1 = other.dim1;
+            this->ptr.dim1 = other.ptr.dim1;
 
-            HIP_CALL(hipMallocManaged(&ptr, sizeof(T) * dim1));
-            HIP_CALL(hipMemcpy(ptr, other.ptr, sizeof(T) * dim1, hipMemcpyDefault));
+            HIP_CALL(hipMallocManaged(&ptr.ptr, sizeof(T) * ptr.dim1));
+            HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof(T) * ptr.dim1, hipMemcpyDefault));
         }
 
         // Copy assignment operator
         Array1D& operator=(const Array1D& other) {
             if (this != &other) {
-                HIP_CALL(hipFree(ptr));
+                HIP_CALL(hipFree(ptr.ptr));
 
-                this->dim1 = other.dim1;
+                this->ptr.dim1 = other.ptr.dim1;
 
-                HIP_CALL(hipMallocManaged(&ptr, sizeof(T) * dim1));
-                HIP_CALL(hipMemcpy(ptr, other.ptr, sizeof(T) * dim1, hipMemcpyDefault));    
+                HIP_CALL(hipMallocManaged(&ptr.ptr, sizeof(T) * ptr.dim1));
+                HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof(T) * ptr.dim1, hipMemcpyDefault));    
             }
 
             return *this;

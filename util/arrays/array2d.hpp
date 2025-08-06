@@ -25,19 +25,19 @@ struct Ptr2D {
 };
 
 template <typename T>
-class Array2DF {
+class Array2D {
 public:
     Ptr2D<T> ptr;
 
     /// Default constructor
-    Array2DF() {
+    Array2D() {
         ptr.dim1 = -1;
         ptr.dim2 = -1;
         ptr.ptr = nullptr;
     }
 
     /// Constructor
-    Array2DF(int dim1, int dim2) {
+    Array2D(int dim1, int dim2) {
         ptr.dim1 = dim1;
         ptr.dim2 = dim2;
 
@@ -45,12 +45,12 @@ public:
     }
 
     /// Destructor
-    ~Array2DF() {
+    ~Array2D() {
         HIP_CALL(hipFree(ptr.ptr));
     }
 
     /// Copy constructor
-    Array2DF(const Array2DF &other) {
+    Array2D(const Array2D &other) {
         HIP_CALL(hipFree(ptr.ptr));
 
         ptr.dim1 = other.ptr.dim1;
@@ -61,7 +61,7 @@ public:
     }
 
     /// Copy assignment operator
-    Array2DF& operator=(const Array2DF& other) {
+    Array2D& operator=(const Array2D& other) {
         if (this != &other) {
             HIP_CALL(hipFree(ptr.ptr));
 

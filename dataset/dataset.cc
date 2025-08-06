@@ -19,7 +19,7 @@ Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept :
     * The goal is to convert X to X_d on device, which is in structure of array form.
     * The dimensions should be X_d[n][m]
     */
-    X_d = Array2DF<float>(n, m);
+    X_d = Array2D<float>(n, m);
 
     // Copy X to X_d on device
     for (int i = 0; i < n; ++i) {
@@ -67,7 +67,7 @@ Dataset::Dataset(pybind11::array_t<float> numpy_X, pybind11::array_t<float> nump
     * The goal is to convert X to X_d on device, which is in structure of array form.
     * The dimensions should be X_d[n][m]
     */
-    X_d = Array2DF<float>(n, m);
+    X_d = Array2D<float>(n, m);
 
     // Allocate y_d on device
     y_d = Array1D<float>(m);

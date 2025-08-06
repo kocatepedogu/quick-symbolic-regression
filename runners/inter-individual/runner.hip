@@ -31,7 +31,7 @@ namespace qsr::inter_individual {
             const int num_of_individuals,
             const int m, 
             Ptr2D<float> X_d, 
-            c_real_1d y_d, 
+            Ptr1D<float> y_d, 
             Ptr2D<float> stack_d, 
             Ptr2D<float> intermediate_d,
             Ptr2D<float> weights_d,
@@ -39,7 +39,7 @@ namespace qsr::inter_individual {
             const int nweights,
             const int nepochs,
             const float learning_rate,
-            real_1d loss_d)
+            Ptr1D<float> loss_d)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -113,9 +113,9 @@ namespace qsr::inter_individual {
         dim3 gridDim(blocks);
         dim3 blockDim(threadsPerBlock);
 
-        Array2DF<float> stack_d(max_stack_depth, program.num_of_individuals);
-        Array2DF<float> intermediate_d(max_stack_depth, program.num_of_individuals);
-        Array2DF<float> weights_grad_d(nweights, program.num_of_individuals);
+        Array2D<float> stack_d(max_stack_depth, program.num_of_individuals);
+        Array2D<float> intermediate_d(max_stack_depth, program.num_of_individuals);
+        Array2D<float> weights_grad_d(nweights, program.num_of_individuals);
 
         hipLaunchKernelGGL(
             vm, gridDim, blockDim, 0, config.stream,
@@ -135,7 +135,7 @@ namespace qsr::inter_individual {
         Program program_pop(population);
 
         // Initialize weights
-        Array2DF<float> weights_d(nweights, population.size());
+        Array2D<float> weights_d(nweights, population.size());
         for (int i = 0; i < nweights; ++i) {
             for (int j = 0; j < population.size(); ++j) {
                 const auto &expression = population[j];

@@ -31,7 +31,7 @@ namespace qsr::inter_individual {
         }
 
         // Element i points to the array containing ith instructions of every program
-        this->bytecode = Array2DF<Instruction>(this->max_num_of_instructions, num_of_individuals);
+        this->bytecode = Array2D<Instruction>(this->max_num_of_instructions, num_of_individuals);
 
         // Copy instructions to GPU memory
         for (int j = 0; j < num_of_individuals; ++j) {

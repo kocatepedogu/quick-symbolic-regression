@@ -24,10 +24,10 @@ namespace cpu {
         // Convert symbolic expressions to bytecode program
         intra_individual::Program program_pop(population);
 
-        auto stack_d = std::make_unique<Array2DF<float>>(max_stack_depth, dataset->m);
-        auto intermediate_d = std::make_unique<Array2DF<float>>(max_stack_depth, dataset->m);
+        auto stack_d = std::make_unique<Array2D<float>>(max_stack_depth, dataset->m);
+        auto intermediate_d = std::make_unique<Array2D<float>>(max_stack_depth, dataset->m);
         auto weights_d = std::make_unique<Array1D<float>>(nweights);
-        auto weights_grad_d = std::make_unique<Array2DF<float>>(nweights, dataset->m);
+        auto weights_grad_d = std::make_unique<Array2D<float>>(nweights, dataset->m);
 
         // Loop over programs
         #pragma omp parallel
@@ -76,7 +76,7 @@ namespace cpu {
 
                         // Forward propagate and evaluate loss
                         vm_debug_print(tid, "Forward propagation");
-                        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
+                        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
                             tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
                             dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
                             s, program_counter, weights_d->ptr, weights_grad_d->ptr);
@@ -88,7 +88,7 @@ namespace cpu {
                         loss += powf(stack_d->ptr[0,tid], 2);
 
                         vm_debug_print(tid, "Backpropagation");
-                        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, c_real_1d>(
+                        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
                             tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
                             dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
                             s, program_counter, weights_d->ptr, weights_grad_d->ptr);
@@ -112,7 +112,7 @@ namespace cpu {
                 }
 
                 // Write final weights back to the original expression
-                population[program_idx].weights = std::vector<float>(weights_d->ptr, weights_d->ptr + nweights);
+                population[program_idx].weights = std::vector<float>(weights_d->ptr.ptr, weights_d->ptr.ptr + nweights);
             }
         }
 

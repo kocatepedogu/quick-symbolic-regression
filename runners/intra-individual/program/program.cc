@@ -5,7 +5,6 @@
 
 #include "../../../compiler/ir.hpp"
 #include "../../../compiler/compiler.hpp"
-#include "../../../util/hip.hpp"
 
 #include <hip/hip_runtime.h>
 
@@ -33,7 +32,7 @@ namespace qsr::intra_individual {
         }
 
         // Create array for storing pointers to individual programs
-        this->bytecode = Array2DF<Instruction>(num_of_individuals, max_num_of_instructions);
+        this->bytecode = Array2D<Instruction>(num_of_individuals, max_num_of_instructions);
 
         // Compile every expression to IR and copy to GPU memory
         for (int i = 0; i < num_of_individuals; ++i) {
