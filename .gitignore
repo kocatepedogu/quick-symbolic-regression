@@ -1,4 +1,5 @@
 gpucore.*
+vgcore.*
 
 Makefile
 CMakeCache.txt
