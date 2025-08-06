@@ -7,6 +7,6 @@ CompileFlags:
     - "-I./"
     - "-D__HIP_PLATFORM_AMD__"
     - "-nogpulib"
-    - "--std=c++20"
+    - "--std=c++23"
     - "-Wno-format-security"
 
