@@ -11,8 +11,6 @@
 #include "../../util/rng.hpp"
 
 namespace qsr::cpu {
-    constexpr int max_stack_depth = 128;
-
     Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
 
@@ -20,13 +18,16 @@ namespace qsr::cpu {
         // Convert symbolic expressions to bytecode program
         intra_individual::Program program_pop(population);
 
-        Array2D<float> stack_d(max_stack_depth, dataset->m);
-        Array2D<float> intermediate_d(max_stack_depth, dataset->m);
+        Array2D<float> stack_d;
+        Array2D<float> intermediate_d;
         Array1D<float> weights_d(nweights);
         Array2D<float> weights_grad_d(nweights, dataset->m);
 
         // Loop over programs
         for (int program_idx = 0; program_idx < program_pop.num_of_individuals; ++program_idx) {
+            stack_d.resize(program_pop.stack_req.ptr[program_idx], dataset->m);
+            intermediate_d.resize(program_pop.intermediate_req.ptr[program_idx], dataset->m);
+
             // If the expression has no weights yet, initialize them randomly
             if (population[program_idx].weights.empty()) {
                 for (int j = 0; j < nweights; ++j) {
