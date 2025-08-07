@@ -19,7 +19,7 @@ for x0 in np.linspace(-5, 5, 64):
     for x1 in np.linspace(-5, 5, 64):
         X.append([x0, x1])
 
-y = [x0*np.exp(x0 + x1) + np.sin(x1) 
+y = [1/(1 + x0**(-4)) + 1/(1 + x1**(-4))
      for x0, x1 in X]
 
 # Create model
@@ -36,7 +36,7 @@ model = GeneticProgrammingIslands(
 )
 
 # Fit model
-solution, history = model.fit(ngenerations=1, nsupergenerations=5, verbose=True)
+solution, history = model.fit(ngenerations=15, nsupergenerations=4, nepochs=1, verbose=True)
 
 # Print best solution
 print("Best solution: {}".format(solution))
