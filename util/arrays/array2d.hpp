@@ -151,9 +151,9 @@ public:
                 HIP_CALL(DEALLOC(ptr.ptr));
             }
 
-            // Allocate a larger array so that we don't have to resize too often
-            ptr.dim1 = 2 * new_dim1;
-            ptr.dim2 = 2 * new_dim2;
+            // Allocate the larger array
+            ptr.dim1 = new_dim1;
+            ptr.dim2 = new_dim2;
             ptr.ptr = nullptr;
 
             if (ptr.dim1 > 0 && ptr.dim2 > 0) {
