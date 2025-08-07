@@ -40,7 +40,7 @@ namespace qsr::cpu {
                 }
             }
 
-            for (int epoch = 0; epoch < epochs; ++epoch) {
+            for (int epoch = 0; epoch < epochs + 1; ++epoch) {
                 float loss = 0;
 
                 // Reset gradients
@@ -79,33 +79,36 @@ namespace qsr::cpu {
                     // Save squared difference as the loss
                     loss += powf(stack_d.ptr[0,tid], 2);
 
-                    vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
-                        tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
-                        dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                        s, program_counter, weights_d.ptr, weights_grad_d.ptr);
+                    if (epochs > 0) {
+                        vm_debug_print(tid, "Backpropagation");
+                        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
+                            tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
+                            dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
+                            s, program_counter, weights_d.ptr, weights_grad_d.ptr);
+                    }
                 }
 
                 // Write loss to the original expression
                 population[program_idx].loss = loss;
 
                 // Compute total gradients with reduction and apply gradient descent
-                for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
-                    // Reduce gradients
-                    float total_grad = 0;
-                    #pragma omp simd reduction(+:total_grad)
-                    for (int tid = 0; tid < dataset->m; ++tid) {
-                        total_grad += weights_grad_d.ptr[weight_idx,tid];
-                    }
+                if (epochs > 0) {
+                    for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+                        // Reduce gradients
+                        float total_grad = 0;
+                        #pragma omp simd reduction(+:total_grad)
+                        for (int tid = 0; tid < dataset->m; ++tid) {
+                            total_grad += weights_grad_d.ptr[weight_idx,tid];
+                        }
 
-                    // Apply gradient descent
-                    weights_d.ptr[weight_idx] -= learning_rate * total_grad;
+                        // Apply gradient descent
+                        weights_d.ptr[weight_idx] -= learning_rate * total_grad;
+                    }
                 }
             }
 
             // Write final weights back to the original expression
             population[program_idx].weights = std::vector<float>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
         }
-
     }
 }
