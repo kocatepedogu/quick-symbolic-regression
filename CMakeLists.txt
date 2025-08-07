@@ -45,6 +45,7 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/selection/selector
     ${CMAKE_CURRENT_SOURCE_DIR}/vm
     ${CMAKE_CURRENT_SOURCE_DIR}/util
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/arrays
     ${CMAKE_CURRENT_SOURCE_DIR}/python
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/common
     ${CMAKE_CURRENT_SOURCE_DIR}/runners

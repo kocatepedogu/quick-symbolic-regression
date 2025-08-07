@@ -5,6 +5,7 @@
 #define ARRAY1D_HPP
 
 #include "../hip.hpp"
+#include "memory.hpp"
 
 namespace qsr {
     template <typename T>
@@ -13,6 +14,23 @@ namespace qsr {
         T *ptr;
 
         __host__ __device__ T &operator[](int i) {
+            #ifdef SANITIZE_MEMORY
+            if (dim1 <= 0) {
+                printf("Error [%s:%d]: Array1D dimension is not positive (dim1=%d)\n", __FILE__, __LINE__, dim1);
+                abort();
+            }
+
+            if (ptr == nullptr) {
+                printf("Error [%s:%d]: Array1D pointer is not initialized\n", __FILE__, __LINE__);
+                abort();
+            }
+
+            if (i >= dim1) {
+                printf("Error [%s:%d]: Array1D index out of bounds (%d >= %d)\n", __FILE__, __LINE__, i, dim1);
+                abort();
+            }
+            #endif
+
             return ptr[i];
         }
     };
@@ -23,36 +41,42 @@ namespace qsr {
 
         Array1D() {
             ptr.ptr = nullptr;
-            ptr.dim1 = -1;
+            ptr.dim1 = 0;
         }
 
         Array1D(int dim1) {
             ptr.dim1 = dim1;
-            HIP_CALL(hipMallocManaged(&ptr.ptr, sizeof(T) * ptr.dim1));
+            HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
         }
 
         ~Array1D() {
-            HIP_CALL(hipFree(ptr.ptr));
+            if (ptr.ptr != nullptr) {
+                HIP_CALL(DEALLOC(ptr.ptr));
+            }
         }
 
         // Copy constructor
         Array1D(const Array1D &other) {
-            HIP_CALL(hipFree(ptr.ptr));
+            if (ptr.ptr != nullptr) {
+                HIP_CALL(DEALLOC(ptr.ptr));
+            }
 
             this->ptr.dim1 = other.ptr.dim1;
 
-            HIP_CALL(hipMallocManaged(&ptr.ptr, sizeof(T) * ptr.dim1));
+            HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
             HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof(T) * ptr.dim1, hipMemcpyDefault));
         }
 
         // Copy assignment operator
         Array1D& operator=(const Array1D& other) {
             if (this != &other) {
-                HIP_CALL(hipFree(ptr.ptr));
+                if (ptr.ptr != nullptr) {
+                    HIP_CALL(DEALLOC(ptr.ptr));
+                }
 
                 this->ptr.dim1 = other.ptr.dim1;
 
-                HIP_CALL(hipMallocManaged(&ptr.ptr, sizeof(T) * ptr.dim1));
+                HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
                 HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof(T) * ptr.dim1, hipMemcpyDefault));    
             }
 
