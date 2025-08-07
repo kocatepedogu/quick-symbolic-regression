@@ -18,7 +18,7 @@
 
 namespace qsr {
 
-template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights> __device__ __host__
+template <PropagationType propType, ParallelismType paraType, typename Code, typename Weights, typename... Debug> __device__ __host__
 void vm_control(const int tid, 
                 const int datapoint_idx,
                 Code bytecode, 
@@ -29,7 +29,8 @@ void vm_control(const int tid,
                 const StackState& s, 
                 int& program_counter,
                 Weights weights_d,
-                Ptr2D<float> weights_grad_d)
+                Ptr2D<float> weights_grad_d,
+                Debug ...debug)
 {
     bool exit = false;
 
@@ -47,50 +48,50 @@ void vm_control(const int tid,
             /* Operations with immediate operands */
             case PUSH_IMMEDIATE:
                 vm_debug_print(tid, "imm %f", instruction.value);
-                propagate_immediate<propType>(tid, instruction.value, s);
+                propagate_immediate<propType>(tid, instruction.value, s, debug...);
                 break;
 
             /* Operations with index operands */
             case PUSH_VARIABLE:
                 vm_debug_print(tid, "var %d", instruction.argindex);
-                propagate_immediate<propType>(tid, X_d[instruction.argindex,datapoint_idx], s);
+                propagate_immediate<propType>(tid, X_d[instruction.argindex,datapoint_idx], s, debug...);
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(tid, "param %d", instruction.argindex);
                 propagate_parameter<propType, paraType, Weights>(tid, instruction.argindex, s, 
-                    weights_d, weights_grad_d);
+                    weights_d, weights_grad_d, debug...);
                 break;
 
             /* Binary Operations */
             case ADD:
                 vm_debug_print(tid, "add");
-                propagate<propType, 2>(tid, forward_add, grad_add, s, instruction);
+                propagate<propType, 2>(tid, forward_add, grad_add, s, instruction, debug...);
                 break;
             case SUB:
                 vm_debug_print(tid, "sub");
-                propagate<propType, 2>(tid, forward_sub, grad_sub, s, instruction);
+                propagate<propType, 2>(tid, forward_sub, grad_sub, s, instruction, debug...);
                 break;
             case MUL:
                 vm_debug_print(tid, "mul");
-                propagate<propType, 2>(tid, forward_mul, grad_mul, s, instruction);
+                propagate<propType, 2>(tid, forward_mul, grad_mul, s, instruction, debug...);
                 break;
             case DIV:
                 vm_debug_print(tid, "div");
-                propagate<propType, 2>(tid, forward_div, grad_div, s, instruction);
+                propagate<propType, 2>(tid, forward_div, grad_div, s, instruction, debug...);
                 break;
 
             /* Unary Operations */
             case SIN:
                 vm_debug_print(tid, "sin");
-                propagate<propType, 1>(tid, forward_sin, grad_sin, s, instruction);
+                propagate<propType, 1>(tid, forward_sin, grad_sin, s, instruction, debug...);
                 break;
             case COS:
                 vm_debug_print(tid, "cos");
-                propagate<propType, 1>(tid, forward_cos, grad_cos, s, instruction);
+                propagate<propType, 1>(tid, forward_cos, grad_cos, s, instruction, debug...);
                 break;
             case EXP:
                 vm_debug_print(tid, "exp");
-                propagate<propType, 1>(tid, forward_exp, grad_exp, s, instruction);
+                propagate<propType, 1>(tid, forward_exp, grad_exp, s, instruction, debug...);
                 break;
 
             /* No operation */

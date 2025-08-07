@@ -13,56 +13,94 @@
 
 namespace qsr {
 
+template <typename... Debug>
 __device__ __host__
-static inline void push_stack(const StackState &s, int tid, float value) {
+static inline void push_stack(const StackState &s, int tid, float value, Debug ...debug) {
+    if constexpr (sizeof...(debug) == 2) {
+        auto stack_length = std::get<0>(std::forward_as_tuple(debug...));
+        if (s.stack_pointer >= stack_length) {
+            printf("Error (push_stack): Stack buffer overflow at thread %d\n Stack pointer: %d, Stack length: %d\n", tid, s.stack_pointer, stack_length);
+            abort();
+        }
+    }
+
     s.stack_d[s.stack_pointer++,tid] = value;
 }
 
+template <typename... Debug>
 __device__ __host__
-static inline float pop_stack(const StackState &s, int tid) {
-    return s.stack_d[--s.stack_pointer,tid];
+static inline float pop_stack(const StackState &s, int tid, Debug ...debug) {
+    --s.stack_pointer;
+
+    if constexpr (sizeof...(debug) == 2) {
+        auto stack_length = std::get<0>(std::forward_as_tuple(debug...));
+        if (s.stack_pointer >= stack_length) {
+            printf("Error (pop_stack): Stack buffer overflow at thread %d\n Stack pointer: %d, Stack length: %d\n", tid, s.stack_pointer, stack_length);
+            abort();
+        }
+    }
+
+    return s.stack_d[s.stack_pointer,tid];
 }
 
+template <typename... Debug>
 __device__ __host__
-static inline void push_intermediate(const StackState &s, int tid, float value) {
+static inline void push_intermediate(const StackState &s, int tid, float value, Debug ...debug) {
+    if constexpr (sizeof...(debug) == 2) {
+        auto intermediate_length = std::get<1>(std::forward_as_tuple(debug...));
+        if (s.intermediate_pointer >= intermediate_length) {
+            printf("Error (push_intermediate): Intermediate buffer overflow at thread %d\n Intermediate pointer: %d, Intermediate length: %d\n", tid, s.intermediate_pointer, intermediate_length);
+            abort();
+        }
+    }
+
     s.intermediate_d[s.intermediate_pointer++,tid] = value;
 }
 
+template <typename... Debug>
 __device__ __host__
-static inline float read_intermediate(const StackState &s, int tid, int index) {
+static inline float read_intermediate(const StackState &s, int tid, int index, Debug ...debug) {
+    if constexpr (sizeof...(debug) == 2) {
+        auto intermediate_length = std::get<1>(std::forward_as_tuple(debug...));
+        if (index >= intermediate_length) {
+            printf("Error (read_intermediate): Intermediate buffer overflow (index) at thread %d\n Index: %d, Intermediate length: %d\n", tid, index, intermediate_length);
+            abort();
+        }
+    }
+
     return s.intermediate_d[index,tid];
 }
 
-template <PropagationType proptype> __device__ __host__
-static inline void propagate_immediate(int tid, const float& immediate, const StackState& s) {
+template <PropagationType proptype, typename... Debug> __device__ __host__
+static inline void propagate_immediate(int tid, const float& immediate, const StackState& s, Debug ...debug) {
     if constexpr (proptype == FORWARD) {
-        push_stack(s, tid, immediate);
+        push_stack(s, tid, immediate, debug...);
     }
 
     if constexpr (proptype == BACK) {
         // Pop gradient from stack, discard the value.
-        pop_stack(s, tid);
+        pop_stack(s, tid, debug...);
     }
 }
 
-template <PropagationType proptype, ParallelismType paraType, typename Weight> __device__ __host__
+template <PropagationType proptype, ParallelismType paraType, typename Weight, typename... Debug> __device__ __host__
 static inline void propagate_parameter(int tid, const int& param_index, const StackState& s,
                                     Weight weights, 
-                                    Ptr2D<float> weights_grad_d) {
+                                    Ptr2D<float> weights_grad_d, Debug ...debug) {
     if constexpr (proptype == FORWARD) {
         if constexpr (paraType == INTRA_INDIVIDUAL) {
             // Intra-individual
-            push_stack(s, tid, weights[param_index]);
+            push_stack(s, tid, weights[param_index], debug...);
         }
         else {
             /// Inter-individual
-            push_stack(s, tid, weights[param_index,tid]);
+            push_stack(s, tid, weights[param_index,tid], debug...);
         }
     }
 
     if constexpr (proptype == BACK) {
         // Pop gradient from stack
-        const float incoming_grad = pop_stack(s, tid);
+        const float incoming_grad = pop_stack(s, tid, debug...);
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
         // Add gradient to the total gradient of the associated trainable parameter
@@ -70,36 +108,37 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
     }
 }
 
-template <PropagationType proptype, int opcount, typename F, typename G> __device__ __host__
-static inline void propagate(int tid, F operation, G gradient, const StackState& s, const Instruction& inst) {
+template <PropagationType proptype, int opcount, typename F, typename G, typename... Debug> __device__ __host__
+static inline void propagate(int tid, F operation, G gradient, const StackState& s, const Instruction& inst, Debug ...debug) {
     if constexpr (proptype == FORWARD) {
         // Pop operands from the stack
         float operands[opcount];
         #pragma unroll
         for (int k = opcount - 1; k >= 0; k--) {
-            operands[k] = pop_stack(s, tid);
+            operands[k] = pop_stack(s, tid, debug...);
         }
 
         // Apply operation and push the result to the stack
-        push_stack(s, tid, operation(operands));
+        push_stack(s, tid, operation(operands), debug...);
 
         // Save consumed operand as intermediate value for backpropagation
         #pragma unroll
         for (int k = 0; k < opcount; ++k) {
-            push_intermediate(s, tid, operands[k]);
+            push_intermediate(s, tid, operands[k], debug...);
         }
     }
 
     if constexpr (proptype == BACK) {
         // Pop incoming gradient from the stack
-        const float incoming_grad = pop_stack(s, tid);
+        const float incoming_grad = pop_stack(s, tid, debug...);
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
         // Pop intermediate calculation results from forward propagation from intermediate_d
         float intermediates[opcount];
         #pragma unroll
         for (int k = opcount - 1; k >= 0; k--) {
-            const float intermediate = read_intermediate(s, tid, inst.intermediate_index + k);
+            vm_debug_print(tid, "k=%d: intermediate_index+k=%d\n", k, inst.intermediate_index + k);
+            const float intermediate = read_intermediate(s, tid, inst.intermediate_index + k, debug...);
             intermediates[k] = intermediate;
             vm_debug_print(tid, "  intermediates[%d]=%f", k, intermediate);
         }
@@ -121,7 +160,7 @@ static inline void propagate(int tid, F operation, G gradient, const StackState&
         // Push outgoing gradients to the stack
         #pragma unroll
         for (int k = opcount - 1; k >= 0; k--) {
-            push_stack(s, tid, local_grad[k]);
+            push_stack(s, tid, local_grad[k], debug...);
         }
     }
 }
