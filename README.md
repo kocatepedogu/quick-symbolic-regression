@@ -21,7 +21,7 @@ The library is implemented in C++/HIP, and the API is provided in Python through
 
 There are three modes: (1) **CPU**, (2) **intra-individual GPU**, and (3) **inter-individual GPU**. 
 
-The **CPU mode** (1) assigns each island to a separate OpenMP thread. Within each island, there is a nested parallel for over individuals. Nested parallelism ensures that, when the computation in an island finishes earlier than others, the associated core does not stay idle. Vectorization using OpenMP SIMD is used for some genetic operations, but the execution of bytecode programs is currently not vectorized. Entire process is done on the CPU.
+The **CPU mode** (1) assigns each island to a separate OpenMP thread. Vectorization using OpenMP SIMD is used for some genetic operations, but the execution of bytecode programs is currently not vectorized. Entire process is done on the CPU.
 
 The **intra-individual GPU mode** (2) assigns each island to a separate HIP stream with further parallelization over data points. For each individual, a new kernel is launched on the stream associated with the individual's island. The kernel executes the same bytecode program over all data points in parallel. Since the losses and gradients from different data points are computed by different threads, the results are summed by reduction on the GPU. After one individual is done, the next one is processed in a sequential loop.
 
