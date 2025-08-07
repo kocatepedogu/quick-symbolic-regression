@@ -15,7 +15,7 @@ NWEIGHTS=2
 
 # Generate dataset
 X = np.linspace(-5, 5, 25)
-y = 3*X + 5*X*X + 7*X*X*X
+y = 1.0 + 3.0*X + 5.0*X*X + 7.0*X*X*X
 
 # Create model
 model = GeneticProgrammingIslands(
@@ -31,7 +31,7 @@ model = GeneticProgrammingIslands(
 )
 
 # Fit model
-solution, history = model.fit(ngenerations=15, nsupergenerations=4, nepochs=1, verbose=True)
+solution, history = model.fit(ngenerations=15, nsupergenerations=15, nepochs=1, verbose=True)
 
 # Print best solution
 print("Best solution: {}".format(solution))
