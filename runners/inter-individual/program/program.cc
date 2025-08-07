@@ -18,6 +18,12 @@ namespace qsr::inter_individual {
         // Largest number of instructions (to determine pad length)
         this->max_num_of_instructions = 0;
 
+        // Largest number of stack elements required
+        this->stack_req = 0;
+
+        // Largest number of intermediate elements required
+        this->intermediate_req = 0;
+
         // Compile each expression to IR and determine the longest IR length
         for (int i = 0; i < num_of_individuals; ++i) {
             const IntermediateRepresentation& ir = compile(exp_pop[i]);
@@ -27,6 +33,14 @@ namespace qsr::inter_individual {
 
             if (num_of_instructions > this->max_num_of_instructions) {
                 this->max_num_of_instructions = num_of_instructions;
+            }
+
+            if (ir.stack_requirement > this->stack_req) {
+                this->stack_req = ir.stack_requirement;
+            }
+
+            if (ir.intermediate_requirement > this->intermediate_req) {
+                this->intermediate_req = ir.intermediate_requirement;
             }
         }
 

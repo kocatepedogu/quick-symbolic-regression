@@ -19,6 +19,12 @@ namespace qsr::inter_individual {
         /// Length of the longest program
         int max_num_of_instructions;
 
+        /// Stack requirement of the longest program
+        int stack_req;
+
+        /// Intermediate requirement of the longest program
+        int intermediate_req;
+
         /// Total number of individuals
         int num_of_individuals;
 

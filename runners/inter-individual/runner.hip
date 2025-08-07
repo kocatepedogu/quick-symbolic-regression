@@ -23,8 +23,6 @@ namespace qsr::inter_individual {
     Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
 
-    constexpr int max_stack_depth = 128;
-
     __global__
     void vm(Ptr2D<Instruction> bytecode, 
             const int max_num_of_instructions,
@@ -113,8 +111,8 @@ namespace qsr::inter_individual {
         dim3 gridDim(blocks);
         dim3 blockDim(threadsPerBlock);
 
-        Array2D<float> stack_d(max_stack_depth, program.num_of_individuals);
-        Array2D<float> intermediate_d(max_stack_depth, program.num_of_individuals);
+        Array2D<float> stack_d(program.stack_req, program.num_of_individuals);
+        Array2D<float> intermediate_d(program.intermediate_req, program.num_of_individuals);
         Array2D<float> weights_grad_d(nweights, program.num_of_individuals);
 
         hipLaunchKernelGGL(
