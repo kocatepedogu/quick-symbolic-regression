@@ -21,9 +21,19 @@ struct CompilerState {
     /// Number of backpropagation instructions
     int backward_length;
 
-    /// The expected intermediate stack pointer value just after the 
+    /// The expected intermediate pointer value just after the 
+    /// currently processed forward propagation instruction is executed.
+    int expected_ip;
+
+    /// The expected stack pointer value just after the 
     /// currently processed forward propagation instruction is executed.
     int expected_sp;
+
+    /// The largest stack pointer value ever reached during forward propagation
+    int max_sp;
+
+    /// The largest intermediate pointer value ever reached during forward propagation
+    int max_ip;
 };
 
 
@@ -48,12 +58,22 @@ static void compile(const Expression& e, IntermediateRepresentation *p, Compiler
     auto& forwprop_inst = p->bytecode[s.forward_offset + s.forward_length++];
     forwprop_inst = Instruction(args...);
 
-    // Calculate at which point the stack intermediate pointer will be before and after this 
+    // Calculate the point at which the intermediate pointer will be before and after this 
     // forward propagation instruction is executed. Save the expected value before the execution
     // into the memindex field of associated backpropagation instruction.
 
-    backprop_inst.intermediate_index = s.expected_sp;
-    s.expected_sp += opcount;
+    backprop_inst.intermediate_index = s.expected_ip;
+    s.expected_ip += opcount;
+    if (s.expected_ip > s.max_ip) {
+        s.max_ip = s.expected_ip;
+    }
+
+    // Calculate the point at which the stack pointer will be before and after this 
+    // forward propagation instruction is executed. Save the expected value after the execution
+    s.expected_sp -= opcount - 1;
+    if (s.expected_sp > s.max_sp) {
+        s.max_sp = s.expected_sp;
+    }
 }
 
 
@@ -105,15 +125,22 @@ static void compile(const Expression& e, IntermediateRepresentation* p) noexcept
     s.backward_offset = e.num_of_nodes + 1;
     s.forward_length = 0;
     s.backward_length = 0;
+    s.expected_ip = 0;
     s.expected_sp = 0;
+    s.max_sp = 0;
+    s.max_ip = 0;
 
     // Compile both forward propagation and backpropagation
-
     compile(e, p, s);
 
     // Add loss function evaluation in between forward propagation and backpropagation
-
     p->bytecode[s.backward_offset - 1] = Instruction(LOSS);
+
+    // Save the stack size required for running this program
+    p->stack_requirement = s.max_sp;
+
+    // Save the intermediate array size required for running this program
+    p->intermediate_requirement = s.max_ip;
 }
 
 IntermediateRepresentation compile(const Expression& e) noexcept {

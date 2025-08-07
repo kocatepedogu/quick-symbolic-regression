@@ -60,6 +60,12 @@ struct Instruction {
 struct IntermediateRepresentation {
     /// Instructions
     std::vector<Instruction> bytecode;
+
+    /// Stack size required for running this program
+    int stack_requirement;
+
+    /// Intermediate array size required for running this program
+    int intermediate_requirement;
     
     /** @brief Creates empty program on GPU memory */
     IntermediateRepresentation(int length);
