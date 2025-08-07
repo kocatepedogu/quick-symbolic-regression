@@ -7,7 +7,7 @@
 #include <vector>
 
 // Uncomment to enable GPU memory allocation sanitization
-#define SANITIZE_MEMORY
+//#define SANITIZE_MEMORY
 
 enum MemoryEventType {
     ALLOC,
