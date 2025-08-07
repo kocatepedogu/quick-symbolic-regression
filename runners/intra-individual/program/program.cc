@@ -16,11 +16,19 @@ namespace qsr::intra_individual {
         // Create array for storing number of instructions in each program
         this->num_of_instructions = Array1D<int>(num_of_individuals);
 
+        // Create array for storing stack requirements for each program
+        this->stack_req = Array1D<int>(num_of_individuals);
+
+        // Create array for storing intermediate requirements for each program
+        this->intermediate_req = Array1D<int>(num_of_individuals);
+
         // Compile all expressions to IR
         std::vector<IntermediateRepresentation> irs(num_of_individuals);
         for (int i = 0; i < num_of_individuals; ++i) {
             const auto &ir = irs[i] = compile(exp_pop[i]);
             num_of_instructions.ptr[i] = ir.bytecode.size();
+            stack_req.ptr[i] = ir.stack_requirement;
+            intermediate_req.ptr[i] = ir.intermediate_requirement;
         }
 
         // Find the longest IR to determine the maximum number of instructions

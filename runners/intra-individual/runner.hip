@@ -11,7 +11,6 @@
 #include "../../util/rng.hpp"
 
 namespace qsr::intra_individual {
-    constexpr int max_stack_depth = 128;
     constexpr int reduction_threads_per_block = 32;
 
     __global__ 
@@ -42,6 +41,7 @@ namespace qsr::intra_individual {
         }
     }
 
+    template <typename... Debug>
     __global__
     void vm(c_inst_1d bytecode, 
             const int bytecode_length,
@@ -53,7 +53,8 @@ namespace qsr::intra_individual {
             Ptr1D<float> weights_d,
             Ptr2D<float> weights_grad_d,
             const int nweights,
-            Ptr1D<float> loss_d)
+            Ptr1D<float> loss_d,
+            Debug ...debug)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -79,7 +80,7 @@ namespace qsr::intra_individual {
         vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
             tid, tid, bytecode, bytecode_length, 
             m, X_d, y_d, 
-            s, program_counter, weights_d, weights_grad_d);
+            s, program_counter, weights_d, weights_grad_d, debug...);
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
@@ -93,7 +94,7 @@ namespace qsr::intra_individual {
             tid, tid, bytecode, bytecode_length, 
             m, X_d, y_d, 
             s, program_counter, 
-            weights_d, weights_grad_d);
+            weights_d, weights_grad_d, debug...);
     }
 
     Runner::Runner(std::shared_ptr<Dataset> dataset, const int nweights) : dataset(dataset), nweights(nweights) {
@@ -109,14 +110,12 @@ namespace qsr::intra_individual {
         reduction_grid_dim = dim3(reduction_blocks_per_grid);
         reduction_block_dim = dim3(reduction_threads_per_block);
 
-        stack_d = Array2D<float>(max_stack_depth, dataset->m);
-        intermediate_d = Array2D<float>(max_stack_depth, dataset->m);
         weights_d = Array1D<float>(nweights);
         weights_grad_d = Array2D<float>(nweights, dataset->m);
         loss_d = Array1D<float>(dataset->m);
     }
 
-    void Runner::run(c_inst_1d code, int code_length, int epochs, float learning_rate) {
+    void Runner::run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, int epochs, float learning_rate) {
         for (int epoch = 0; epoch < epochs + 1; ++epoch) {
             // Run forward propagation and backpropagation to compute
             // weight gradients for each weight and for each data point
@@ -125,7 +124,8 @@ namespace qsr::intra_individual {
                 code, code_length, 
                 dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
                 stack_d.ptr, intermediate_d.ptr,
-                weights_d.ptr, weights_grad_d.ptr, nweights, loss_d.ptr);
+                weights_d.ptr, weights_grad_d.ptr, nweights, loss_d.ptr,
+                stack_length, intermediate_length);
 
             // For every weight, sum gradient contributions from all data points using reduction
             // Apply gradient descent rule
@@ -150,6 +150,12 @@ namespace qsr::intra_individual {
         {
             auto code = program_pop.bytecode.ptr[i];
             auto code_length = program_pop.num_of_instructions.ptr[i];
+            auto stack_length = program_pop.stack_req.ptr[i];
+            auto intermediate_length = program_pop.intermediate_req.ptr[i];
+
+            // Allocate memory for stack and intermediate
+            stack_d.resize(stack_length, dataset->m);
+            intermediate_d.resize(intermediate_length, dataset->m);
 
             // If the expression has no weights yet, initialize them randomly
             if (population[i].weights.empty()) {
@@ -165,7 +171,7 @@ namespace qsr::intra_individual {
             }
 
             // Do the work
-            run(code, code_length, epochs, learning_rate);
+            run(code, code_length, stack_length, intermediate_length, epochs, learning_rate);
 
             // Compute total loss
             float total_loss = 0;

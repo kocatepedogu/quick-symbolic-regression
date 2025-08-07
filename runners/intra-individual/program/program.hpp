@@ -20,6 +20,12 @@ namespace qsr::intra_individual {
         /// Length of Programs
         Array1D<int> num_of_instructions;
 
+        /// Stack requirement of Programs
+        Array1D<int> stack_req;
+
+        /// Intermediate requirement of Programs
+        Array1D<int> intermediate_req;
+
         /// Total number of individuals
         int num_of_individuals;
 

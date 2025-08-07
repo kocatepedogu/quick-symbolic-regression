@@ -38,7 +38,7 @@ namespace intra_individual {
     public:
         Runner(std::shared_ptr<Dataset> dataset, const int nweights);
 
-        void run(c_inst_1d code, int code_length, int epochs, float learning_rate);
+        void run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, int epochs, float learning_rate);
 
         void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
     };
