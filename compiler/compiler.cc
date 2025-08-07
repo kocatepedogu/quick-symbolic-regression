@@ -27,10 +27,17 @@ struct CompilerState {
 
     /// The expected stack pointer value just after the 
     /// currently processed forward propagation instruction is executed.
-    int expected_sp;
+    int expected_sp_forward;
+
+    /// The expected stack pointer value just after the 
+    /// currently processed backpropagation instruction is executed.
+    int expected_sp_backward;
 
     /// The largest stack pointer value ever reached during forward propagation
-    int max_sp;
+    int max_sp_forward;
+
+    /// The largest stack pointer value ever reached during backpropagation
+    int max_sp_backward;
 
     /// The largest intermediate pointer value ever reached during forward propagation
     int max_ip;
@@ -47,6 +54,13 @@ static void compile(const Expression& e, IntermediateRepresentation *p, Compiler
     // In backpropagation, operation comes first, operands come afterwards
     auto& backprop_inst = p->bytecode[s.backward_offset + s.backward_length++];
     backprop_inst = Instruction(args...);
+
+    // Calculate the point at which the stack pointer will be before and after this 
+    // backpropagation instruction is executed. Save the expected value before the execution
+    s.expected_sp_backward += opcount - 1;
+    if (s.expected_sp_backward > s.max_sp_backward) {
+        s.max_sp_backward = s.expected_sp_backward;
+    }
 
     // Operands
     #pragma unroll
@@ -70,9 +84,9 @@ static void compile(const Expression& e, IntermediateRepresentation *p, Compiler
 
     // Calculate the point at which the stack pointer will be before and after this 
     // forward propagation instruction is executed. Save the expected value after the execution
-    s.expected_sp -= opcount - 1;
-    if (s.expected_sp > s.max_sp) {
-        s.max_sp = s.expected_sp;
+    s.expected_sp_forward -= opcount - 1;
+    if (s.expected_sp_forward > s.max_sp_forward) {
+        s.max_sp_forward = s.expected_sp_forward;
     }
 }
 
@@ -126,8 +140,10 @@ static void compile(const Expression& e, IntermediateRepresentation* p) noexcept
     s.forward_length = 0;
     s.backward_length = 0;
     s.expected_ip = 0;
-    s.expected_sp = 0;
-    s.max_sp = 0;
+    s.expected_sp_forward = 0;
+    s.expected_sp_backward = 0;
+    s.max_sp_forward = 0;
+    s.max_sp_backward = 1;
     s.max_ip = 0;
 
     // Compile both forward propagation and backpropagation
@@ -137,7 +153,7 @@ static void compile(const Expression& e, IntermediateRepresentation* p) noexcept
     p->bytecode[s.backward_offset - 1] = Instruction(LOSS);
 
     // Save the stack size required for running this program
-    p->stack_requirement = s.max_sp;
+    p->stack_requirement = std::max(s.max_sp_forward, s.max_sp_backward) + 1;
 
     // Save the intermediate array size required for running this program
     p->intermediate_requirement = s.max_ip;
