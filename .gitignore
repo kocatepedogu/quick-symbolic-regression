@@ -18,3 +18,5 @@ libquicksr.so
 
 benchmark/benchmark1d.sh
 benchmark/benchmark2d.sh
+
+*.log
