@@ -10,6 +10,9 @@
 
 #include "../../util/rng.hpp"
 
+// Uncomment to enable buffer overflow checks
+// #define CHECK_BUFFER_OVERFLOW
+
 namespace qsr::intra_individual {
     constexpr int reduction_threads_per_block = 32;
 
@@ -129,8 +132,13 @@ namespace qsr::intra_individual {
                 code, code_length, 
                 dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
                 stack_d.ptr, intermediate_d.ptr,
-                weights_d.ptr, weights_grad_d.ptr, nweights, loss_d.ptr,
-                stack_length, intermediate_length);
+                weights_d.ptr, weights_grad_d.ptr, nweights, loss_d.ptr
+
+                // Optional arguments for buffer overflow checking
+                #ifdef CHECK_BUFFER_OVERFLOW
+                , stack_length, intermediate_length
+                #endif
+            );
 
             // For every weight, sum gradient contributions from all data points using reduction
             // Apply gradient descent rule
