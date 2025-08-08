@@ -58,6 +58,11 @@ namespace qsr::intra_individual {
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
+        // Mask excess threads
+        if (tid >= m) {
+            return;
+        }
+
         // Reset weight gradients that will be computed by this thread
         for (int j = 0; j < nweights; ++j) {
             weights_grad_d[j,tid] = 0;
