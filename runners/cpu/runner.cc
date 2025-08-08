@@ -10,6 +10,9 @@
 
 #include "../../util/rng.hpp"
 
+// Uncomment to enable buffer overflow checks
+// #define CHECK_BUFFER_OVERFLOW
+
 namespace qsr::cpu {
     Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
@@ -72,7 +75,14 @@ namespace qsr::cpu {
                     vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
                         tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
                         dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                        s, program_counter, weights_d.ptr, weights_grad_d.ptr);
+                        s, program_counter, weights_d.ptr, weights_grad_d.ptr
+                    
+                        // Optional arguments for buffer overflow checking
+                        #ifdef CHECK_BUFFER_OVERFLOW
+                        , program_pop.stack_req.ptr[program_idx], 
+                          program_pop.intermediate_req.ptr[program_idx]
+                        #endif
+                    );
 
                     // Print an empty line in between forward propagation output and backpropagation output
                     vm_debug_print(tid, "");
@@ -85,7 +95,14 @@ namespace qsr::cpu {
                         vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
                             tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
                             dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                            s, program_counter, weights_d.ptr, weights_grad_d.ptr);
+                            s, program_counter, weights_d.ptr, weights_grad_d.ptr
+
+                            // Optional arguments for buffer overflow checking
+                            #ifdef CHECK_BUFFER_OVERFLOW
+                            , program_pop.stack_req.ptr[program_idx], 
+                            program_pop.intermediate_req.ptr[program_idx]
+                            #endif
+                        );
                     }
                 }
 
