@@ -19,10 +19,14 @@
 #include <hip/hip_runtime.h>
 #include <memory>
 
+// Uncomment to enable buffer overflow checks
+// #define CHECK_BUFFER_OVERFLOW
+
 namespace qsr::inter_individual {
     Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
 
+    template <typename... Debug>
     __global__
     void vm(Ptr2D<Instruction> bytecode, 
             const int max_num_of_instructions,
@@ -37,7 +41,8 @@ namespace qsr::inter_individual {
             const int nweights,
             const int nepochs,
             const float learning_rate,
-            Ptr1D<float> loss_d)
+            Ptr1D<float> loss_d,
+            Debug... debug)
     {
         const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -72,7 +77,7 @@ namespace qsr::inter_individual {
                         tid, datapoint_idx, bytecode, max_num_of_instructions, 
                         m, X_d, y_d, 
                         s, program_counter, 
-                        weights_d, weights_grad_d);
+                        weights_d, weights_grad_d, debug...);
 
                     // Print an empty line in between forward propagation output and backpropagation output
                     vm_debug_print(tid, "");
@@ -87,7 +92,7 @@ namespace qsr::inter_individual {
                             tid, datapoint_idx, bytecode, max_num_of_instructions, 
                             m, X_d, y_d, 
                             s, program_counter, 
-                            weights_d, weights_grad_d);
+                            weights_d, weights_grad_d, debug...);
                     }
                 }
 
@@ -123,7 +128,13 @@ namespace qsr::inter_individual {
             dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
             stack_d.ptr, intermediate_d.ptr,
             weights_d, weights_grad_d.ptr, nweights,
-            epochs, learning_rate, loss_d.ptr);
+            epochs, learning_rate, loss_d.ptr
+
+            // Optional arguments for buffer overflow checking
+            #ifdef CHECK_BUFFER_OVERFLOW
+            , program.stack_req, program.intermediate_req
+            #endif
+        );
 
         HIP_CALL(hipStreamSynchronize(config.stream));
     }
