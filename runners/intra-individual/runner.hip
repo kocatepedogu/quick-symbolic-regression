@@ -14,7 +14,7 @@
 // #define CHECK_BUFFER_OVERFLOW
 
 namespace qsr::intra_individual {
-    constexpr int reduction_threads_per_block = 32;
+    constexpr int reduction_threads_per_block = 1024;
 
     __global__ 
     void weight_update(c_real_1d weight_grads, real_1d weight, int m, float learning_rate) {
