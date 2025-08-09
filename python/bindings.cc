@@ -17,6 +17,7 @@
 #include "../runners/inter-individual/runner_generator.hpp"
 #include "../runners/intra-individual/runner_generator.hpp"
 #include "../runners/cpu/runner_generator.hpp"
+#include "../runners/hybrid/runner_generator.hpp"
 
 namespace py = pybind11;
 
@@ -85,6 +86,9 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<cpu::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<cpu::RunnerGenerator>>(m, "CPURunnerGenerator")
+        .def(py::init<>());
+
+    py::class_<hybrid::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<hybrid::RunnerGenerator>>(m, "HybridRunnerGenerator")
         .def(py::init<>());
 
     /* Genetic Programming Algorithm Classes */

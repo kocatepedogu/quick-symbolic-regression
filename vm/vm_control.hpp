@@ -43,6 +43,9 @@ void vm_control(const int tid,
         if constexpr (paraType == INTER_INDIVIDUAL) {
             instruction = bytecode[program_counter,tid];
         }
+        if constexpr (paraType == HYBRID) {
+            instruction = bytecode[program_counter,tid / 32];
+        }
         
         switch (instruction.opcode) {
             /* Operations with immediate operands */

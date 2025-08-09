@@ -89,12 +89,14 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
                                     Ptr2D<float> weights_grad_d, Debug ...debug) {
     if constexpr (proptype == FORWARD) {
         if constexpr (paraType == INTRA_INDIVIDUAL) {
-            // Intra-individual
             push_stack(s, tid, weights[param_index], debug...);
         }
-        else {
-            /// Inter-individual
+        if constexpr (paraType == INTER_INDIVIDUAL) {
             push_stack(s, tid, weights[param_index,tid], debug...);
+        }
+        if constexpr (paraType == HYBRID) {
+            constexpr int datapoint_block_dim = 32;
+            push_stack(s, tid, weights[param_index,tid / datapoint_block_dim], debug...);
         }
     }
 
@@ -104,7 +106,14 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
         // Add gradient to the total gradient of the associated trainable parameter
-        weights_grad_d[param_index,tid] += incoming_grad;
+        if constexpr (paraType == INTRA_INDIVIDUAL || paraType == INTER_INDIVIDUAL) {
+            weights_grad_d[param_index,tid] += incoming_grad;
+        }
+
+        if constexpr (paraType == HYBRID) {
+            constexpr int datapoint_block_dim = 32;
+            atomicAdd(&weights_grad_d[param_index,tid / datapoint_block_dim], incoming_grad);
+        }
     }
 }
 

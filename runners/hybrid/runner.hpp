@@ -6,6 +6,8 @@
 
 #include "../base.hpp"
 
+#include "../inter-individual/program/program.hpp"
+
 #include "../../expressions/expression.hpp"
 #include "../../dataset/dataset.hpp"
 
@@ -18,8 +20,12 @@ namespace qsr::hybrid {
 
         const int nweights;
 
+        HIPState config;
+
     public:
         Runner(std::shared_ptr<Dataset> dataset, int nweights);
+
+        void run(const inter_individual::Program &program, int epochs, float learning_rate, Array1D<float> &loss_d, Ptr2D<float> &weights_d);
 
         void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
     };

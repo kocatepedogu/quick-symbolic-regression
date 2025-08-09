@@ -19,7 +19,7 @@ int main(void) {
 
     // Generate ground truth data
     generate_test_data(X, y, [](float x) { 
-        return 4.0 + 3.0*x; 
+        return 2.5382 * cos(x)*x + x*x - 0.5; 
     });
 
     // Create dataset
@@ -34,18 +34,25 @@ int main(void) {
     Expression w2 = Parameter(2);
 
     // Symbolic expression
-    Expression f1 = w0 + w1 * x;
+    Expression f1 = w0 * Cos(x)*x + x*x - w1;
+    Expression f2 = w0 * Cos(x) + x - w1;
+    Expression f3 = w0 * Sin(x + w2)*x + x*x - w1;
 
     // Construct a population
-    std::vector<Expression> expression_pop = {f1};
+    std::vector<Expression> expression_pop = {f1, f2, f3};
 
     // Fit expressions
     hybrid::Runner runner(dataset, 3);
-    runner.run(expression_pop, 10, 1e-3);
+
+    for (int i = 0; i < 60; ++i) {
+        runner.run(expression_pop, 10, 1e-3);
+    }
 
     // Print losses
-    std::cout << "CPU" << std::endl;
-    std::cout << "f1: " << expression_pop[0] << std::endl;
+    std::cout << "Hybrid" << std::endl;
+    std::cout << "f1: " << expression_pop[0].loss << std::endl;
+    std::cout << "f2: " << expression_pop[1].loss << std::endl;
+    std::cout << "f3: " << expression_pop[2].loss << std::endl;
 
     // Free data
     delete_test_data(X, y);

@@ -28,7 +28,8 @@ typedef const float *const __restrict__ *const __restrict__ c_real_2d;
 
 enum ParallelismType {
     INTRA_INDIVIDUAL,
-    INTER_INDIVIDUAL
+    INTER_INDIVIDUAL,
+    HYBRID
 };
 
 enum PropagationType {
