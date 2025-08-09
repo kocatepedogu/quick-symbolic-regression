@@ -27,11 +27,11 @@ model = GeneticProgrammingIslands(
     mutation=DefaultMutation(nvars=NVARS, nweights=NWEIGHTS),
     crossover=DefaultCrossover(),
     selection=FitnessProportionalSelection(),
-    runner_generator=InterIndividualRunnerGenerator()
+    runner_generator=HybridRunnerGenerator()
 )
 
 # Fit model
-solution, history = model.fit(ngenerations=15, nsupergenerations=15, nepochs=1, verbose=True)
+solution, history = model.fit(ngenerations=15, nsupergenerations=4, nepochs=500, verbose=True)
 
 # Print best solution
 print("Best solution: {}".format(solution))
