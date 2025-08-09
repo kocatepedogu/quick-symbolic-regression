@@ -9,6 +9,7 @@ CMakeFiles
 testinter
 testintra
 testcpu
+testhybrid
 testexprgen
 testmutation
 testcrossover

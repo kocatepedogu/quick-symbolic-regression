@@ -50,6 +50,7 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/common
     ${CMAKE_CURRENT_SOURCE_DIR}/runners
     ${CMAKE_CURRENT_SOURCE_DIR}/runners/cpu
+    ${CMAKE_CURRENT_SOURCE_DIR}/runners/hybrid
     ${CMAKE_CURRENT_SOURCE_DIR}/runners/inter-individual
     ${CMAKE_CURRENT_SOURCE_DIR}/runners/inter-individual/program
     ${CMAKE_CURRENT_SOURCE_DIR}/runners/intra-individual
@@ -107,6 +108,7 @@ install(TARGETS quicksr
 add_executable(testintra ${CMAKE_CURRENT_SOURCE_DIR}/tests/testintra.cc)
 add_executable(testinter ${CMAKE_CURRENT_SOURCE_DIR}/tests/testinter.cc)
 add_executable(testcpu ${CMAKE_CURRENT_SOURCE_DIR}/tests/testcpu.cc)
+add_executable(testhybrid ${CMAKE_CURRENT_SOURCE_DIR}/tests/testhybrid.cc)
 add_executable(testexprgen ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprgen.cc)
 add_executable(testmutation ${CMAKE_CURRENT_SOURCE_DIR}/tests/testmutation.cc)
 add_executable(testcrossover ${CMAKE_CURRENT_SOURCE_DIR}/tests/testcrossover.cc)
@@ -115,6 +117,7 @@ add_executable(testexprpick ${CMAKE_CURRENT_SOURCE_DIR}/tests/testexprpick.cc)
 target_compile_options(testintra PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testinter PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testcpu PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
+target_compile_options(testhybrid PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testexprgen PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testmutation PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
 target_compile_options(testcrossover PRIVATE -O3 -march=native -fopenmp ${SANITIZER_COMPILER_FLAGS})
@@ -123,6 +126,7 @@ target_compile_options(testexprpick PRIVATE -O3 -march=native -fopenmp ${SANITIZ
 target_link_libraries(testintra ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testinter ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testcpu ${SANITIZER_LINKER_FLAGS} quicksr)
+target_link_libraries(testhybrid ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testexprgen ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testmutation ${SANITIZER_LINKER_FLAGS} quicksr)
 target_link_libraries(testcrossover ${SANITIZER_LINKER_FLAGS} quicksr)
