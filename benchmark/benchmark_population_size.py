@@ -28,8 +28,6 @@ POPULATIONS = [
     5000,
     10000,
     20000,
-    #50000,
-    #100000,
 ]
 
 def fit_model(npopulation, runner_generator):
@@ -50,7 +48,7 @@ def fit_model(npopulation, runner_generator):
     )
 
     # Fit model
-    solution, history = model.fit(ngenerations=2, nsupergenerations=2, nepochs=1, verbose=True)
+    solution, history = model.fit(ngenerations=2, nsupergenerations=2, nepochs=250, verbose=True)
 
     # Find elapsed time
     elapsed_time = time.time() - start_time
@@ -62,11 +60,8 @@ def fit_model(npopulation, runner_generator):
 mse_values_cpu = []
 elapsed_times_cpu = []
 
-mse_values_interindividual = []
-elapsed_times_interindividual = []
-
-mse_values_intraindividual = []
-elapsed_times_intraindividual = []
+mse_values_hybrid = []
+elapsed_times_hybrid = []
 
 
 for pop_per_island in POPULATIONS:
@@ -77,21 +72,15 @@ for pop_per_island in POPULATIONS:
     mse_values_cpu.append(mse)
     elapsed_times_cpu.append(elapsed_time)
 
-    mse, elapsed_time = fit_model(npopulation, InterIndividualRunnerGenerator())
-    print(f'Inter Individual - Population: {npopulation}, MSE: {mse}, Elapsed Time: {elapsed_time} seconds')
-    mse_values_interindividual.append(mse)
-    elapsed_times_interindividual.append(elapsed_time)
-
-    mse, elapsed_time = fit_model(npopulation, IntraIndividualRunnerGenerator())
-    print(f'Intra Individual - Population: {npopulation}, MSE: {mse}, Elapsed Time: {elapsed_time} seconds')
-    mse_values_intraindividual.append(mse)
-    elapsed_times_intraindividual.append(elapsed_time)
+    mse, elapsed_time = fit_model(npopulation, HybridRunnerGenerator())
+    print(f'Hybrid - Population: {npopulation}, MSE: {mse}, Elapsed Time: {elapsed_time} seconds')
+    mse_values_hybrid.append(mse)
+    elapsed_times_hybrid.append(elapsed_time)
 
 # Plot MSE vs Population Size
 plt.figure(figsize=(10, 6))
 plt.plot(POPULATIONS, mse_values_cpu, label='CPU')
-plt.plot(POPULATIONS, mse_values_interindividual, label='Inter Individual')
-plt.plot(POPULATIONS, mse_values_intraindividual, label='Intra Individual')
+plt.plot(POPULATIONS, mse_values_hybrid, label='Hybrid')
 plt.xlabel('Population Size')
 plt.ylabel('Loss (MSE)')
 plt.title('MSE vs Population Size')
@@ -102,8 +91,7 @@ plt.savefig('benchmark_mse_vs_population_size.png')
 # Plot Elapsed Time vs Population Size
 plt.figure(figsize=(10, 6))
 plt.plot(POPULATIONS, elapsed_times_cpu, label='CPU')
-plt.plot(POPULATIONS, elapsed_times_interindividual, label='Inter Individual')
-plt.plot(POPULATIONS, elapsed_times_intraindividual, label='Intra Individual')
+plt.plot(POPULATIONS, elapsed_times_hybrid, label='Hybrid')
 plt.xlabel('Population Size')
 plt.ylabel('Elapsed Time (seconds)')
 plt.title('Elapsed Time vs Population Size')
