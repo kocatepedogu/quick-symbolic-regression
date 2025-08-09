@@ -27,8 +27,6 @@ DATASET_SIZES = [
     20000,
     50000,
     100000,
-    200000,
-    500000,
 ]
 
 def fit_model(dataset_size, runner_generator):
@@ -53,7 +51,7 @@ def fit_model(dataset_size, runner_generator):
     )
 
     # Fit model
-    solution, history = model.fit(ngenerations=2, nsupergenerations=2, nepochs=1, verbose=True)
+    solution, history = model.fit(ngenerations=2, nsupergenerations=2, nepochs=100, verbose=True)
 
     # Find elapsed time
     elapsed_time = time.time() - start_time
@@ -65,9 +63,6 @@ def fit_model(dataset_size, runner_generator):
 mse_values_cpu = []
 elapsed_times_cpu = []
 
-mse_values_interindividual = []
-elapsed_times_interindividual = []
-
 mse_values_intraindividual = []
 elapsed_times_intraindividual = []
 
@@ -78,11 +73,6 @@ for dataset_size in DATASET_SIZES:
     mse_values_cpu.append(mse)
     elapsed_times_cpu.append(elapsed_time)
 
-    mse, elapsed_time = fit_model(dataset_size, InterIndividualRunnerGenerator())
-    print(f'Inter Individual - Dataset Size: {dataset_size}, MSE: {mse}, Elapsed Time: {elapsed_time} seconds')
-    mse_values_interindividual.append(mse)
-    elapsed_times_interindividual.append(elapsed_time)
-
     mse, elapsed_time = fit_model(dataset_size, IntraIndividualRunnerGenerator())
     print(f'Intra Individual - Dataset Size: {dataset_size}, MSE: {mse}, Elapsed Time: {elapsed_time} seconds')
     mse_values_intraindividual.append(mse)
@@ -91,7 +81,6 @@ for dataset_size in DATASET_SIZES:
 # Plot MSE vs Dataset Size
 plt.figure(figsize=(10, 6))
 plt.plot(DATASET_SIZES, mse_values_cpu, label='CPU')
-plt.plot(DATASET_SIZES, mse_values_interindividual, label='Inter Individual')
 plt.plot(DATASET_SIZES, mse_values_intraindividual, label='Intra Individual')
 plt.xlabel('Dataset Size')
 plt.ylabel('Loss (MSE)')
@@ -103,7 +92,6 @@ plt.savefig('benchmark_mse_vs_dataset_size.png')
 # Plot Elapsed Time vs Dataset Size
 plt.figure(figsize=(10, 6))
 plt.plot(DATASET_SIZES, elapsed_times_cpu, label='CPU')
-plt.plot(DATASET_SIZES, elapsed_times_interindividual, label='Inter Individual')
 plt.plot(DATASET_SIZES, elapsed_times_intraindividual, label='Intra Individual')
 plt.xlabel('Dataset Size')
 plt.ylabel('Elapsed Time (seconds)')
