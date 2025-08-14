@@ -8,7 +8,6 @@ from quicksr import *
 
 # Define constants
 NISLANDS=28
-NVARS=1
 NWEIGHTS=2
 
 # Generate dataset
@@ -34,20 +33,15 @@ def fit_model(npopulation, runner_generator):
     start_time = time.time()
 
     # Create model
-    model = GeneticProgrammingIslands(
-        Dataset(X, y), 
-        nislands=NISLANDS, 
+    model = SymbolicRegressionModel(
         nweights=NWEIGHTS, 
         npopulation=npopulation, 
-        initialization=DefaultInitialization(),
-        mutation=DefaultMutation(),
-        recombination=DefaultRecombination(),
-        selection=FitnessProportionalSelection(),
+        nislands=NISLANDS,
         runner_generator=runner_generator
     )
 
     # Fit model
-    solution, history = model.fit(ngenerations=2, nsupergenerations=2, nepochs=250, verbose=True)
+    solution, history = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=250)
 
     # Find elapsed time
     elapsed_time = time.time() - start_time

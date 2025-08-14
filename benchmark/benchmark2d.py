@@ -9,7 +9,6 @@ from quicksr import *
 # Define constants
 NPOPULATION=11200
 NISLANDS=8
-NVARS=2
 NWEIGHTS=1
 
 # Generate dataset
@@ -22,20 +21,10 @@ y = [1/(1 + x0**(-4)) + 1/(1 + x1**(-4))
      for x0, x1 in X]
 
 # Create model
-model = GeneticProgrammingIslands(
-    Dataset(X, y), 
-    nislands=NISLANDS, 
-    nweights=NWEIGHTS, 
-    npopulation=NPOPULATION, 
-    initialization=DefaultInitialization(),
-    mutation=DefaultMutation(),
-    recombination=DefaultRecombination(),
-    selection=FitnessProportionalSelection(),
-    runner_generator=HybridRunnerGenerator()
-)
+model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS)
 
 # Fit model
-solution, history = model.fit(ngenerations=20, nsupergenerations=15, nepochs=1, verbose=True)
+solution, history = model.fit(X, y, ngenerations=20, nsupergenerations=15, nepochs=1)
 
 # Print best solution
 print("Best solution: {}".format(solution))
@@ -54,9 +43,7 @@ plt.grid()
 plt.savefig('benchmark_learning_history_2d.png')
 
 # Compute predicted values
-solution_lambda = expr_to_lambda(solution)
-y_predicted = solution_lambda(X)
-print("Predicted values: {}".format(y_predicted))
+y_predicted = model.predict(X)
 
 # Compare target and predicted values
 fig = plt.figure(figsize=(15, 15))

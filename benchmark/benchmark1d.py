@@ -8,29 +8,18 @@ from quicksr import *
 
 # Define constants
 NPOPULATION=11200
-NISLANDS=8
-NVARS=1
 NWEIGHTS=2
+NISLANDS=8
 
 # Generate dataset
 X = np.linspace(-5, 5, 25)
 y = 1.0 + 3.0*X + 5.0*X*X + 7.0*X*X*X
 
 # Create model
-model = GeneticProgrammingIslands(
-    Dataset(X, y), 
-    nislands=NISLANDS, 
-    nweights=NWEIGHTS, 
-    npopulation=NPOPULATION, 
-    initialization=DefaultInitialization(),
-    mutation=DefaultMutation(),
-    recombination=DefaultRecombination(),
-    selection=FitnessProportionalSelection(),
-    runner_generator=HybridRunnerGenerator()
-)
+model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS)
 
 # Fit model
-solution, history = model.fit(ngenerations=15, nsupergenerations=4, nepochs=500, verbose=True)
+solution, history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=500)
 
 # Print best solution
 print("Best solution: {}".format(solution))
@@ -49,9 +38,7 @@ plt.grid()
 plt.savefig('benchmark_learning_history_1d.png')
 
 # Compute predicted values
-solution_lambda = expr_to_lambda(solution)
-y_predicted = solution_lambda(X)
-print("Predicted values: {}".format(y_predicted))
+y_predicted = model.predict(X)
 
 # Compare target and predicted values
 plt.figure(figsize=(10, 6))

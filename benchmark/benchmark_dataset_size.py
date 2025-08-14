@@ -9,7 +9,6 @@ from quicksr import *
 # Define constants
 NPOPULATION=1000
 NISLANDS=28
-NVARS=1
 NWEIGHTS=2
 
 DATASET_SIZES = [
@@ -37,20 +36,15 @@ def fit_model(dataset_size, runner_generator):
     y = 3*X + 5*X*X + 7*X*X*X
 
     # Create model
-    model = GeneticProgrammingIslands(
-        Dataset(X, y), 
-        nislands=NISLANDS, 
+    model = SymbolicRegressionModel(
         nweights=NWEIGHTS, 
         npopulation=NPOPULATION, 
-        initialization=DefaultInitialization(),
-        mutation=DefaultMutation(),
-        recombination=DefaultRecombination(),
-        selection=FitnessProportionalSelection(),
+        nislands=NISLANDS, 
         runner_generator=runner_generator
     )
 
     # Fit model
-    solution, history = model.fit(ngenerations=2, nsupergenerations=2, nepochs=100, verbose=True)
+    solution, history = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=100, verbose=True)
 
     # Find elapsed time
     elapsed_time = time.time() - start_time
