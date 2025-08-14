@@ -76,12 +76,12 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
             runner);
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
-            // Iterate island
+            // Run island
             local_histories[threadIdx] = islands[threadIdx]->fit(ngenerations, nepochs, learning_rate);
 
-            // Increase number of free cores
-            #pragma omp critical
-            {
+            // Print the islands that are completed
+            if (verbose){
+                #pragma omp critical
                 std::cout << "Island " << threadIdx << " completed." << std::endl;
             }
 
