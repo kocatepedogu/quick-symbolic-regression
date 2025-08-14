@@ -16,7 +16,7 @@ GeneticProgramming::GeneticProgramming(
                int npopulation, 
                std::shared_ptr<BaseInitialization> initialization,
                std::shared_ptr<BaseMutation> mutation,
-               std::shared_ptr<BaseRecombiner> recombiner,
+               std::shared_ptr<BaseRecombination> recombination,
                std::shared_ptr<BaseSelection> selection,
                std::shared_ptr<BaseRunner> runner) noexcept : 
                dataset(dataset), 
@@ -25,7 +25,7 @@ GeneticProgramming::GeneticProgramming(
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
                initialization(initialization),
                mutation(mutation),
-               recombiner(recombiner),
+               recombination(recombination),
                selection(selection),
                runner(runner)
 {
@@ -34,6 +34,9 @@ GeneticProgramming::GeneticProgramming(
 
     // Get mutator
     mutator = mutation->get_mutator(nvars, nweights);
+
+    // Get recombiner
+    recombiner = recombination->get_recombiner();
 
     // Get initializer
     initializer = initialization->get_initializer(nvars, nweights, npopulation);

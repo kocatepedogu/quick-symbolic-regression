@@ -12,7 +12,7 @@
 
 #include "../genetic/initialization/default.hpp"
 #include "../genetic/mutation/default.hpp"
-#include "../genetic/recombiner/default.hpp"
+#include "../genetic/recombination/default.hpp"
 #include "../genetic/selection/fitness_proportional_selection.hpp"
 #include "../runners/inter-individual/runner_generator.hpp"
 #include "../runners/intra-individual/runner_generator.hpp"
@@ -38,10 +38,10 @@ PYBIND11_MODULE(libquicksr, m) {
 
     /* Recombination Classes */
 
-    py::class_<BaseRecombiner, std::shared_ptr<BaseRecombiner>>(m, "BaseRecombiner")
+    py::class_<BaseRecombination, std::shared_ptr<BaseRecombination>>(m, "BaseRecombination")
         .def(py::init<>());
 
-    py::class_<DefaultRecombiner, BaseRecombiner, std::shared_ptr<DefaultRecombiner>>(m, "DefaultRecombiner")
+    py::class_<DefaultRecombination, BaseRecombination, std::shared_ptr<DefaultRecombination>>(m, "DefaultRecombination")
         .def(py::init<float>(), 
              py::arg("crossover_probability") = 0.8);
 
@@ -95,7 +95,7 @@ PYBIND11_MODULE(libquicksr, m) {
             int, int, int,
             std::shared_ptr<BaseInitialization>,
             std::shared_ptr<BaseMutation>,
-            std::shared_ptr<BaseRecombiner>,
+            std::shared_ptr<BaseRecombination>,
             std::shared_ptr<BaseSelection>,
             std::shared_ptr<BaseRunnerGenerator>>(),
             py::arg("dataset"),
@@ -104,7 +104,7 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("npopulation"),
             py::arg("initialization"),
             py::arg("mutation"),
-            py::arg("recombiner"),
+            py::arg("recombination"),
             py::arg("selection"),
             py::arg("runner_generator"))
 

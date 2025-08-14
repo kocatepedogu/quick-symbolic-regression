@@ -44,7 +44,7 @@ def fit_model(dataset_size, runner_generator):
         npopulation=NPOPULATION, 
         initialization=DefaultInitialization(),
         mutation=DefaultMutation(),
-        recombiner=DefaultRecombiner(),
+        recombination=DefaultRecombination(),
         selection=FitnessProportionalSelection(),
         runner_generator=runner_generator
     )
