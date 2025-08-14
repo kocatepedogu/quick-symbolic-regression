@@ -13,7 +13,7 @@ namespace qsr {
 
 class DefaultMutation : public BaseMutation {
 public:
-    DefaultMutation(int max_depth, float mutation_probability) :
+    constexpr DefaultMutation(int max_depth, float mutation_probability) :
         max_depth(max_depth),
         mutation_probability(mutation_probability) {}
 

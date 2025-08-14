@@ -27,7 +27,7 @@ model = GeneticProgrammingIslands(
     nislands=NISLANDS, 
     nweights=NWEIGHTS, 
     npopulation=NPOPULATION, 
-    initializer=DefaultInitializer(nvars=NVARS, nweights=NWEIGHTS, npopulation=NPOPULATION//NISLANDS),
+    initialization=DefaultInitialization(),
     mutation=DefaultMutation(),
     crossover=DefaultCrossover(),
     selection=FitnessProportionalSelection(),

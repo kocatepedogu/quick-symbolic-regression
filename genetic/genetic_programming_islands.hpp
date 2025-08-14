@@ -8,7 +8,7 @@
 
 #include "crossover/base.hpp"
 #include "genetic_programming.hpp"
-#include "initializer/base.hpp"
+#include "initialization/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
 #include "../runners/runner_generator_base.hpp"
@@ -21,7 +21,7 @@ public:
                               int nislands, 
                               int nweights, 
                               int npopulation, 
-                              std::shared_ptr<BaseInitializer> initializer,
+                              std::shared_ptr<BaseInitialization> initialization,
                               std::shared_ptr<BaseMutation> mutation,
                               std::shared_ptr<BaseCrossover> crossover,
                               std::shared_ptr<BaseSelection> selection,
@@ -36,7 +36,7 @@ private:
     std::shared_ptr<Dataset> dataset;
 
     /// Population initializer shared by all islands
-    std::shared_ptr<BaseInitializer> initializer;
+    std::shared_ptr<BaseInitialization> initialization;
 
     /// Mutation operator shared by all islands
     std::shared_ptr<BaseMutation> mutation;

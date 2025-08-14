@@ -39,7 +39,7 @@ def fit_model(npopulation, runner_generator):
         nislands=NISLANDS, 
         nweights=NWEIGHTS, 
         npopulation=npopulation, 
-        initializer=DefaultInitializer(nvars=NVARS, nweights=NWEIGHTS, npopulation=npopulation//NISLANDS),
+        initialization=DefaultInitialization(),
         mutation=DefaultMutation(),
         crossover=DefaultCrossover(),
         selection=FitnessProportionalSelection(),

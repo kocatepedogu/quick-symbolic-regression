@@ -5,7 +5,6 @@
 
 #include "../expressions/expression.hpp"
 
-#include "initializer/base.hpp"
 #include "learning_history.hpp"
 #include <cmath>
 
@@ -15,7 +14,7 @@ GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
                int nweights, 
                int npopulation, 
-               std::shared_ptr<BaseInitializer> initializer,
+               std::shared_ptr<BaseInitialization> initialization,
                std::shared_ptr<BaseMutation> mutation,
                std::shared_ptr<BaseCrossover> crossover,
                std::shared_ptr<BaseSelection> selection,
@@ -24,20 +23,23 @@ GeneticProgramming::GeneticProgramming(
                nvars(dataset->n), 
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
-               initializer(initializer),
+               initialization(initialization),
                mutation(mutation),
                crossover(crossover),
                selection(selection),
                runner(runner)
 {
-    // Initialize island with a population of random expressions
-    initializer->initialize(population);
-
     // Get selector
     selector = selection->get_selector(npopulation);
 
     // Get mutator
     mutator = mutation->get_mutator(nvars, nweights);
+
+    // Get initializer
+    initializer = initialization->get_initializer(nvars, nweights, npopulation);
+
+    // Initialize island with a population of random expressions
+    initializer->initialize(population);
 
     // Fitnesses have never been computed yet
     initialized = false;

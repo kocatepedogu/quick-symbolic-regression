@@ -10,7 +10,7 @@
 
 #include "../genetic/genetic_programming_islands.hpp"
 
-#include "../genetic/initializer/default.hpp"
+#include "../genetic/initialization/default.hpp"
 #include "../genetic/mutation/default.hpp"
 #include "../genetic/crossover/default.hpp"
 #include "../genetic/selection/fitness_proportional_selection.hpp"
@@ -55,15 +55,12 @@ PYBIND11_MODULE(libquicksr, m) {
 
     /* Initialization Classes */
 
-    py::class_<BaseInitializer, std::shared_ptr<BaseInitializer>>(m, "BaseInitializer")
+    py::class_<BaseInitialization, std::shared_ptr<BaseInitialization>>(m, "BaseInitialization")
         .def(py::init<>());
 
-    py::class_<DefaultInitializer, BaseInitializer, std::shared_ptr<DefaultInitializer>>(m, "DefaultInitializer")
-        .def(py::init<int, int, int, int>(),
-             py::arg("nvars"),
-             py::arg("nweights"),
-             py::arg("max_depth") = 1,
-             py::arg("npopulation"));
+    py::class_<DefaultInitialization, BaseInitialization, std::shared_ptr<DefaultInitialization>>(m, "DefaultInitialization")
+        .def(py::init<int>(),
+             py::arg("max_depth") = 1);
 
     /* Dataset Class */
 
@@ -96,7 +93,7 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<
             std::shared_ptr<Dataset>, 
             int, int, int,
-            std::shared_ptr<BaseInitializer>,
+            std::shared_ptr<BaseInitialization>,
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseCrossover>,
             std::shared_ptr<BaseSelection>,
@@ -105,7 +102,7 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("nislands"),
             py::arg("nweights"),
             py::arg("npopulation"),
-            py::arg("initializer"),
+            py::arg("initialization"),
             py::arg("mutation"),
             py::arg("crossover"),
             py::arg("selection"),

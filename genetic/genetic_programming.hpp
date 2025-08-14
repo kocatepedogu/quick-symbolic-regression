@@ -9,7 +9,7 @@
 #include "../runners/base.hpp"
 
 #include "crossover/base.hpp"
-#include "initializer/base.hpp"
+#include "initialization/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
 #include "selection/selector/base.hpp"
@@ -23,7 +23,7 @@ public:
     GeneticProgramming(std::shared_ptr<const Dataset> dataset, 
                        int nweights, 
                        int npopulation, 
-                       std::shared_ptr<BaseInitializer> initializer,
+                       std::shared_ptr<BaseInitialization> initializer,
                        std::shared_ptr<BaseMutation> mutator,
                        std::shared_ptr<BaseCrossover> crossover,
                        std::shared_ptr<BaseSelection> selection,
@@ -41,11 +41,12 @@ private:
 
     std::vector<Expression> population;
 
-    std::shared_ptr<BaseInitializer> initializer;
+    std::shared_ptr<BaseInitialization> initialization;
     std::shared_ptr<BaseMutation> mutation;
     std::shared_ptr<BaseCrossover> crossover;
     std::shared_ptr<BaseSelection> selection;
 
+    std::shared_ptr<BaseInitializer> initializer;
     std::shared_ptr<BaseMutator> mutator;
     std::shared_ptr<BaseSelector> selector;
 

@@ -5,7 +5,6 @@
 
 #include <iostream>
 
-#include "initializer/base.hpp"
 #include "learning_history.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
@@ -19,13 +18,13 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
     int nislands, 
     int nweights, 
     int npopulation, 
-    std::shared_ptr<BaseInitializer> initializer, 
+    std::shared_ptr<BaseInitialization> initialization, 
     std::shared_ptr<BaseMutation> mutation, 
     std::shared_ptr<BaseCrossover> crossover, 
     std::shared_ptr<BaseSelection> selection,
     std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
         dataset(dataset),
-        initializer(initializer),
+        initialization(initialization),
         mutation(mutation),
         crossover(crossover),
         selection(selection),
@@ -70,7 +69,7 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
             dataset, 
             nweights, 
             population_per_island, 
-            initializer,
+            initialization,
             mutation,
             crossover,
             selection,
