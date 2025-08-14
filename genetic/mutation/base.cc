@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "base.hpp"
-#include <cstdio>
 
 namespace qsr {
-
-Expression BaseMutation::mutate(const Expression &expr) noexcept {
-    fprintf(stderr, "Unimplemented base method called.");
-    abort();
-}
-
+    std::shared_ptr<BaseMutator> BaseMutation::get_mutator(int nvars, int nweights) {
+        fprintf(stderr, "Unimplemented base method called.");
+        abort();
+    }
 }

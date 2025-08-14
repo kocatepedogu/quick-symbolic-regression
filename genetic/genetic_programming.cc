@@ -16,7 +16,7 @@ GeneticProgramming::GeneticProgramming(
                int nweights, 
                int npopulation, 
                std::shared_ptr<BaseInitializer> initializer,
-               std::shared_ptr<BaseMutation> mutator,
+               std::shared_ptr<BaseMutation> mutation,
                std::shared_ptr<BaseCrossover> crossover,
                std::shared_ptr<BaseSelection> selection,
                std::shared_ptr<BaseRunner> runner) noexcept : 
@@ -25,7 +25,7 @@ GeneticProgramming::GeneticProgramming(
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
                initializer(initializer),
-               mutator(mutator),
+               mutation(mutation),
                crossover(crossover),
                selection(selection),
                runner(runner)
@@ -35,6 +35,9 @@ GeneticProgramming::GeneticProgramming(
 
     // Get selector
     selector = selection->get_selector(npopulation);
+
+    // Get mutator
+    mutator = mutation->get_mutator(nvars, nweights);
 
     // Fitnesses have never been computed yet
     initialized = false;

@@ -42,10 +42,13 @@ private:
     std::vector<Expression> population;
 
     std::shared_ptr<BaseInitializer> initializer;
-    std::shared_ptr<BaseMutation> mutator;
+    std::shared_ptr<BaseMutation> mutation;
     std::shared_ptr<BaseCrossover> crossover;
     std::shared_ptr<BaseSelection> selection;
+
+    std::shared_ptr<BaseMutator> mutator;
     std::shared_ptr<BaseSelector> selector;
+
     std::shared_ptr<BaseRunner> runner;
 
     const int nvars;

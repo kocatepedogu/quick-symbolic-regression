@@ -23,7 +23,7 @@ model = GeneticProgrammingIslands(
     nweights=NWEIGHTS, 
     npopulation=NPOPULATION, 
     initializer=DefaultInitializer(nvars=NVARS, nweights=NWEIGHTS, npopulation=NPOPULATION//NISLANDS),
-    mutation=DefaultMutation(nvars=NVARS, nweights=NWEIGHTS),
+    mutation=DefaultMutation(),
     crossover=DefaultCrossover(),
     selection=FitnessProportionalSelection(),
     runner_generator=HybridRunnerGenerator()

@@ -32,9 +32,7 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<DefaultMutation, BaseMutation, std::shared_ptr<DefaultMutation>>(m, "DefaultMutation")
-        .def(py::init<int, int, int, float>(),
-            py::arg("nvars"), 
-            py::arg("nweights"), 
+        .def(py::init<int, float>(),
             py::arg("max_depth") = 3, 
             py::arg("mutation_probability") = 0.7);
 

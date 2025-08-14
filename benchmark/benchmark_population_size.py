@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import libquicksr
 import numpy as np
 import matplotlib.pyplot as plt
 
-from libquicksr import *
+from quicksr import *
 
 # Define constants
 NISLANDS=28
@@ -41,7 +40,7 @@ def fit_model(npopulation, runner_generator):
         nweights=NWEIGHTS, 
         npopulation=npopulation, 
         initializer=DefaultInitializer(nvars=NVARS, nweights=NWEIGHTS, npopulation=npopulation//NISLANDS),
-        mutation=DefaultMutation(nvars=NVARS, nweights=NWEIGHTS),
+        mutation=DefaultMutation(),
         crossover=DefaultCrossover(),
         selection=FitnessProportionalSelection(),
         runner_generator=runner_generator

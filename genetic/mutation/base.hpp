@@ -4,15 +4,15 @@
 #ifndef MUTATION_BASE_HPP
 #define MUTATION_BASE_HPP
 
-#include "../../expressions/expression.hpp"
+#include "mutator/base.hpp"
+
+#include <memory>
 
 namespace qsr {
 
 class BaseMutation {
 public:
-    virtual Expression mutate(const Expression &expr) noexcept;
-
-    virtual ~BaseMutation() = default;
+    virtual std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights);
 };
 
 }
