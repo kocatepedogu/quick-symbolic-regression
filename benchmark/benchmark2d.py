@@ -35,7 +35,7 @@ model = GeneticProgrammingIslands(
 )
 
 # Fit model
-solution, history = model.fit(ngenerations=15, nsupergenerations=15, nepochs=1, verbose=True)
+solution, history = model.fit(ngenerations=20, nsupergenerations=15, nepochs=1, verbose=True)
 
 # Print best solution
 print("Best solution: {}".format(solution))
@@ -48,8 +48,8 @@ plt.figure(figsize=(10, 6))
 plt.plot(history)
 plt.xlabel('Generation')
 plt.ylabel('Loss (MSE)')
-plt.title('Learning History - {}'.format(solution))
-plt.xticks(np.arange(0, len(history), 1.0))
+plt.title('Learning History')
+plt.xticks(np.arange(0, len(history), 15.0))
 plt.grid()
 plt.savefig('benchmark_learning_history_2d.png')
 
