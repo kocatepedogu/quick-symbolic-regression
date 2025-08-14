@@ -8,7 +8,7 @@
 #include "../expressions/expression.hpp"
 #include "../runners/base.hpp"
 
-#include "crossover/base.hpp"
+#include "recombiner/base.hpp"
 #include "initialization/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
@@ -25,7 +25,7 @@ public:
                        int npopulation, 
                        std::shared_ptr<BaseInitialization> initializer,
                        std::shared_ptr<BaseMutation> mutator,
-                       std::shared_ptr<BaseCrossover> crossover,
+                       std::shared_ptr<BaseRecombiner> recombiner,
                        std::shared_ptr<BaseSelection> selection,
                        std::shared_ptr<BaseRunner> runner) noexcept;
 
@@ -43,7 +43,7 @@ private:
 
     std::shared_ptr<BaseInitialization> initialization;
     std::shared_ptr<BaseMutation> mutation;
-    std::shared_ptr<BaseCrossover> crossover;
+    std::shared_ptr<BaseRecombiner> recombiner;
     std::shared_ptr<BaseSelection> selection;
 
     std::shared_ptr<BaseInitializer> initializer;

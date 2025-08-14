@@ -10,11 +10,11 @@
 
 namespace qsr {
 
-class BaseCrossover {
+class BaseRecombiner {
 public:
-    virtual std::tuple<Expression, Expression> crossover(Expression e1, Expression e2) noexcept;
+    virtual std::tuple<Expression, Expression> recombine(Expression e1, Expression e2) noexcept;
 
-    virtual ~BaseCrossover() = default;
+    virtual ~BaseRecombiner() = default;
 };
 
 }

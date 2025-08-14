@@ -20,13 +20,13 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
     int npopulation, 
     std::shared_ptr<BaseInitialization> initialization, 
     std::shared_ptr<BaseMutation> mutation, 
-    std::shared_ptr<BaseCrossover> crossover, 
+    std::shared_ptr<BaseRecombiner> recombiner, 
     std::shared_ptr<BaseSelection> selection,
     std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
         dataset(dataset),
         initialization(initialization),
         mutation(mutation),
-        crossover(crossover),
+        recombiner(recombiner),
         selection(selection),
         runner_generator(runner_generator),
         nweights(nweights),
@@ -71,7 +71,7 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
             population_per_island, 
             initialization,
             mutation,
-            crossover,
+            recombiner,
             selection,
             runner);
         

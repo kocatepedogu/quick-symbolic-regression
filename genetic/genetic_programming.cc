@@ -16,7 +16,7 @@ GeneticProgramming::GeneticProgramming(
                int npopulation, 
                std::shared_ptr<BaseInitialization> initialization,
                std::shared_ptr<BaseMutation> mutation,
-               std::shared_ptr<BaseCrossover> crossover,
+               std::shared_ptr<BaseRecombiner> recombiner,
                std::shared_ptr<BaseSelection> selection,
                std::shared_ptr<BaseRunner> runner) noexcept : 
                dataset(dataset), 
@@ -25,7 +25,7 @@ GeneticProgramming::GeneticProgramming(
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
                initialization(initialization),
                mutation(mutation),
-               crossover(crossover),
+               recombiner(recombiner),
                selection(selection),
                runner(runner)
 {
@@ -100,7 +100,7 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
         for (int i = 0; i < npopulation / 2; ++i) {
             const auto &parent1 = selector->select(&population[0]);
             const auto &parent2 = selector->select(&population[0]);
-            const auto &children = crossover->crossover(parent1, parent2);
+            const auto &children = recombiner->recombine(parent1, parent2);
             const auto &child1 = get<0>(children);
             const auto &child2 = get<1>(children);
             offspring.push_back(mutator->mutate(child1));

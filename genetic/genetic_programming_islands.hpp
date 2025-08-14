@@ -6,7 +6,7 @@
 
 #include "../dataset/dataset.hpp"
 
-#include "crossover/base.hpp"
+#include "recombiner/base.hpp"
 #include "genetic_programming.hpp"
 #include "initialization/base.hpp"
 #include "mutation/base.hpp"
@@ -23,7 +23,7 @@ public:
                               int npopulation, 
                               std::shared_ptr<BaseInitialization> initialization,
                               std::shared_ptr<BaseMutation> mutation,
-                              std::shared_ptr<BaseCrossover> crossover,
+                              std::shared_ptr<BaseRecombiner> recombiner,
                               std::shared_ptr<BaseSelection> selection,
                               std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept;
 
@@ -42,7 +42,7 @@ private:
     std::shared_ptr<BaseMutation> mutation;
 
     /// Crossover operator shared by all islands
-    std::shared_ptr<BaseCrossover> crossover;
+    std::shared_ptr<BaseRecombiner> recombiner;
 
     /// Selection operator shared by all islands
     std::shared_ptr<BaseSelection> selection;

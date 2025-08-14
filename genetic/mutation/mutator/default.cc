@@ -7,7 +7,7 @@ namespace qsr {
 
 Expression DefaultMutator::mutate(const Expression &expr) noexcept {
     const auto &random_expr = expression_generator.generate();
-    const auto &result_pair = crossover.crossover(expr, random_expr);
+    const auto &result_pair = recombiner.recombine(expr, random_expr);
 
     Expression result = 0.0;
 

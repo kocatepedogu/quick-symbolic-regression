@@ -29,7 +29,7 @@ model = GeneticProgrammingIslands(
     npopulation=NPOPULATION, 
     initialization=DefaultInitialization(),
     mutation=DefaultMutation(),
-    crossover=DefaultCrossover(),
+    recombiner=DefaultRecombiner(),
     selection=FitnessProportionalSelection(),
     runner_generator=HybridRunnerGenerator()
 )

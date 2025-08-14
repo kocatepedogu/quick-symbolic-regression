@@ -12,12 +12,12 @@
 
 namespace qsr {
 
-class DefaultCrossover : public BaseCrossover {
+class DefaultRecombiner : public BaseRecombiner {
 public:
-    constexpr DefaultCrossover(float crossover_probability) :
+    constexpr DefaultRecombiner(float crossover_probability) :
         crossover_probability(crossover_probability), expression_picker() {}
 
-    std::tuple<Expression, Expression> crossover(Expression e1, Expression e2) noexcept;
+    std::tuple<Expression, Expression> recombine(Expression e1, Expression e2) noexcept;
 
 private:
     ExpressionPicker expression_picker;

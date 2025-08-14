@@ -40,7 +40,7 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/initialization
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/initialization/initializer
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/crossover
+    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/recombiner
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/mutation
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/mutation/mutator
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/selection

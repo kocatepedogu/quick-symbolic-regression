@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "../genetic/crossover/default.hpp"
+#include "../genetic/recombiner/default.hpp"
 #include "../expressions/unary.hpp"
 #include "../expressions/binary.hpp"
 
@@ -20,10 +20,10 @@ int main(void) {
     Expression f1 = x * x + w0;
     Expression f2 = Sin(w1 * x);
 
-    DefaultCrossover crossover(1.0);
+    DefaultRecombiner recombiner(1.0);
 
     for (int i = 0; i < 1000; ++i) {
-        auto offspring = crossover.crossover(f1, f2);
+        auto offspring = recombiner.recombine(f1, f2);
         std::cout << std::get<0>(offspring) << " " << std::get<1>(offspring) << std::endl;
     }
 
