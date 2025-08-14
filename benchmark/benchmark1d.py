@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import libquicksr
 import numpy as np
 import matplotlib.pyplot as plt
 
-from libquicksr import *
+from quicksr import *
 
 # Define constants
 NPOPULATION=11200
@@ -48,3 +47,19 @@ plt.title('Learning History - {}'.format(solution))
 plt.xticks(np.arange(0, len(history), 1.0))
 plt.grid()
 plt.savefig('benchmark_learning_history_1d.png')
+
+# Compute predicted values
+solution_lambda = expr_to_lambda(solution)
+y_predicted = solution_lambda(X)
+print("Predicted values: {}".format(y_predicted))
+
+# Compare target and predicted values
+plt.figure(figsize=(10, 6))
+plt.plot(X, y, label='TruTargete')
+plt.plot(X, y_predicted, label='Predicted')
+plt.xlabel('X')
+plt.ylabel('y')
+plt.title('Target vs Predicted')
+plt.legend()
+plt.grid()
+plt.savefig('benchmark_target_vs_predicted_1d.png')

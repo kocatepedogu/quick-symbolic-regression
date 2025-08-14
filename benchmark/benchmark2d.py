@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import libquicksr
 import numpy as np
 import matplotlib.pyplot as plt
 
-from libquicksr import *
+from quicksr import *
 
 # Define constants
 NPOPULATION=11200
@@ -36,7 +35,7 @@ model = GeneticProgrammingIslands(
 )
 
 # Fit model
-solution, history = model.fit(ngenerations=15, nsupergenerations=4, nepochs=50, verbose=True)
+solution, history = model.fit(ngenerations=15, nsupergenerations=15, nepochs=1, verbose=True)
 
 # Print best solution
 print("Best solution: {}".format(solution))
@@ -53,3 +52,20 @@ plt.title('Learning History - {}'.format(solution))
 plt.xticks(np.arange(0, len(history), 1.0))
 plt.grid()
 plt.savefig('benchmark_learning_history_2d.png')
+
+# Compute predicted values
+solution_lambda = expr_to_lambda(solution)
+y_predicted = solution_lambda(X)
+print("Predicted values: {}".format(y_predicted))
+
+# Compare target and predicted values
+fig = plt.figure(figsize=(15, 15))
+
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(np.array(X)[:, 0], np.array(X)[:, 1], np.array(y), c='b', marker='o', label='Target')
+ax.scatter(np.array(X)[:, 0], np.array(X)[:, 1], np.array(y_predicted), c='r', marker='x', label='Prediction')
+ax.legend()
+
+plt.title('Target vs Prediction')
+plt.savefig('benchmark_target_vs_predicted_2d.png')
+plt.show()
