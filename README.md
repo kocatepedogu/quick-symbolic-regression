@@ -2,8 +2,8 @@
 Hybrid CPU/GPU implementation of symbolic regression with genetic programming, backpropagation and bytecode virtual machine
 
 <div style="display: inline-block;">
-  <img src="./benchmark/benchmark_learning_history_1d.png" height="250px">
-  <img src="./benchmark/benchmark_target_vs_predicted_1d.png" height="250px">
+  <img src="./benchmark/benchmark_learning_history_1d.png" height="200px">
+  <img src="./benchmark/benchmark_target_vs_predicted_1d.png" height="200px">
 </div>
 
 <div style="display: inline-block;">
