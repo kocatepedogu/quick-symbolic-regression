@@ -9,7 +9,7 @@ class SymbolicRegressionModel:
         nweights, 
         npopulation,
         nislands,
-        initialization=DefaultInitialization(), 
+        initialization=GrowInitialization(), 
         mutation=DefaultMutation(), 
         recombination=DefaultRecombination(), 
         selection=FitnessProportionalSelection(), 

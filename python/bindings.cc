@@ -10,7 +10,7 @@
 
 #include "../genetic/genetic_programming_islands.hpp"
 
-#include "../genetic/initialization/default.hpp"
+#include "../genetic/initialization/grow_initialization.hpp"
 #include "../genetic/mutation/default.hpp"
 #include "../genetic/recombination/default.hpp"
 #include "../genetic/selection/fitness_proportional_selection.hpp"
@@ -65,7 +65,7 @@ PYBIND11_MODULE(libquicksr, m) {
     py::class_<BaseInitialization, std::shared_ptr<BaseInitialization>>(m, "BaseInitialization")
         .def(py::init<>());
 
-    py::class_<DefaultInitialization, BaseInitialization, std::shared_ptr<DefaultInitialization>>(m, "DefaultInitialization")
+    py::class_<GrowInitialization, BaseInitialization, std::shared_ptr<GrowInitialization>>(m, "GrowInitialization")
         .def(py::init<int>(),
              py::arg("max_depth") = 1);
 
