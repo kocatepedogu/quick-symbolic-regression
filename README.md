@@ -18,6 +18,7 @@ sudo dnf install gcc gcc-c++ make cmake
 sudo dnf install rocminfo rocm-opencl rocm-clinfo rocm-hip rocm-hip-devel amd-smi
 sudo dnf install python3 python3-devel
 sudo dnf install libasan libubsan
+sudo dnf install doxygen
 
 cmake .
 make -j$(nproc)
