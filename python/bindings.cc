@@ -14,6 +14,7 @@
 #include "../genetic/mutation/default.hpp"
 #include "../genetic/recombination/default.hpp"
 #include "../genetic/selection/fitness_proportional_selection.hpp"
+#include "../genetic/selection/rank_selection.hpp"
 #include "../runners/inter-individual/runner_generator.hpp"
 #include "../runners/intra-individual/runner_generator.hpp"
 #include "../runners/cpu/runner_generator.hpp"
@@ -52,6 +53,10 @@ PYBIND11_MODULE(libquicksr, m) {
 
     py::class_<FitnessProportionalSelection, BaseSelection, std::shared_ptr<FitnessProportionalSelection>>(m, "FitnessProportionalSelection")
         .def(py::init<>());
+
+    py::class_<RankSelection, BaseSelection, std::shared_ptr<RankSelection>>(m, "RankSelection")
+        .def(py::init<float>(), 
+             py::arg("sp") = 1.0f);
 
     /* Initialization Classes */
 
