@@ -4,8 +4,6 @@
 #include "default.hpp"
 
 #include "../../../util/rng.hpp"
-#include "../../../expressions/unary.hpp"
-#include "../../../expressions/binary.hpp"
 
 #include "../../expression_picker.hpp"
 
@@ -13,26 +11,6 @@
 #include <cassert>
 
 namespace qsr {
-
-Expression reorganize(const Expression& e) {
-    #define _REORGANIZE_CALL(i) \
-        reorganize(e.operands[i])
-
-    switch (e.operation) {
-        case CONSTANT:
-        case IDENTITY:
-        case PARAMETER:
-            return e;
-
-        BINARY_OP_CASE(ADDITION, _REORGANIZE_CALL, +);
-        BINARY_OP_CASE(SUBTRACTION, _REORGANIZE_CALL, -);
-        BINARY_OP_CASE(MULTIPLICATION, _REORGANIZE_CALL, *);
-        BINARY_OP_CASE(DIVISION, _REORGANIZE_CALL, /);
-        UNARY_OP_CASE(SINE, _REORGANIZE_CALL, Sin);
-        UNARY_OP_CASE(COSINE, _REORGANIZE_CALL, Cos);
-        UNARY_OP_CASE(EXPONENTIAL, _REORGANIZE_CALL, Exp);
-    }
-}
 
 std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, Expression e2) noexcept {
     if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > crossover_probability) {
@@ -61,8 +39,8 @@ std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, E
 
     // Update number of nodes in each tree and apply optimizations
 
-    Expression e1_reorg = reorganize(e1);
-    Expression e2_reorg = reorganize(e2);
+    Expression e1_reorg = expression_reorganizer.reorganize(e1);
+    Expression e2_reorg = expression_reorganizer.reorganize(e2);
 
     // If the number of nodes exceed the maximum depth, revert to original trees
     if (e1.num_of_nodes > max_depth) {
