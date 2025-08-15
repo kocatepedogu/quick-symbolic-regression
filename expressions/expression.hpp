@@ -46,7 +46,8 @@ struct Expression
     constexpr Expression(float value) noexcept :
         operation(CONSTANT), 
         value(value), 
-        num_of_nodes(1) {}
+        num_of_nodes(1),
+        depth(1) {}
 
     /**
       * @brief Constructs an expression that corresponds to a variable (input feature) or trainable parameter (weight)
@@ -58,7 +59,8 @@ struct Expression
     constexpr Expression(operation_t operation, int argindex) noexcept :
         operation(operation), 
         argindex(argindex), 
-        num_of_nodes(1) {}
+        num_of_nodes(1),
+        depth(1) {}
 
     /**
       * @brief Constructs an expression in which a unary function is applied to the result of another expression.
@@ -91,6 +93,9 @@ struct Expression
 
     /// Total number of nodes in the tree representing the expression
     int num_of_nodes;
+
+    /// Depth of the tree representing the expression
+    int depth;
 
     /// Training loss (MSE on dataset)
     float loss;

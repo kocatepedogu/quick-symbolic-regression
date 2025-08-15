@@ -42,11 +42,11 @@ std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, E
     Expression e1_reorg = expression_reorganizer.reorganize(e1);
     Expression e2_reorg = expression_reorganizer.reorganize(e2);
 
-    // If the number of nodes exceed the maximum depth, revert to original trees
-    if (e1.num_of_nodes > max_depth) {
+    // If the depth exceeds the maximum depth, revert to original trees
+    if (e1.depth > max_depth) {
         e1_reorg = e1_original;
     }
-    if (e2.num_of_nodes > max_depth) {
+    if (e2.depth > max_depth) {
         e2_reorg = e2_original;
     }
 

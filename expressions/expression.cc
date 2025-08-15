@@ -12,13 +12,15 @@ namespace qsr {
 Expression::Expression(operation_t operation, const Expression& e) noexcept :
     operation(operation), 
     operands({e}), 
-    num_of_nodes(e.num_of_nodes + 1) {}
+    num_of_nodes(e.num_of_nodes + 1),
+    depth(e.depth + 1) {}
 
     
 Expression::Expression(operation_t operation, const Expression& e1, const Expression& e2) noexcept :
     operation(operation), 
     operands({e1, e2}), 
-    num_of_nodes(e1.num_of_nodes + e2.num_of_nodes + 1) {}
+    num_of_nodes(e1.num_of_nodes + e2.num_of_nodes + 1),
+    depth(std::max(e1.depth, e2.depth) + 1) {}
 
 
 static std::string to_string(const Expression& node, const Expression& root) {

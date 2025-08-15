@@ -24,8 +24,8 @@ Expression SubtreeMutator::mutate(const Expression &expr) noexcept {
     // Return the mutated expression
     result = expression_reorganizer.reorganize(result);
 
-    // If the number of nodes in the new expression exceeds the maximum depth, revert to original tree
-    if (result.num_of_nodes > max_depth) {
+    // If the depth of the new expression exceeds the maximum depth, revert to original tree
+    if (result.depth > max_depth) {
         result = expr;
     }
 
