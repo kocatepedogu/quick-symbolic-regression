@@ -41,6 +41,10 @@ python3 ./benchmark/benchmark1d.py # Single feature
 python3 ./benchmark/benchmark2d.py # Two features
 ```
 
+## Documentation
+
+Run `doxygen Doxyfile` in the root directory to generate low-level documentation of the codebase and the project internals.
+
 ## Algorithm
 
 At the beginning, a random population of expressions (in parse tree form) is generated. The trees contain nodes of unary operations (sin, cos, exp), binary operations (+, -, *, /), variables/features (x0, x1, ...), constants (c0, c1, ...), and trainable parameters (w0, w1, ...) which are initially random but are later trained using gradient descent.
