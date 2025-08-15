@@ -38,9 +38,8 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<SubtreeMutation, BaseMutation, std::shared_ptr<SubtreeMutation>>(m, "SubtreeMutation")
-        .def(py::init<int, int, float>(),
+        .def(py::init<int, float>(),
             py::arg("max_depth_increment") = 3, 
-            py::arg("max_depth") = INT_MAX,
             py::arg("mutation_probability") = 0.7);
 
     /* Recombination Classes */
@@ -49,8 +48,7 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<DefaultRecombination, BaseRecombination, std::shared_ptr<DefaultRecombination>>(m, "DefaultRecombination")
-        .def(py::init<int, float>(), 
-             py::arg("max_depth") = INT_MAX,
+        .def(py::init<float>(), 
              py::arg("crossover_probability") = 0.8);
 
     /* Selection Classes */
@@ -71,16 +69,13 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<GrowInitialization, BaseInitialization, std::shared_ptr<GrowInitialization>>(m, "GrowInitialization")
-        .def(py::init<int>(),
-             py::arg("max_depth") = 1);
+        .def(py::init<>());
 
     py::class_<FullInitialization, BaseInitialization, std::shared_ptr<FullInitialization>>(m, "FullInitialization")
-        .def(py::init<int>(),
-             py::arg("depth") = 8);
+        .def(py::init<>());
 
     py::class_<RampedHalfAndHalfInitialization, BaseInitialization, std::shared_ptr<RampedHalfAndHalfInitialization>>(m, "RampedHalfAndHalfInitialization")
-        .def(py::init<int>(),
-             py::arg("depth") = 8);
+        .def(py::init<>());
 
     /* Dataset Class */
 
@@ -112,7 +107,7 @@ PYBIND11_MODULE(libquicksr, m) {
         // Constructor
         .def(py::init<
             std::shared_ptr<Dataset>, 
-            int, int, int,
+            int, int, int, int,
             std::shared_ptr<BaseInitialization>,
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseRecombination>,
@@ -122,6 +117,7 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("nislands"),
             py::arg("nweights"),
             py::arg("npopulation"),
+            py::arg("max_depth"),
             py::arg("initialization"),
             py::arg("mutation"),
             py::arg("recombination"),

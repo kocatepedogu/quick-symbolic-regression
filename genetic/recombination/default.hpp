@@ -9,15 +9,12 @@
 namespace qsr {
     class DefaultRecombination : public BaseRecombination {
     public:
-        constexpr DefaultRecombination(int max_depth, float crossover_probability) : 
-            max_depth(max_depth),
+        constexpr DefaultRecombination(float crossover_probability) : 
             crossover_probability(crossover_probability) {}
 
-        std::shared_ptr<BaseRecombiner> get_recombiner() override;
+        std::shared_ptr<BaseRecombiner> get_recombiner(int max_depth) override;
 
     private:
-        const int max_depth;
-
         const float crossover_probability;
     };
 }

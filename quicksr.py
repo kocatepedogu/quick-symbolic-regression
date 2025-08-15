@@ -9,6 +9,7 @@ class SymbolicRegressionModel:
         nweights, 
         npopulation,
         nislands,
+        max_depth=16,
         initialization=GrowInitialization(), 
         mutation=SubtreeMutation(), 
         recombination=DefaultRecombination(), 
@@ -30,6 +31,7 @@ class SymbolicRegressionModel:
         self.nislands = nislands
         self.nweights = nweights
         self.npopulation = npopulation
+        self.max_depth = max_depth
         self.initialization = initialization
         self.mutation = mutation
         self.recombination = recombination
@@ -58,6 +60,7 @@ class SymbolicRegressionModel:
             nislands=self.nislands, 
             nweights=self.nweights, 
             npopulation=self.npopulation, 
+            max_depth=self.max_depth,
             initialization=self.initialization,
             mutation=self.mutation,
             recombination=self.recombination,

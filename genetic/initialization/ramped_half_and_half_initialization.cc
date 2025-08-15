@@ -5,7 +5,7 @@
 #include "initializer/ramped_half_and_half_initializer.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseInitializer> RampedHalfAndHalfInitialization::get_initializer(int nvars, int nweights, int npopulation) {
+    std::shared_ptr<BaseInitializer> RampedHalfAndHalfInitialization::get_initializer(int nvars, int nweights, int npopulation, int max_depth) {
         return std::make_shared<RampedHalfAndHalfInitializer>(nvars, nweights, max_depth, npopulation);
     }
 }

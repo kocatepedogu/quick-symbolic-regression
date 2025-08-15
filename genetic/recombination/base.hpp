@@ -10,7 +10,8 @@
 namespace qsr {
     class BaseRecombination {
         public:
-            virtual std::shared_ptr<BaseRecombiner> get_recombiner();
+            virtual std::shared_ptr<BaseRecombiner> get_recombiner(int max_depth);
+
             virtual ~BaseRecombination() = default;
     };
 }

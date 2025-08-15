@@ -21,6 +21,7 @@ public:
                               int nislands, 
                               int nweights, 
                               int npopulation, 
+                              int max_depth,
                               std::shared_ptr<BaseInitialization> initialization,
                               std::shared_ptr<BaseMutation> mutation,
                               std::shared_ptr<BaseRecombination> recombination,
@@ -61,6 +62,9 @@ private:
 
     /// Number of islands
     const int nislands;
+
+    /// Maximum depth of expressions
+    const int max_depth;
 };
 
 }

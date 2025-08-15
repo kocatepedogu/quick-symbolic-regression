@@ -6,7 +6,7 @@
 #include <memory>
 
 namespace qsr {
-    std::shared_ptr<BaseRecombiner> BaseRecombination::get_recombiner() {
+    std::shared_ptr<BaseRecombiner> BaseRecombination::get_recombiner(int max_depth) {
         fprintf(stderr, "Unimplemented base method called.");
         abort();
     }

@@ -12,7 +12,7 @@ namespace qsr {
 
 class BaseMutation {
 public:
-    virtual std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights);
+    virtual std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights, int max_depth);
 };
 
 }

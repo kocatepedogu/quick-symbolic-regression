@@ -4,7 +4,7 @@
 #include "base.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseInitializer> BaseInitialization::get_initializer(int nvars, int nweights, int npopulation) {
+    std::shared_ptr<BaseInitializer> BaseInitialization::get_initializer(int nvars, int nweights, int npopulation, int max_depth) {
         fprintf(stderr, "Unimplemented base method called.");
         abort();
     }

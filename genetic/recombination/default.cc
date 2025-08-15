@@ -5,7 +5,7 @@
 #include "recombiner/default.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseRecombiner> DefaultRecombination::get_recombiner() {
+    std::shared_ptr<BaseRecombiner> DefaultRecombination::get_recombiner(int max_depth) {
         return std::make_shared<DefaultRecombiner>(max_depth, crossover_probability);
     }
 }

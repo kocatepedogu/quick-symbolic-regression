@@ -18,6 +18,7 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
     int nislands, 
     int nweights, 
     int npopulation, 
+    int max_depth,
     std::shared_ptr<BaseInitialization> initialization, 
     std::shared_ptr<BaseMutation> mutation, 
     std::shared_ptr<BaseRecombination> recombination, 
@@ -31,7 +32,8 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         runner_generator(runner_generator),
         nweights(nweights),
         nislands(nislands),
-        npopulation(npopulation)
+        npopulation(npopulation),
+        max_depth(max_depth)
 {
     // Create empty island array
     islands = new GeneticProgramming*[nislands];
@@ -69,6 +71,7 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
             dataset, 
             nweights, 
             population_per_island, 
+            max_depth,
             initialization,
             mutation,
             recombination,

@@ -10,7 +10,7 @@
 namespace qsr {
     class BaseInitialization {
     public:
-        virtual std::shared_ptr<BaseInitializer> get_initializer(int nvars, int nweights, int npopulation);
+        virtual std::shared_ptr<BaseInitializer> get_initializer(int nvars, int nweights, int npopulation, int max_depth);
     };
 }
 

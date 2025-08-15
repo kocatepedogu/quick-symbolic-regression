@@ -14,6 +14,7 @@ GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
                int nweights, 
                int npopulation, 
+               int max_depth,
                std::shared_ptr<BaseInitialization> initialization,
                std::shared_ptr<BaseMutation> mutation,
                std::shared_ptr<BaseRecombination> recombination,
@@ -23,6 +24,7 @@ GeneticProgramming::GeneticProgramming(
                nvars(dataset->n), 
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
+               max_depth(max_depth),
                initialization(initialization),
                mutation(mutation),
                recombination(recombination),
@@ -33,13 +35,13 @@ GeneticProgramming::GeneticProgramming(
     selector = selection->get_selector(npopulation);
 
     // Get mutator
-    mutator = mutation->get_mutator(nvars, nweights);
+    mutator = mutation->get_mutator(nvars, nweights, max_depth);
 
     // Get recombiner
-    recombiner = recombination->get_recombiner();
+    recombiner = recombination->get_recombiner(max_depth);
 
     // Get initializer
-    initializer = initialization->get_initializer(nvars, nweights, npopulation);
+    initializer = initialization->get_initializer(nvars, nweights, npopulation, max_depth);
 
     // Initialize island with a population of random expressions
     initializer->initialize(population);

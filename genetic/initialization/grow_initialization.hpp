@@ -9,12 +9,7 @@
 namespace qsr {
     class GrowInitialization : public BaseInitialization {
     public:
-        constexpr GrowInitialization(int max_depth) : max_depth(max_depth) {}
-    
-        std::shared_ptr<BaseInitializer> get_initializer(int nvars, int nweights, int npopulation) override;
-
-    private:
-        const int max_depth;
+        std::shared_ptr<BaseInitializer> get_initializer(int nvars, int nweights, int npopulation, int max_depth) override;
     };
 }
 

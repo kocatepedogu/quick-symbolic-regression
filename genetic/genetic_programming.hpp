@@ -23,6 +23,7 @@ public:
     GeneticProgramming(std::shared_ptr<const Dataset> dataset, 
                        int nweights, 
                        int npopulation, 
+                       int max_depth,
                        std::shared_ptr<BaseInitialization> initializer,
                        std::shared_ptr<BaseMutation> mutator,
                        std::shared_ptr<BaseRecombination> recombination,
@@ -56,6 +57,7 @@ private:
     const int nvars;
     const int nweights;
     const int npopulation;
+    const int max_depth;
 
     bool initialized;
 };
