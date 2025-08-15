@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef MUTATOR_DEFAULT_HPP
-#define MUTATOR_DEFAULT_HPP
+#ifndef MUTATOR_SUBTREE_HPP
+#define MUTATOR_SUBTREE_HPP
 
 #include "../../../expressions/expression.hpp"
 

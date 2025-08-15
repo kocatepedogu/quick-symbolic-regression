@@ -18,6 +18,8 @@
 #include "../genetic/selection/rank_selection.hpp"
 
 #include "../genetic/mutation/subtree_mutation.hpp"
+#include "../genetic/mutation/hoist_mutation.hpp"
+
 #include "../genetic/recombination/default.hpp"
 
 #include "../runners/inter-individual/runner_generator.hpp"
@@ -40,6 +42,10 @@ PYBIND11_MODULE(libquicksr, m) {
     py::class_<SubtreeMutation, BaseMutation, std::shared_ptr<SubtreeMutation>>(m, "SubtreeMutation")
         .def(py::init<int, float>(),
             py::arg("max_depth_increment") = 3, 
+            py::arg("mutation_probability") = 0.7);
+
+    py::class_<HoistMutation, BaseMutation, std::shared_ptr<HoistMutation>>(m, "HoistMutation")
+        .def(py::init<float>(),
             py::arg("mutation_probability") = 0.7);
 
     /* Recombination Classes */
