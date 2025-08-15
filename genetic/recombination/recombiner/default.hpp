@@ -14,13 +14,17 @@ namespace qsr {
 
 class DefaultRecombiner : public BaseRecombiner {
 public:
-    constexpr DefaultRecombiner(float crossover_probability) :
-        crossover_probability(crossover_probability), expression_picker() {}
+    constexpr DefaultRecombiner(int max_depth, float crossover_probability) :
+        max_depth(max_depth),
+        crossover_probability(crossover_probability), 
+        expression_picker() {}
 
     std::tuple<Expression, Expression> recombine(Expression e1, Expression e2) noexcept;
 
 private:
     ExpressionPicker expression_picker;
+
+    const int max_depth;
 
     float crossover_probability;
 };

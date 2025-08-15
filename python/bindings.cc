@@ -44,7 +44,8 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<DefaultRecombination, BaseRecombination, std::shared_ptr<DefaultRecombination>>(m, "DefaultRecombination")
-        .def(py::init<float>(), 
+        .def(py::init<int, float>(), 
+             py::arg("max_depth") = INT_MAX,
              py::arg("crossover_probability") = 0.8);
 
     /* Selection Classes */

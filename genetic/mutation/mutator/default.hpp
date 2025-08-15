@@ -18,7 +18,7 @@ public:
                             float mutation_probability)  :
         max_depth(max_depth),
         expression_generator(nvars, nweights, max_depth_increment), 
-        recombiner(mutation_probability) {}
+        recombiner(max_depth, mutation_probability) {}
 
     Expression mutate(const Expression &expr) noexcept;
 

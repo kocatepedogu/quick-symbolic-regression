@@ -6,6 +6,6 @@
 
 namespace qsr {
     std::shared_ptr<BaseRecombiner> DefaultRecombination::get_recombiner() {
-        return std::make_shared<DefaultRecombiner>(crossover_probability);
+        return std::make_shared<DefaultRecombiner>(max_depth, crossover_probability);
     }
 }

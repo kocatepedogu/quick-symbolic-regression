@@ -20,7 +20,7 @@ int main(void) {
     Expression f1 = x * x + w0;
     Expression f2 = Sin(w1 * x);
 
-    DefaultRecombiner recombiner(1.0);
+    DefaultRecombiner recombiner(10, 1.0);
 
     for (int i = 0; i < 1000; ++i) {
         auto offspring = recombiner.recombine(f1, f2);

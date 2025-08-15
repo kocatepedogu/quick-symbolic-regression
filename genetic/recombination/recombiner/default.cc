@@ -39,6 +39,10 @@ std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, E
         return std::make_tuple(e1, e2);
     }
 
+    // Save original expressions
+    const Expression e1_original(e1);
+    const Expression e2_original(e2);
+
     // Get original weights from both expressions
 
     const std::vector<float> weights1 = e1.weights;
@@ -59,6 +63,14 @@ std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, E
 
     Expression e1_reorg = reorganize(e1);
     Expression e2_reorg = reorganize(e2);
+
+    // If the number of nodes exceed the maximum depth, revert to original trees
+    if (e1.num_of_nodes > max_depth) {
+        e1_reorg = e1_original;
+    }
+    if (e2.num_of_nodes > max_depth) {
+        e2_reorg = e2_original;
+    }
 
     // If both trees have weights, apply whole arithmetic crossover to weights
 
