@@ -5,7 +5,6 @@
 #define MUTATION_DEFAULT_HPP
 
 #include "base.hpp"
-#include "mutator/default.hpp"
 
 #include <memory>
 
@@ -13,14 +12,17 @@ namespace qsr {
 
 class DefaultMutation : public BaseMutation {
 public:
-    constexpr DefaultMutation(int max_depth, float mutation_probability) :
+    constexpr DefaultMutation(int max_depth_increment, int max_depth, float mutation_probability) :
+        max_depth_increment(max_depth_increment),
         max_depth(max_depth),
         mutation_probability(mutation_probability) {}
 
     virtual std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights) override;
 
 private:
+    int max_depth_increment;
     int max_depth;
+
     float mutation_probability;
 };
 

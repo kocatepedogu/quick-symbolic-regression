@@ -20,6 +20,11 @@ Expression DefaultMutator::mutate(const Expression &expr) noexcept {
         result = get<1>(result_pair);
     }
 
+    // If the number of nodes exceed the maximum depth, revert to original expression
+    if (result.num_of_nodes > max_depth) {
+        result = expr;
+    }
+
     // Use the same weights as the original expression
     result.weights = expr.weights;
 

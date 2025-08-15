@@ -13,13 +13,18 @@ namespace qsr {
 
 class DefaultMutator : public BaseMutator {
 public:
-    constexpr DefaultMutator(int nvars, int nweights, int max_depth, float mutation_probability)  :
-        expression_generator(nvars, nweights, max_depth), 
+    constexpr DefaultMutator(int nvars, int nweights, 
+                            int max_depth_increment, int max_depth, 
+                            float mutation_probability)  :
+        max_depth(max_depth),
+        expression_generator(nvars, nweights, max_depth_increment), 
         recombiner(mutation_probability) {}
 
     Expression mutate(const Expression &expr) noexcept;
 
 private:
+    const int max_depth;
+
     ExpressionGenerator expression_generator;
 
     DefaultRecombiner recombiner;

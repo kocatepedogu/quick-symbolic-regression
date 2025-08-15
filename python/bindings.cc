@@ -33,8 +33,9 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<DefaultMutation, BaseMutation, std::shared_ptr<DefaultMutation>>(m, "DefaultMutation")
-        .def(py::init<int, float>(),
-            py::arg("max_depth") = 3, 
+        .def(py::init<int, int, float>(),
+            py::arg("max_depth_increment") = 3, 
+            py::arg("max_depth") = INT_MAX,
             py::arg("mutation_probability") = 0.7);
 
     /* Recombination Classes */
