@@ -23,7 +23,7 @@ public:
         mutation_probability(mutation_probability),
         expression_generator(nvars, nweights, max_depth_increment) {}
 
-    Expression mutate(const Expression &expr) noexcept;
+    Expression mutate(const Expression &expr) noexcept override;
 
 private:
     const int max_depth;

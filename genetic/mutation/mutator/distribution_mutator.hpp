@@ -21,7 +21,7 @@ public:
             assert(mutators.size() == probabilities.size());
         }
 
-    Expression mutate(const Expression &expr) noexcept;
+    Expression mutate(const Expression &expr) noexcept override;
 
 private:
     const std::vector<std::shared_ptr<BaseMutator>> mutators;

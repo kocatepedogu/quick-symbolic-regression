@@ -19,6 +19,7 @@
 
 #include "../genetic/mutation/subtree_mutation.hpp"
 #include "../genetic/mutation/hoist_mutation.hpp"
+#include "../genetic/mutation/point_mutation.hpp"
 #include "../genetic/mutation/distribution_mutation.hpp"
 
 #include "../genetic/recombination/default.hpp"
@@ -46,6 +47,10 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("mutation_probability") = 0.7);
 
     py::class_<HoistMutation, BaseMutation, std::shared_ptr<HoistMutation>>(m, "HoistMutation")
+        .def(py::init<float>(),
+            py::arg("mutation_probability") = 0.7);
+
+    py::class_<PointMutation, BaseMutation, std::shared_ptr<PointMutation>>(m, "PointMutation")
         .def(py::init<float>(),
             py::arg("mutation_probability") = 0.7);
 

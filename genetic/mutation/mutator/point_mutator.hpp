@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef MUTATOR_HOIST_HPP
-#define MUTATOR_HOIST_HPP
+#ifndef MUTATOR_POINT_HPP
+#define MUTATOR_POINT_HPP
 
 #include "../../../expressions/expression.hpp"
 
@@ -13,14 +13,20 @@
 
 namespace qsr {
 
-class HoistMutator : public BaseMutator {
+class PointMutator : public BaseMutator {
 public:
-    constexpr HoistMutator(float mutation_probability)  :
+    constexpr PointMutator(int nvars, int nweights, float mutation_probability)  :
+        nvars(nvars),
+        nweights(nweights),
         mutation_probability(mutation_probability) {}
 
     Expression mutate(const Expression &expr) noexcept override;
 
 private:
+    const int nvars;
+
+    const int nweights;
+
     const float mutation_probability;
 
     ExpressionPicker expression_picker;

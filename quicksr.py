@@ -1,4 +1,7 @@
 
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import libquicksr
 import numpy as np
 
@@ -11,7 +14,7 @@ class SymbolicRegressionModel:
         nislands,
         max_depth=16,
         initialization=GrowInitialization(), 
-        mutation=DistributionMutation([SubtreeMutation(), HoistMutation()], [0.5, 0.5]), 
+        mutation=DistributionMutation([SubtreeMutation(), HoistMutation(), PointMutation()], [0.5, 0.25, 0.25]), 
         recombination=DefaultRecombination(), 
         selection=FitnessProportionalSelection(), 
         runner_generator=HybridRunnerGenerator()):
