@@ -11,10 +11,14 @@
 #include "../genetic/genetic_programming_islands.hpp"
 
 #include "../genetic/initialization/grow_initialization.hpp"
-#include "../genetic/mutation/default.hpp"
-#include "../genetic/recombination/default.hpp"
+#include "../genetic/initialization/full_initialization.hpp"
+
 #include "../genetic/selection/fitness_proportional_selection.hpp"
 #include "../genetic/selection/rank_selection.hpp"
+
+#include "../genetic/mutation/default.hpp"
+#include "../genetic/recombination/default.hpp"
+
 #include "../runners/inter-individual/runner_generator.hpp"
 #include "../runners/intra-individual/runner_generator.hpp"
 #include "../runners/cpu/runner_generator.hpp"
@@ -68,6 +72,10 @@ PYBIND11_MODULE(libquicksr, m) {
     py::class_<GrowInitialization, BaseInitialization, std::shared_ptr<GrowInitialization>>(m, "GrowInitialization")
         .def(py::init<int>(),
              py::arg("max_depth") = 1);
+
+    py::class_<FullInitialization, BaseInitialization, std::shared_ptr<FullInitialization>>(m, "FullInitialization")
+        .def(py::init<int>(),
+             py::arg("depth") = 1);
 
     /* Dataset Class */
 
