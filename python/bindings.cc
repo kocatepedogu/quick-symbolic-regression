@@ -12,6 +12,7 @@
 
 #include "../genetic/initialization/grow_initialization.hpp"
 #include "../genetic/initialization/full_initialization.hpp"
+#include "../genetic/initialization/ramped_half_and_half_initialization.hpp"
 
 #include "../genetic/selection/fitness_proportional_selection.hpp"
 #include "../genetic/selection/rank_selection.hpp"
@@ -75,7 +76,11 @@ PYBIND11_MODULE(libquicksr, m) {
 
     py::class_<FullInitialization, BaseInitialization, std::shared_ptr<FullInitialization>>(m, "FullInitialization")
         .def(py::init<int>(),
-             py::arg("depth") = 1);
+             py::arg("depth") = 8);
+
+    py::class_<RampedHalfAndHalfInitialization, BaseInitialization, std::shared_ptr<RampedHalfAndHalfInitialization>>(m, "RampedHalfAndHalfInitialization")
+        .def(py::init<int>(),
+             py::arg("depth") = 8);
 
     /* Dataset Class */
 
