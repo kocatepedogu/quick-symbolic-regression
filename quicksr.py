@@ -11,7 +11,7 @@ class SymbolicRegressionModel:
         nislands,
         max_depth=16,
         initialization=GrowInitialization(), 
-        mutation=SubtreeMutation(), 
+        mutation=DistributionMutation([SubtreeMutation(), HoistMutation()], [0.5, 0.5]), 
         recombination=DefaultRecombination(), 
         selection=FitnessProportionalSelection(), 
         runner_generator=HybridRunnerGenerator()):
