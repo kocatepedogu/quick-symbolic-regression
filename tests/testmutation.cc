@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "../genetic/mutation/mutator/default.hpp"
+#include "../genetic/mutation/mutator/subtree_mutator.hpp"
 #include "../expressions/unary.hpp"
 #include "../expressions/binary.hpp"
 
@@ -19,7 +19,7 @@ int main(void) {
 
     Expression f = w0 + w1*Cos(x) + w2*Sin(y);
 
-    DefaultMutator mutation(2, 3, 3, 10, 0.7);
+    SubtreeMutator mutation(2, 3, 3, 10, 0.7);
 
     for (int i = 0; i < 1000; ++i) {
         std::cout << mutation.mutate(f) << std::endl;

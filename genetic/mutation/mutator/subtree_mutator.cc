@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "default.hpp"
+#include "subtree_mutator.hpp"
 
 namespace qsr {
 
-Expression DefaultMutator::mutate(const Expression &expr) noexcept {
+Expression SubtreeMutator::mutate(const Expression &expr) noexcept {
     const auto &random_expr = expression_generator.generate();
     const auto &result_pair = recombiner.recombine(expr, random_expr);
 

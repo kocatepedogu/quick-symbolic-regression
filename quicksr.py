@@ -10,7 +10,7 @@ class SymbolicRegressionModel:
         npopulation,
         nislands,
         initialization=GrowInitialization(), 
-        mutation=DefaultMutation(), 
+        mutation=SubtreeMutation(), 
         recombination=DefaultRecombination(), 
         selection=FitnessProportionalSelection(), 
         runner_generator=HybridRunnerGenerator()):

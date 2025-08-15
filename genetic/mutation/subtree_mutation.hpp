@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef MUTATION_DEFAULT_HPP
-#define MUTATION_DEFAULT_HPP
+#ifndef MUTATION_SUBTREE_HPP
+#define MUTATION_SUBTREE_HPP
 
 #include "base.hpp"
 
@@ -10,9 +10,9 @@
 
 namespace qsr {
 
-class DefaultMutation : public BaseMutation {
+class SubtreeMutation : public BaseMutation {
 public:
-    constexpr DefaultMutation(int max_depth_increment, int max_depth, float mutation_probability) :
+    constexpr SubtreeMutation(int max_depth_increment, int max_depth, float mutation_probability) :
         max_depth_increment(max_depth_increment),
         max_depth(max_depth),
         mutation_probability(mutation_probability) {}

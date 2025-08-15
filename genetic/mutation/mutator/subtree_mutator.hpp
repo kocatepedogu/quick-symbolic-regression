@@ -11,9 +11,9 @@
 
 namespace qsr {
 
-class DefaultMutator : public BaseMutator {
+class SubtreeMutator : public BaseMutator {
 public:
-    constexpr DefaultMutator(int nvars, int nweights, 
+    constexpr SubtreeMutator(int nvars, int nweights, 
                             int max_depth_increment, int max_depth, 
                             float mutation_probability)  :
         max_depth(max_depth),

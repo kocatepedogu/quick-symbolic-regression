@@ -17,7 +17,7 @@
 #include "../genetic/selection/fitness_proportional_selection.hpp"
 #include "../genetic/selection/rank_selection.hpp"
 
-#include "../genetic/mutation/default.hpp"
+#include "../genetic/mutation/subtree_mutation.hpp"
 #include "../genetic/recombination/default.hpp"
 
 #include "../runners/inter-individual/runner_generator.hpp"
@@ -37,7 +37,7 @@ PYBIND11_MODULE(libquicksr, m) {
     py::class_<BaseMutation, std::shared_ptr<BaseMutation>>(m, "BaseMutation")
         .def(py::init<>());
 
-    py::class_<DefaultMutation, BaseMutation, std::shared_ptr<DefaultMutation>>(m, "DefaultMutation")
+    py::class_<SubtreeMutation, BaseMutation, std::shared_ptr<SubtreeMutation>>(m, "SubtreeMutation")
         .def(py::init<int, int, float>(),
             py::arg("max_depth_increment") = 3, 
             py::arg("max_depth") = INT_MAX,
