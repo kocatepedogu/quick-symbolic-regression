@@ -18,7 +18,7 @@ namespace qsr {
 namespace intra_individual {
     class Runner : public BaseRunner {
     private:
-        std::shared_ptr<Dataset> dataset;
+        std::shared_ptr<const Dataset> dataset;
 
         const int nweights;
 
@@ -36,7 +36,7 @@ namespace intra_individual {
         Array2D<float> weights_grad_d;
 
     public:
-        Runner(std::shared_ptr<Dataset> dataset, const int nweights);
+        Runner(std::shared_ptr<const Dataset> dataset, const int nweights);
 
         void run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, int epochs, float learning_rate);
 

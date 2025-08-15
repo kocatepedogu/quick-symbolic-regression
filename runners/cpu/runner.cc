@@ -14,7 +14,7 @@
 // #define CHECK_BUFFER_OVERFLOW
 
 namespace qsr::cpu {
-    Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
+    Runner::Runner(std::shared_ptr<const Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
 
     void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {

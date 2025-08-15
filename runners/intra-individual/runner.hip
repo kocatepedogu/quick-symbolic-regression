@@ -105,7 +105,7 @@ namespace qsr::intra_individual {
             weights_d, weights_grad_d, debug...);
     }
 
-    Runner::Runner(std::shared_ptr<Dataset> dataset, const int nweights) : dataset(dataset), nweights(nweights) {
+    Runner::Runner(std::shared_ptr<const Dataset> dataset, const int nweights) : dataset(dataset), nweights(nweights) {
         const int threadsPerBlock = min(dataset->m, hipState.props.maxThreadsPerBlock);
         const int blocks = (dataset->m + threadsPerBlock - 1) / threadsPerBlock;
 

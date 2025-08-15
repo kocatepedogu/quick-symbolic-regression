@@ -16,14 +16,14 @@
 namespace qsr::hybrid {
     class Runner : public BaseRunner {
     private:
-        std::shared_ptr<Dataset> dataset;
+        std::shared_ptr<const Dataset> dataset;
 
         const int nweights;
 
         HIPState config;
 
     public:
-        Runner(std::shared_ptr<Dataset> dataset, int nweights);
+        Runner(std::shared_ptr<const Dataset> dataset, int nweights);
 
         void run(const inter_individual::Program &program, int epochs, float learning_rate, Array1D<float> &loss_d, Ptr2D<float> &weights_d);
 

@@ -9,7 +9,7 @@
 #include "../../vm/vm_control.hpp"
 
 namespace qsr::hybrid {
-    Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
+    Runner::Runner(std::shared_ptr<const Dataset> dataset, int nweights) :
         dataset(dataset),
         nweights(nweights) {
     }

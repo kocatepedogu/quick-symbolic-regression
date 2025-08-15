@@ -23,7 +23,7 @@
 // #define CHECK_BUFFER_OVERFLOW
 
 namespace qsr::inter_individual {
-    Runner::Runner(std::shared_ptr<Dataset> dataset, int nweights) :
+    Runner::Runner(std::shared_ptr<const Dataset> dataset, int nweights) :
         dataset(dataset), nweights(nweights) {}
 
     template <typename... Debug>
