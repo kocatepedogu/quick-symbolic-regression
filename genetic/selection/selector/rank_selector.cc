@@ -16,7 +16,7 @@ namespace qsr {
         // Sort indices based on population fitness in descending order
         std::stable_sort(indices.begin(), indices.end(),
               [&population](int i, int j) {
-                  return population[i].loss < population[j].loss;
+                  return population[i].fitness > population[j].fitness;
         });
 
         // Calculate probabilities based on rank

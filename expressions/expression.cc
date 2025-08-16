@@ -98,4 +98,12 @@ bool operator != (const Expression& left_operand, const Expression& right_operan
     return !(left_operand == right_operand);
 }
 
+bool operator < (const Expression& left_operand, const Expression& right_operand) noexcept {
+    return left_operand.fitness < right_operand.fitness;
+}
+
+bool operator > (const Expression& left_operand, const Expression& right_operand) noexcept {
+    return left_operand.fitness > right_operand.fitness;
+}
+
 }

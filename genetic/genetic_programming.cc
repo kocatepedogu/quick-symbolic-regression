@@ -50,35 +50,57 @@ GeneticProgramming::GeneticProgramming(
     initialized = false;
 }
 
-static auto expression_comparator = [](const Expression& a, const Expression& b) {
-    // Return true if a is better (more fit/has less loss) than b
-
-    if (std::isnan(a.loss) && std::isnan(b.loss)) {
-        // Return false to be consistent with NaN < NaN, but the result does not actually matter
-        return false;
-    } 
-    else if (std::isnan(a.loss) && !std::isnan(b.loss)) {
-        // a is NaN, b is non-NaN; a is worse
-        return false;
-    }
-    else if (!std::isnan(a.loss) && std::isnan(b.loss)) {
-        // a is non-NaN, b is NaN; so a is better
-        return true;
-    } 
-    else {
-        // Neither is NaN, compare the actual loss values
-        return a.loss < b.loss;
-    }
-};
-
 Expression *GeneticProgramming::get_best_solution() {
-    return std::min_element(population.begin(), population.end(), 
-    expression_comparator).base();
+    return std::min_element(population.begin(), population.end(), std::greater<Expression>()).base();
 }
 
 Expression *GeneticProgramming::get_worst_solution() {
-    return std::max_element(population.begin(), population.end(), 
-    expression_comparator).base();
+    return std::max_element(population.begin(), population.end(), std::greater<Expression>()).base();
+}
+
+static void calculate_fitnesses(std::vector<Expression> &pop) {
+    // Compute fitnesses from losses
+    for (int i = 0; i < pop.size(); ++i) {
+        const float loss = pop[i].loss;
+        
+        if (std::isnan(loss) && !std::isfinite(loss)) {
+            pop[i].fitness = 0.0f;
+        }
+        else if (loss == 0.0f) {
+            pop[i].fitness = std::numeric_limits<float>::max();
+        }
+        else {
+            pop[i].fitness = 1 / loss;
+        }
+    }
+
+    // Find the mean fitness and the mean number of nodes
+    float mean_fitness = 0.0;
+    float mean_length = 0.0;
+    for (const auto &expr : pop) {
+        mean_fitness += expr.fitness / (float)pop.size();
+        mean_length += expr.num_of_nodes / (float)pop.size();
+    }
+
+    // Find the covariance of fitness and number of nodes
+    float covariance = 0.0;
+    for (const auto &expr : pop) {
+        covariance += (expr.fitness - mean_fitness) * (expr.num_of_nodes - mean_length) / (float)pop.size();
+    }
+
+    // Find the variance of number of nodes
+    double variance_length = 0.0;
+    for (const auto &expr : pop) {
+        variance_length += (expr.num_of_nodes - mean_length) * (expr.num_of_nodes - mean_length) / (float)pop.size();
+    }
+
+    // Find the parsimony pressure coefficient
+    double ct = covariance / variance_length;
+
+    // Subtract from the fitness of each function the parsimony pressure term
+    for (auto &expr : pop) {
+        expr.fitness -= ct * expr.num_of_nodes;
+    }
 }
 
 LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
@@ -88,6 +110,7 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
     // Compute initial fitnesses if not initialized
     if (!initialized) {
         runner->run(population, nepochs, learning_rate);
+        calculate_fitnesses(population);
         initialized = true;
     }
 
@@ -109,14 +132,17 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
             offspring.push_back(mutator->mutate(child2));
         }
 
-        // Compute fitnesses
+        // Compute losses
         runner->run(offspring, nepochs, learning_rate);
 
         // Insert offspring into population
         population.insert(population.end(), offspring.begin(), offspring.end());
 
+        // Calculate fitnesses
+        calculate_fitnesses(population);
+
         // Sort population by fitness in descending order
-        std::sort(population.begin(), population.end(), expression_comparator);
+        std::sort(population.begin(), population.end(), std::greater<Expression>());
 
         // Remove the worst half of the population
         population.resize(npopulation);

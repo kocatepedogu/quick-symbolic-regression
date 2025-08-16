@@ -100,6 +100,9 @@ struct Expression
     /// Training loss (MSE on dataset)
     float loss;
 
+    /// Fitness (max loss in the population - loss)
+    float fitness;
+
     /// Learned weights
     std::vector<float> weights;
 };
@@ -118,6 +121,16 @@ bool operator == (const Expression& left_operand, const Expression& right_operan
   * @brief Tests whether two expressions are different
   */
 bool operator != (const Expression& left_operand, const Expression& right_operand) noexcept;
+
+/**
+  * @brief Tests whether the first expression is less fit than the second
+ */
+bool operator < (const Expression& left_operand, const Expression& right_operand) noexcept;
+
+/**
+  * @brief Tests whether the first expression is more fit than the second
+ */
+bool operator > (const Expression& left_operand, const Expression& right_operand) noexcept;
 
 /**
   * @brief Generates a variable associated with a particular input feature
