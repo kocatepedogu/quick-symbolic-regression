@@ -11,6 +11,7 @@ class SymbolicRegressionModel:
         nweights, 
         npopulation,
         nislands,
+        noffspring=None,
         max_depth=16,
         initialization=GrowInitialization(), 
         mutation=DistributionMutation([SubtreeMutation(), HoistMutation(), PointMutation()], [0.5, 0.25, 0.25]), 
@@ -29,10 +30,15 @@ class SymbolicRegressionModel:
         :param runner_generator: Runner generator (CPURunnerGenerator, HybridRunnerGenerator, InterIndividualRunnerGenerator, IntraIndividualRunnerGenerator)
         """
 
+        # Set offspring size to population size if not specified
+        if noffspring is None:
+            noffspring = npopulation
+
         # Save the given parameters
         self.nislands = nislands
         self.nweights = nweights
         self.npopulation = npopulation
+        self.noffspring = noffspring
         self.max_depth = max_depth
         self.initialization = initialization
         self.mutation = mutation
@@ -62,6 +68,7 @@ class SymbolicRegressionModel:
             nislands=self.nislands, 
             nweights=self.nweights, 
             npopulation=self.npopulation, 
+            noffspring=self.noffspring,
             max_depth=self.max_depth,
             initialization=self.initialization,
             mutation=self.mutation,

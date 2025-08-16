@@ -18,6 +18,7 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
     int nislands, 
     int nweights, 
     int npopulation, 
+    int noffspring,
     int max_depth,
     std::shared_ptr<BaseInitialization> initialization, 
     std::shared_ptr<BaseMutation> mutation, 
@@ -33,6 +34,7 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         nweights(nweights),
         nislands(nislands),
         npopulation(npopulation),
+        noffspring(noffspring),
         max_depth(max_depth)
 {
     // Create empty island array
@@ -64,6 +66,7 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
     {
         const int threadIdx = omp_get_thread_num();
         const int population_per_island = npopulation / nislands;
+        const int offspring_per_island = noffspring / nislands;
 
         auto runner = runner_generator->generate(dataset, nweights);
 
@@ -71,6 +74,7 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
             dataset, 
             nweights, 
             population_per_island, 
+            offspring_per_island,
             max_depth,
             initialization,
             mutation,

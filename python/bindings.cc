@@ -127,7 +127,7 @@ PYBIND11_MODULE(libquicksr, m) {
         // Constructor
         .def(py::init<
             std::shared_ptr<Dataset>, 
-            int, int, int, int,
+            int, int, int, int, int,
             std::shared_ptr<BaseInitialization>,
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseRecombination>,
@@ -137,6 +137,7 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("nislands"),
             py::arg("nweights"),
             py::arg("npopulation"),
+            py::arg("noffspring"),
             py::arg("max_depth"),
             py::arg("initialization"),
             py::arg("mutation"),

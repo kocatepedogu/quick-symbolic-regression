@@ -14,6 +14,7 @@ GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
                int nweights, 
                int npopulation, 
+               int noffspring,
                int max_depth,
                std::shared_ptr<BaseInitialization> initialization,
                std::shared_ptr<BaseMutation> mutation,
@@ -24,6 +25,7 @@ GeneticProgramming::GeneticProgramming(
                nvars(dataset->n), 
                nweights(nweights), 
                npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
+               noffspring(noffspring % 2 == 0 ? noffspring : noffspring + 1),
                max_depth(max_depth),
                initialization(initialization),
                mutation(mutation),
@@ -122,7 +124,7 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
-        for (int i = 0; i < npopulation / 2; ++i) {
+        for (int i = 0; i < noffspring / 2; ++i) {
             const auto &parent1 = selector->select(&population[0]);
             const auto &parent2 = selector->select(&population[0]);
             const auto &children = recombiner->recombine(parent1, parent2);

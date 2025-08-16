@@ -21,6 +21,7 @@ public:
                               int nislands, 
                               int nweights, 
                               int npopulation, 
+                              int noffspring,
                               int max_depth,
                               std::shared_ptr<BaseInitialization> initialization,
                               std::shared_ptr<BaseMutation> mutation,
@@ -56,6 +57,9 @@ private:
 
     /// Total population size
     const int npopulation;
+
+    /// Total offspring size
+    const int noffspring;
 
     /// Array of islands
     GeneticProgramming **islands;
