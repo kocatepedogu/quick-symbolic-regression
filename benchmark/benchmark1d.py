@@ -9,7 +9,7 @@ from quicksr import *
 # Define constants
 NPOPULATION=11200
 NWEIGHTS=2
-NISLANDS=8
+NISLANDS=28
 
 # Generate dataset
 X = np.linspace(-5, 5, 25)
