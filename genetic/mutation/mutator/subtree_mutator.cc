@@ -7,13 +7,15 @@
 
 namespace qsr {
 
-SubtreeMutator::SubtreeMutator(int nvars, int nweights, 
-                        int max_depth_increment, int max_depth, 
-                        float mutation_probability,
-                        std::shared_ptr<FunctionSet> function_set)  :
-    max_depth(max_depth),
+SubtreeMutator::SubtreeMutator(const Config &config, float mutation_probability, int max_depth_increment)  :
+    config(config),
     mutation_probability(mutation_probability),
-    expression_generator(nvars, nweights, max_depth_increment, function_set) {}
+    max_depth_increment(max_depth_increment)
+{
+    Config expression_generator_config(config);
+    expression_generator_config.max_depth = max_depth_increment;
+    expression_generator = ExpressionGenerator(expression_generator_config);
+}
 
     
 Expression SubtreeMutator::mutate(const Expression &expr) noexcept {
@@ -34,7 +36,7 @@ Expression SubtreeMutator::mutate(const Expression &expr) noexcept {
     result = expression_reorganizer.reorganize(result);
 
     // If the depth of the new expression exceeds the maximum depth, revert to original tree
-    if (result.depth > max_depth) {
+    if (result.depth > config.max_depth) {
         result = expr;
     }
 

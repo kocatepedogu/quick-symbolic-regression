@@ -11,12 +11,12 @@
 namespace qsr {
     class FullInitializer : public BaseInitializer {
     public:
-        FullInitializer(int nvars, int nweights, int depth, int npopulation, std::shared_ptr<FunctionSet> function_set);
+        FullInitializer(const Config &config);
 
         void initialize(std::vector<Expression>& population) override;
 
     private:
-        const int npopulation;
+        const Config config;
 
         FullExpressionGenerator generator;
     };

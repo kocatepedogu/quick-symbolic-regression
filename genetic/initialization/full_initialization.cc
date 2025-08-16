@@ -5,16 +5,16 @@
 #include "initializer/full_initializer.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseInitializer> FullInitialization::get_initializer(int nvars, int nweights, int npopulation, int max_depth, std::shared_ptr<FunctionSet> function_set) {
+    std::shared_ptr<BaseInitializer> FullInitialization::get_initializer(const Config &config) {
         int depth;
 
-        if (init_depth.has_value() && init_depth.value() >= 1 && init_depth.value() <= max_depth) {
+        if (init_depth.has_value() && init_depth.value() >= 1 && init_depth.value() <= config.max_depth) {
             depth = init_depth.value();
         } else {
-            depth = max_depth;
+            depth = config.max_depth;
         }
 
-        return std::make_shared<FullInitializer>(nvars, nweights, depth, npopulation, function_set);
+        return std::make_shared<FullInitializer>(config);
     }
 }
 

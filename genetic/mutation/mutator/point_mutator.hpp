@@ -8,31 +8,26 @@
 
 #include "../../common/expression_picker.hpp"
 #include "../../common/expression_reorganizer.hpp"
-#include "../../common/function_set.hpp"
+#include "../../common/config.hpp"
 
 #include "base.hpp"
-#include <memory>
 
 namespace qsr {
 
 class PointMutator : public BaseMutator {
 public:
-    PointMutator(int nvars, int nweights, float mutation_probability, std::shared_ptr<FunctionSet> function_set);
+    PointMutator(const Config &config, float mutation_probability);
 
     Expression mutate(const Expression &expr) noexcept override;
 
 private:
-    const int nvars;
-
-    const int nweights;
+    const Config config;
 
     const float mutation_probability;
 
     ExpressionPicker expression_picker;
 
     ExpressionReorganizer expression_reorganizer;
-
-    std::shared_ptr<FunctionSet> function_set;
 };
 
 }

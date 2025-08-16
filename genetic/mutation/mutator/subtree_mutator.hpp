@@ -16,17 +16,16 @@ namespace qsr {
 
 class SubtreeMutator : public BaseMutator {
 public:
-    SubtreeMutator(int nvars, int nweights, 
-                            int max_depth_increment, int max_depth, 
-                            float mutation_probability,
-                            std::shared_ptr<FunctionSet> function_set);
+    SubtreeMutator(const Config &config, float mutation_probability, int max_depth_increment);
 
     Expression mutate(const Expression &expr) noexcept override;
 
 private:
-    const int max_depth;
+    const Config config;
 
     const float mutation_probability;
+
+    const int max_depth_increment;
 
     ExpressionGenerator expression_generator;
 

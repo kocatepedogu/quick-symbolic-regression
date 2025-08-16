@@ -13,19 +13,10 @@
 
 namespace qsr {
 
-ExpressionGenerator::ExpressionGenerator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) : 
-    nvars(nvars), nweights(nweights), max_depth(max_depth), function_set(function_set) {
+ExpressionGenerator::ExpressionGenerator() {}
 
-    if (max_depth <= 0) {
-        fprintf(stderr, "ExpressionGenerator: max_depth must be greater than zero.\n");
-        abort();
-    }
-
-    if (nvars <= 0) {
-        fprintf(stderr, "ExpressionGenerator: number of variables must be greater than zero.\n");
-        abort();
-    }
-
+ExpressionGenerator::ExpressionGenerator(const Config &config) : config(config)
+{
     depth_one_distribution = std::discrete_distribution<>({
         0.0,  /*CONSTANT*/
         1.0,  /*PARAMETER*/
@@ -36,14 +27,14 @@ ExpressionGenerator::ExpressionGenerator(int nvars, int nweights, int max_depth,
         0.0,  /*CONSTANT*/
         1.0,  /*PARAMETER*/
         1.0,  /*IDENTITY*/
-        function_set->addition ? 1.0 : 0.0,
-        function_set->subtraction ? 1.0 : 0.0,
-        function_set->multiplication ? 1.0 : 0.0,
-        function_set->division ? 1.0 : 0.0,
-        function_set->sine ? 1.0 : 0.0,
-        function_set->cosine ? 1.0 : 0.0,
-        function_set->exponential ? 1.0 : 0.0,
-        function_set->rectified_linear_unit ? 1.0 : 0.0,
+        config.function_set->addition ? 1.0 : 0.0,
+        config.function_set->subtraction ? 1.0 : 0.0,
+        config.function_set->multiplication ? 1.0 : 0.0,
+        config.function_set->division ? 1.0 : 0.0,
+        config.function_set->sine ? 1.0 : 0.0,
+        config.function_set->cosine ? 1.0 : 0.0,
+        config.function_set->exponential ? 1.0 : 0.0,
+        config.function_set->rectified_linear_unit ? 1.0 : 0.0,
     });
 }
 
@@ -79,9 +70,9 @@ Expression ExpressionGenerator::generate(int max_depth) noexcept {
 
     switch (operation) {
         case IDENTITY:
-            return Var(thread_local_rng() % nvars);
+            return Var(thread_local_rng() % config.nvars);
         case PARAMETER:
-            return Parameter(thread_local_rng() % nweights);
+            return Parameter(thread_local_rng() % config.nweights);
 
         BINARY_OP_CASE(ADDITION, _RANDOM_EXPR_CALL, +);
         BINARY_OP_CASE(SUBTRACTION, _RANDOM_EXPR_CALL, -);
@@ -99,7 +90,7 @@ Expression ExpressionGenerator::generate(int max_depth) noexcept {
 }
 
 Expression ExpressionGenerator::generate() noexcept {
-    return generate(this->max_depth);
+    return generate(config.max_depth);
 }
 
 }

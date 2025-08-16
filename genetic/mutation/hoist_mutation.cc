@@ -5,7 +5,7 @@
 #include "mutator/hoist_mutator.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseMutator> HoistMutation::get_mutator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) {
+    std::shared_ptr<BaseMutator> HoistMutation::get_mutator(const Config &config) {
         return std::make_shared<HoistMutator>(mutation_probability);
     }
 }

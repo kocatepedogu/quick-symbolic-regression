@@ -6,13 +6,13 @@
 
 #include "initializer/base.hpp"
 
-#include "../common/function_set.hpp"
+#include "../common/config.hpp"
 
 #include <memory>
 namespace qsr {
     class BaseInitialization {
     public:
-        virtual std::shared_ptr<BaseInitializer> get_initializer(int nvars, int nweights, int npopulation, int max_depth, std::shared_ptr<FunctionSet> function_set);
+        virtual std::shared_ptr<BaseInitializer> get_initializer(const Config &config);
     };
 }
 

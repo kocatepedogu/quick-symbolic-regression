@@ -5,7 +5,7 @@
 #include "mutator/point_mutator.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseMutator> PointMutation::get_mutator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) {
-        return std::make_shared<PointMutator>(nvars, nweights, mutation_probability, function_set);
+    std::shared_ptr<BaseMutator> PointMutation::get_mutator(const Config &config) {
+        return std::make_shared<PointMutator>(config, mutation_probability);
     }
 }

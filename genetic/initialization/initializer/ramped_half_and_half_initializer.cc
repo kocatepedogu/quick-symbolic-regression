@@ -5,20 +5,18 @@
 
 namespace qsr {
 
-RampedHalfAndHalfInitializer::RampedHalfAndHalfInitializer(int nvars, int nweights, int max_depth, int npopulation, std::shared_ptr<FunctionSet> function_set) :
-    grow_generator(nvars, nweights, max_depth, function_set), 
-    full_generator(nvars, nweights, max_depth, function_set),
-    npopulation(npopulation) {}
+RampedHalfAndHalfInitializer::RampedHalfAndHalfInitializer(const Config &config) :
+    config(config), grow_generator(config), full_generator(config) {}
 
     
 void RampedHalfAndHalfInitializer::initialize(std::vector<Expression>& population) {
     population.clear();
 
-    for (int i = 0; i < npopulation / 2; ++i) {
+    for (int i = 0; i < config.npopulation / 2; ++i) {
         population.push_back(grow_generator.generate());
     }
 
-    for (int i = 0; i < npopulation / 2; ++i) {
+    for (int i = 0; i < config.npopulation / 2; ++i) {
         population.push_back(full_generator.generate());
     }
 }

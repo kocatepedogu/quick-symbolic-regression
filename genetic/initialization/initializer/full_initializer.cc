@@ -4,12 +4,12 @@
 #include "full_initializer.hpp"
 
 namespace qsr {
-    FullInitializer::FullInitializer(int nvars, int nweights, int depth, int npopulation, std::shared_ptr<FunctionSet> function_set) 
-            : npopulation(npopulation), generator(nvars, nweights, depth, function_set) {}
+    FullInitializer::FullInitializer(const Config &config) 
+            : config(config), generator(config) {}
 
-    void FullInitializer::initialize(std::vector<Expression>& population) {
+    void FullInitializer::initialize(std::vector<Expression> &population) {
         population.clear();
-        for (int i = 0; i < npopulation; ++i) {
+        for (int i = 0; i < config.npopulation; ++i) {
             population.push_back(generator.generate());
         }
     }

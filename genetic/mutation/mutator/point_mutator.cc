@@ -9,11 +9,9 @@
 #include "../../../util/rng.hpp"
 
 namespace qsr {
-    PointMutator::PointMutator(int nvars, int nweights, float mutation_probability, std::shared_ptr<FunctionSet> function_set)  :
-        nvars(nvars),
-        nweights(nweights),
-        mutation_probability(mutation_probability),
-        function_set(function_set) {}
+    PointMutator::PointMutator(const Config &config, float mutation_probability)  :
+        config(config), mutation_probability(mutation_probability) {}
+
 
     Expression PointMutator::mutate(const Expression &expr) noexcept {
         if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > mutation_probability) {
@@ -38,11 +36,11 @@ namespace qsr {
             switch (operation) {
                 case 0:
                     subtree.operation = IDENTITY;
-                    subtree.argindex = thread_local_rng() % nvars;
+                    subtree.argindex = thread_local_rng() % config.nvars;
                     break;
                 case 1:
                     subtree.operation = PARAMETER;
-                    subtree.argindex = thread_local_rng() % nweights;
+                    subtree.argindex = thread_local_rng() % config.nweights;
                     break;
             }
         }
@@ -54,22 +52,22 @@ namespace qsr {
             int operation = thread_local_rng() % 4;
             switch (operation) {
                 case 0:
-                    if (function_set->sine) {
+                    if (config.function_set->sine) {
                         subtree.operation = SINE;
                         break;
                     }
                 case 1:
-                    if (function_set->cosine) {
+                    if (config.function_set->cosine) {
                         subtree.operation = COSINE;
                         break;
                     }
                 case 2:
-                    if (function_set->exponential) {
+                    if (config.function_set->exponential) {
                         subtree.operation = EXPONENTIAL;
                         break;
                     }
                 case 3:
-                    if (function_set->rectified_linear_unit) {
+                    if (config.function_set->rectified_linear_unit) {
                         subtree.operation = RECTIFIED_LINEAR_UNIT;
                         break;
                     }
@@ -87,22 +85,22 @@ namespace qsr {
             int operation = thread_local_rng() % 4;
             switch (operation) {
                 case 0:
-                    if (function_set->addition) {
+                    if (config.function_set->addition) {
                         subtree.operation = ADDITION;
                         break;
                     }
                 case 1:
-                    if (function_set->subtraction) {
+                    if (config.function_set->subtraction) {
                         subtree.operation = SUBTRACTION;
                         break;
                     }
                 case 2:
-                    if (function_set->multiplication) {
+                    if (config.function_set->multiplication) {
                         subtree.operation = MULTIPLICATION;
                         break;
                     }
                 case 3:
-                    if (function_set->division) {
+                    if (config.function_set->division) {
                         subtree.operation = DIVISION;
                         break;
                     }

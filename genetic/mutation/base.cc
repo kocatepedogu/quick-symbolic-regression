@@ -4,7 +4,7 @@
 #include "base.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseMutator> BaseMutation::get_mutator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) {
+    std::shared_ptr<BaseMutator> BaseMutation::get_mutator(const Config &config) {
         fprintf(stderr, "Unimplemented base method called.");
         abort();
     }

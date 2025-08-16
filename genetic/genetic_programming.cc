@@ -35,17 +35,20 @@ GeneticProgramming::GeneticProgramming(
                runner(runner),
                function_set(function_set)
 {
+    // Create config
+    Config config(nvars, nweights, max_depth, npopulation, function_set);
+
     // Get selector
     selector = selection->get_selector(npopulation);
 
     // Get mutator
-    mutator = mutation->get_mutator(nvars, nweights, max_depth, function_set);
+    mutator = mutation->get_mutator(config);
 
     // Get recombiner
     recombiner = recombination->get_recombiner(max_depth);
 
     // Get initializer
-    initializer = initialization->get_initializer(nvars, nweights, npopulation, max_depth, function_set);
+    initializer = initialization->get_initializer(config);
 
     // Initialize island with a population of random expressions
     initializer->initialize(population);

@@ -4,24 +4,13 @@
 #include "../../util/macro.hpp"
 #include "../../expressions/unary.hpp"
 #include "../../expressions/binary.hpp"
+#include "config.hpp"
 
 #include <cassert>
 
 namespace qsr {
 
-FullExpressionGenerator::FullExpressionGenerator(int nvars, int nweights, int depth, std::shared_ptr<FunctionSet> function_set) : 
-    nvars(nvars), nweights(nweights), depth(depth), function_set(function_set) {
-
-    if (depth <= 0) {
-        fprintf(stderr, "FullExpressionGenerator: depth must be greater than zero.\n");
-        abort();
-    }
-
-    if (nvars <= 0) {
-        fprintf(stderr, "FullExpressionGenerator: number of variables must be greater than zero.\n");
-        abort();
-    }
-
+FullExpressionGenerator::FullExpressionGenerator(const Config &config) : config(config) {
     depth_one_distribution = std::discrete_distribution<>({
         0.0,  /*CONSTANT*/
         1.0,  /*PARAMETER*/
@@ -32,14 +21,14 @@ FullExpressionGenerator::FullExpressionGenerator(int nvars, int nweights, int de
         0.0,  /*CONSTANT*/
         0.0,  /*PARAMETER*/
         0.0,  /*IDENTITY*/
-        function_set->addition ? 1.0 : 0.0,
-        function_set->subtraction ? 1.0 : 0.0,
-        function_set->multiplication ? 1.0 : 0.0,
-        function_set->division ? 1.0 : 0.0,
-        function_set->sine ? 1.0 : 0.0,
-        function_set->cosine ? 1.0 : 0.0,
-        function_set->exponential ? 1.0 : 0.0,
-        function_set->rectified_linear_unit ? 1.0 : 0.0,
+        config.function_set->addition ? 1.0 : 0.0,
+        config.function_set->subtraction ? 1.0 : 0.0,
+        config.function_set->multiplication ? 1.0 : 0.0,
+        config.function_set->division ? 1.0 : 0.0,
+        config.function_set->sine ? 1.0 : 0.0,
+        config.function_set->cosine ? 1.0 : 0.0,
+        config.function_set->exponential ? 1.0 : 0.0,
+        config.function_set->rectified_linear_unit ? 1.0 : 0.0,
     });
 }
 
@@ -53,9 +42,9 @@ Expression FullExpressionGenerator::generate(int remaining_depth) noexcept {
         int operation = depth_one_distribution(thread_local_rng);
         switch (operation) {
             case IDENTITY:
-                return Var(thread_local_rng() % nvars);
+                return Var(thread_local_rng() % config.nvars);
             case PARAMETER:
-                return Parameter(thread_local_rng() % nweights);
+                return Parameter(thread_local_rng() % config.nweights);
         }
     } 
     else if (remaining_depth >= 2) {
@@ -78,7 +67,7 @@ Expression FullExpressionGenerator::generate(int remaining_depth) noexcept {
 }
 
 Expression FullExpressionGenerator::generate() noexcept {
-    return generate(this->depth);
+    return generate(config.max_depth);
 }
 
 }

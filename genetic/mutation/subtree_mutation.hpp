@@ -16,7 +16,7 @@ public:
         max_depth_increment(max_depth_increment),
         mutation_probability(mutation_probability) {}
 
-    virtual std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) override;
+    virtual std::shared_ptr<BaseMutator> get_mutator(const Config &config) override;
 
 private:
     int max_depth_increment;

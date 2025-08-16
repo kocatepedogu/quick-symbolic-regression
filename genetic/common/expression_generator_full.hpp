@@ -5,6 +5,7 @@
 #define EXPRESSION_GENERATOR_FULL_HPP
 
 #include "../../expressions/expression.hpp"
+#include "config.hpp"
 #include "function_set.hpp"
 
 #include <memory>
@@ -14,18 +15,14 @@ namespace qsr {
 
 class FullExpressionGenerator {
 public:
-    FullExpressionGenerator(int nvars, int nweights, int depth, std::shared_ptr<FunctionSet> function_set);
+    FullExpressionGenerator(const Config &config);
 
     Expression generate(int remaining_depth) noexcept;
-
     Expression generate() noexcept;
 
 private:
-    const int nvars;
-    const int nweights;
-    const int depth;
+    Config config;
 
-    std::shared_ptr<FunctionSet> function_set;
     std::discrete_distribution<> depth_one_distribution;
     std::discrete_distribution<> depth_two_distribution;
 };

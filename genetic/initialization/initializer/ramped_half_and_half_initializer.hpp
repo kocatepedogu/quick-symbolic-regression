@@ -13,12 +13,12 @@ namespace qsr {
 
 class RampedHalfAndHalfInitializer : public BaseInitializer {
 public:
-    RampedHalfAndHalfInitializer(int nvars, int nweights, int max_depth, int npopulation, std::shared_ptr<FunctionSet> function_set);
+    RampedHalfAndHalfInitializer(const Config &config);
 
     void initialize(std::vector<Expression>& population) override;
 
 private:
-    const int npopulation;
+    const Config config;
 
     ExpressionGenerator grow_generator;
     FullExpressionGenerator full_generator;
