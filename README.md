@@ -103,11 +103,11 @@ The **CPU mode** (4) uses multiple CPU cores to process multiple islands with no
 
 ## Benchmarks
 
-<img src="./benchmark/benchmark_elapsed_time_vs_population_size.png" width="600px">
+<img src="./docs/plots/benchmark_elapsed_time_vs_population_size.png" width="600px">
 
 The first plot shows the elapsed time of the algorithm as a function of the population size, measured by *benchmark_population_size.py* script. The hybrid GPU mode significantly outperforms the CPU mode (near 2x speedup) on large populations.
 
-<img src="./benchmark/benchmark_elapsed_time_vs_dataset_size.png" width="600px">
+<img src="./docs/plots/benchmark_elapsed_time_vs_dataset_size.png" width="600px">
 
 The second plot shows the elapsed time of the algorithm as a function of dataset size, measured by *benchmark_dataset_size.py* script. While the CPU mode is initially better, the intra-individual GPU mode eventually outperforms the CPU implementation on large dataset sizes.
 
