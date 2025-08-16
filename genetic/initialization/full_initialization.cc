@@ -6,7 +6,15 @@
 
 namespace qsr {
     std::shared_ptr<BaseInitializer> FullInitialization::get_initializer(int nvars, int nweights, int npopulation, int max_depth) {
-        return std::make_shared<FullInitializer>(nvars, nweights, max_depth, npopulation);
+        int depth;
+
+        if (init_depth.has_value() && init_depth.value() >= 1 && init_depth.value() <= max_depth) {
+            depth = init_depth.value();
+        } else {
+            depth = max_depth;
+        }
+
+        return std::make_shared<FullInitializer>(nvars, nweights, depth, npopulation);
     }
 }
 

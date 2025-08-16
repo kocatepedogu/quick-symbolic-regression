@@ -16,7 +16,7 @@ X = np.linspace(-5, 5, 25)
 y = 1.0 + 3.0*X + 5.0*X*X + 7.0*X*X*X
 
 # Create model
-model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS)
+model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS, initialization=GrowInitialization(init_depth=1))
 
 # Fit model
 solution, history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=500)

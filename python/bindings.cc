@@ -86,13 +86,16 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<GrowInitialization, BaseInitialization, std::shared_ptr<GrowInitialization>>(m, "GrowInitialization")
-        .def(py::init<>());
+        .def(py::init<std::optional<int>>(),
+             py::arg("init_depth") = std::nullopt);
 
     py::class_<FullInitialization, BaseInitialization, std::shared_ptr<FullInitialization>>(m, "FullInitialization")
-        .def(py::init<>());
+        .def(py::init<std::optional<int>>(),
+             py::arg("init_depth") = std::nullopt);
 
     py::class_<RampedHalfAndHalfInitialization, BaseInitialization, std::shared_ptr<RampedHalfAndHalfInitialization>>(m, "RampedHalfAndHalfInitialization")
-        .def(py::init<>());
+        .def(py::init<std::optional<int>>(),
+             py::arg("init_depth") = std::nullopt);
 
     /* Dataset Class */
 
