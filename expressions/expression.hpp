@@ -29,7 +29,8 @@ typedef enum {
     DIVISION = 6,
     SINE = 7,
     COSINE = 8,
-    EXPONENTIAL = 9
+    EXPONENTIAL = 9,
+    RECTIFIED_LINEAR_UNIT = 10
 } operation_t;
 
 struct Expression

@@ -35,7 +35,8 @@ static thread_local std::discrete_distribution<> depth_two_distribution({
     10, /*DIVISION*/
     10, /*SINE*/
     10, /*COSINE*/
-    10  /*EXPONENTIAL*/
+    10,  /*EXPONENTIAL*/
+    10  /*RELU*/
 });
 
 int ExpressionGenerator::random_operation(int max_depth) const noexcept 
@@ -81,6 +82,7 @@ Expression ExpressionGenerator::generate(int max_depth) const noexcept {
         UNARY_OP_CASE(SINE, _RANDOM_EXPR_CALL, Sin);
         UNARY_OP_CASE(COSINE, _RANDOM_EXPR_CALL, Cos);
         UNARY_OP_CASE(EXPONENTIAL, _RANDOM_EXPR_CALL, Exp);
+        UNARY_OP_CASE(RECTIFIED_LINEAR_UNIT, _RANDOM_EXPR_CALL, ReLU);
     }
 
     // Control must never reach here.

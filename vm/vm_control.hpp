@@ -96,6 +96,10 @@ void vm_control(const int tid,
                 vm_debug_print(tid, "exp");
                 propagate<propType, 1>(tid, forward_exp, grad_exp, s, instruction, debug...);
                 break;
+            case RELU:
+                vm_debug_print(tid, "relu");
+                propagate<propType, 1>(tid, forward_relu, grad_relu, s, instruction, debug...);
+                break;
 
             /* No operation */
             case NOP:

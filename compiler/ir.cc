@@ -50,6 +50,9 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
         case EXP:
             os << "exp";
             break;
+        case RELU:
+            os << "relu";
+            break;
         case NOP:
             os << "nop";
             break;

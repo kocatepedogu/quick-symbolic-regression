@@ -48,6 +48,11 @@ static inline void grad_exp(c_real_1d &i, real_1d &o) {
     o[0] = exp(i[0]);
 }
 
+__device__ __host__
+static inline void grad_relu(c_real_1d &i, real_1d &o) {
+    o[0] = i[0] > 0 ? 1 : 0;
+}
+
 }
 
 #endif

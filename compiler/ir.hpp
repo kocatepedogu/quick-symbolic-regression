@@ -20,6 +20,7 @@ enum Opcode {
     SIN,
     COS,
     EXP,
+    RELU,
     NOP,
     LOSS
 };

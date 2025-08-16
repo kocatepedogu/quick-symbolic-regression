@@ -38,6 +38,7 @@ void ExpressionPicker::pick(Expression *node, Expression **result, int& current,
         VOID_UNARY_OP_CASE(SINE, _PICK_CALL);
         VOID_UNARY_OP_CASE(COSINE, _PICK_CALL);
         VOID_UNARY_OP_CASE(EXPONENTIAL, _PICK_CALL);
+        VOID_UNARY_OP_CASE(RECTIFIED_LINEAR_UNIT, _PICK_CALL);
     }
 }
 

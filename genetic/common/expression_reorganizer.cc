@@ -24,6 +24,7 @@ namespace qsr {
             UNARY_OP_CASE(SINE, _REORGANIZE_CALL, Sin);
             UNARY_OP_CASE(COSINE, _REORGANIZE_CALL, Cos);
             UNARY_OP_CASE(EXPONENTIAL, _REORGANIZE_CALL, Exp);
+            UNARY_OP_CASE(RECTIFIED_LINEAR_UNIT, _REORGANIZE_CALL, ReLU);
         }
     }
 };

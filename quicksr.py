@@ -136,4 +136,6 @@ class SymbolicRegressionModel:
                 return lambda x: np.cos(operand1(np.array(x)))
             case Operation.EXPONENTIAL:
                 return lambda x: np.exp(operand1(np.array(x)))
+            case Operation.RECTIFIED_LINEAR_UNIT:
+                return lambda x: np.maximum(operand1(np.array(x)), 0)
 

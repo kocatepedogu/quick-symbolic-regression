@@ -165,7 +165,8 @@ PYBIND11_MODULE(libquicksr, m) {
         .value("DIVISION", operation_t::DIVISION)
         .value("SINE", operation_t::SINE)
         .value("COSINE", operation_t::COSINE)
-        .value("EXPONENTIAL", operation_t::EXPONENTIAL);
+        .value("EXPONENTIAL", operation_t::EXPONENTIAL)
+        .value("RECTIFIED_LINEAR_UNIT", operation_t::RECTIFIED_LINEAR_UNIT);
 
     py::class_<Expression>(m, "Expression")
         .def_readwrite("operation", &Expression::operation)

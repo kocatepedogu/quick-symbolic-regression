@@ -44,7 +44,7 @@ namespace qsr {
         if (num_operands == 1) {
             // Replace with a unary operation
 
-            int operation = thread_local_rng() % 3;
+            int operation = thread_local_rng() % 4;
             switch (operation) {
                 case 0:
                     subtree.operation = SINE;
@@ -54,6 +54,9 @@ namespace qsr {
                     break;
                 case 2:
                     subtree.operation = EXPONENTIAL;
+                    break;
+                case 3:
+                    subtree.operation = RECTIFIED_LINEAR_UNIT;
                     break;
             }
         }

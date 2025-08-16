@@ -44,6 +44,11 @@ static inline float forward_exp(c_real_1d &x) {
     return exp(x[0]);
 }
 
+__device__ __host__
+static inline float forward_relu(c_real_1d &x) {
+    return x[0] > 0 ? x[0] : 0;
+}
+
 }
 
 #endif

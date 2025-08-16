@@ -35,6 +35,15 @@ static inline Expression Exp(const Expression &e) {
     return Expression(EXPONENTIAL, e);
 }
 
+static inline Expression ReLU(const Expression &e) {
+    // Remove unary operations involving only trainable parameters or constants
+    if (e.operation == PARAMETER || e.operation == CONSTANT) {
+        return e;
+    }
+
+    return Expression(RECTIFIED_LINEAR_UNIT, e);
+}
+
 }
 
 #endif

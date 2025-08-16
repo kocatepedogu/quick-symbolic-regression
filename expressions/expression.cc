@@ -59,6 +59,9 @@ static std::string to_string(const Expression& node, const Expression& root) {
         case EXPONENTIAL:
             result = "exp(" + to_string(node.operands[0], root) + ")";
             break;
+        case RECTIFIED_LINEAR_UNIT:
+            result = "relu(" + to_string(node.operands[0], root) + ")";
+            break;
     }
 
     return result;

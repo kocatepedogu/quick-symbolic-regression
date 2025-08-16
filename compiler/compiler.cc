@@ -120,6 +120,9 @@ static void compile(const Expression& e, IntermediateRepresentation* p, Compiler
         case COSINE:
             compile<1>(e, p, s, COS);
             break;
+        case RECTIFIED_LINEAR_UNIT:
+            compile<1>(e, p, s, RELU);
+            break;
         case EXPONENTIAL:
             compile<1>(e, p, s, EXP);
             break;
