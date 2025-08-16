@@ -23,4 +23,4 @@ benchmark/benchmark2d.sh
 *.log
 *.pyc
 
-docs
+docs/html
