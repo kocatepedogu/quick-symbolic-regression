@@ -94,9 +94,6 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
     // Iterate for ngenerations
     for (int generation = 0; generation < ngenerations; ++generation)
     {
-        // Get the best solution
-        const Expression prev_best = *get_best_solution();
-
         // Update selection probabilities
         selector->update(&population[0]);
 
@@ -112,22 +109,23 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
             offspring.push_back(mutator->mutate(child2));
         }
 
-        // Replace current population with offspring
-        population = offspring;
-
         // Compute fitnesses
-        runner->run(population, nepochs, learning_rate);
+        runner->run(offspring, nepochs, learning_rate);
+
+        // Insert offspring into population
+        population.insert(population.end(), offspring.begin(), offspring.end());
+
+        // Sort population by fitness in descending order
+        std::sort(population.begin(), population.end(), expression_comparator);
+
+        // Remove the worst half of the population
+        population.resize(npopulation);
 
         // Find new best
-        const Expression new_best = *get_best_solution();
-
-        // Preserve previous best if it is better than the new best
-        if (prev_best.loss < new_best.loss) {
-            *get_worst_solution() = prev_best;
-        }
+        const Expression best = *get_best_solution();
 
         // Append to learning history
-        history.add_to_history(prev_best.loss < new_best.loss ? prev_best : new_best);
+        history.add_to_history(best);
     }
 
     return history;
