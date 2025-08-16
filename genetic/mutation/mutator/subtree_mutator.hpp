@@ -6,9 +6,9 @@
 
 #include "../../../expressions/expression.hpp"
 
-#include "../../expression_generator.hpp"
-#include "../../expression_picker.hpp"
-#include "../../expression_reorganizer.hpp"
+#include "../../common/expression_generator.hpp"
+#include "../../common/expression_picker.hpp"
+#include "../../common/expression_reorganizer.hpp"
 
 #include "base.hpp"
 

@@ -5,7 +5,7 @@
 
 #include "../../../util/rng.hpp"
 
-#include "../../expression_picker.hpp"
+#include "../../common/expression_picker.hpp"
 
 #include <tuple>
 #include <cassert>

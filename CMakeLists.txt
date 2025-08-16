@@ -38,6 +38,7 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/dataset
     ${CMAKE_CURRENT_SOURCE_DIR}/expressions
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic
+    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/common
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/initialization
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/initialization/initializer
     ${CMAKE_CURRENT_SOURCE_DIR}/genetic/recombination

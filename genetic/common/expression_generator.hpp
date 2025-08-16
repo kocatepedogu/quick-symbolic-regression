@@ -4,7 +4,7 @@
 #ifndef EXPRESSION_GENERATOR_HPP
 #define EXPRESSION_GENERATOR_HPP
 
-#include "../expressions/expression.hpp"
+#include "../../expressions/expression.hpp"
 
 namespace qsr {
 

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Doğu Kocatepe
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "../genetic/expression_picker.hpp"
+#include "../genetic/common/expression_picker.hpp"
 
 #include "../expressions/expression.hpp"
 #include "../expressions/binary.hpp"
