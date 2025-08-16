@@ -20,7 +20,8 @@ GeneticProgramming::GeneticProgramming(
                std::shared_ptr<BaseMutation> mutation,
                std::shared_ptr<BaseRecombination> recombination,
                std::shared_ptr<BaseSelection> selection,
-               std::shared_ptr<BaseRunner> runner) noexcept : 
+               std::shared_ptr<BaseRunner> runner,
+               std::shared_ptr<FunctionSet> function_set) noexcept : 
                dataset(dataset), 
                nvars(dataset->n), 
                nweights(nweights), 
@@ -31,19 +32,20 @@ GeneticProgramming::GeneticProgramming(
                mutation(mutation),
                recombination(recombination),
                selection(selection),
-               runner(runner)
+               runner(runner),
+               function_set(function_set)
 {
     // Get selector
     selector = selection->get_selector(npopulation);
 
     // Get mutator
-    mutator = mutation->get_mutator(nvars, nweights, max_depth);
+    mutator = mutation->get_mutator(nvars, nweights, max_depth, function_set);
 
     // Get recombiner
     recombiner = recombination->get_recombiner(max_depth);
 
     // Get initializer
-    initializer = initialization->get_initializer(nvars, nweights, npopulation, max_depth);
+    initializer = initialization->get_initializer(nvars, nweights, npopulation, max_depth, function_set);
 
     // Initialize island with a population of random expressions
     initializer->initialize(population);

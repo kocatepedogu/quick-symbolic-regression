@@ -5,8 +5,8 @@
 #include "mutator/subtree_mutator.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseMutator> SubtreeMutation::get_mutator(int nvars, int nweights, int max_depth) {
-        return std::make_shared<SubtreeMutator>(nvars, nweights, max_depth_increment, max_depth, mutation_probability);
+    std::shared_ptr<BaseMutator> SubtreeMutation::get_mutator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) {
+        return std::make_shared<SubtreeMutator>(nvars, nweights, max_depth_increment, max_depth, mutation_probability, function_set);
     }
 }
 

@@ -19,7 +19,7 @@ public:
             }
         }
 
-    std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights, int max_depth) override;
+    std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) override;
 
 private:
     std::vector<std::shared_ptr<BaseMutation>> mutations;

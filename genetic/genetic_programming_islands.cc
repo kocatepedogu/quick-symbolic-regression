@@ -24,13 +24,15 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
     std::shared_ptr<BaseMutation> mutation, 
     std::shared_ptr<BaseRecombination> recombination, 
     std::shared_ptr<BaseSelection> selection,
-    std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
+    std::shared_ptr<BaseRunnerGenerator> runner_generator,
+    std::shared_ptr<FunctionSet> function_set) noexcept :
         dataset(dataset),
         initialization(initialization),
         mutation(mutation),
         recombination(recombination),
         selection(selection),
         runner_generator(runner_generator),
+        function_set(function_set),
         nweights(nweights),
         nislands(nislands),
         npopulation(npopulation),
@@ -80,7 +82,8 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
             mutation,
             recombination,
             selection,
-            runner);
+            runner,
+            function_set);
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Run island

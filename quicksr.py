@@ -17,7 +17,8 @@ class SymbolicRegressionModel:
         mutation=DistributionMutation([SubtreeMutation(), HoistMutation(), PointMutation()], [0.5, 0.25, 0.25]), 
         recombination=DefaultRecombination(), 
         selection=FitnessProportionalSelection(), 
-        runner_generator=HybridRunnerGenerator()):
+        runner_generator=HybridRunnerGenerator(),
+        functions=['+','-','*', '/', 'sin', 'cos', 'exp', 'relu']):
         """
         Initialize the SymbolicRegressionModel with the given parameters.
         :param nweights: Maximum number of trainable weights in candidate expressions.
@@ -34,6 +35,9 @@ class SymbolicRegressionModel:
         if noffspring is None:
             noffspring = npopulation
 
+        # Create function set
+        self.function_set = FunctionSet(functions)
+
         # Save the given parameters
         self.nislands = nislands
         self.nweights = nweights
@@ -48,6 +52,7 @@ class SymbolicRegressionModel:
         self.solution = None
         self.history = None
         self.compiled_solution = None
+
 
     def fit(self, X, y, ngenerations, nsupergenerations, nepochs=1, learning_rate=1e-3, verbose=True):
         """
@@ -74,7 +79,8 @@ class SymbolicRegressionModel:
             mutation=self.mutation,
             recombination=self.recombination,
             selection=self.selection,
-            runner_generator=self.runner_generator
+            runner_generator=self.runner_generator,
+            function_set=self.function_set
         )
 
         # Fit an expression

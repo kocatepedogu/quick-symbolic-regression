@@ -4,10 +4,17 @@
 #include "point_mutator.hpp"
 
 #include <cassert>
+#include <iostream>
 
 #include "../../../util/rng.hpp"
 
 namespace qsr {
+    PointMutator::PointMutator(int nvars, int nweights, float mutation_probability, std::shared_ptr<FunctionSet> function_set)  :
+        nvars(nvars),
+        nweights(nweights),
+        mutation_probability(mutation_probability),
+        function_set(function_set) {}
+
     Expression PointMutator::mutate(const Expression &expr) noexcept {
         if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > mutation_probability) {
             return expr;
@@ -47,16 +54,28 @@ namespace qsr {
             int operation = thread_local_rng() % 4;
             switch (operation) {
                 case 0:
-                    subtree.operation = SINE;
-                    break;
+                    if (function_set->sine) {
+                        subtree.operation = SINE;
+                        break;
+                    }
                 case 1:
-                    subtree.operation = COSINE;
-                    break;
+                    if (function_set->cosine) {
+                        subtree.operation = COSINE;
+                        break;
+                    }
                 case 2:
-                    subtree.operation = EXPONENTIAL;
-                    break;
+                    if (function_set->exponential) {
+                        subtree.operation = EXPONENTIAL;
+                        break;
+                    }
                 case 3:
-                    subtree.operation = RECTIFIED_LINEAR_UNIT;
+                    if (function_set->rectified_linear_unit) {
+                        subtree.operation = RECTIFIED_LINEAR_UNIT;
+                        break;
+                    }
+                default:
+                    std::cerr << "Invalid state at line" << __LINE__ << std::endl;
+                    abort();
                     break;
             }
         }
@@ -68,16 +87,28 @@ namespace qsr {
             int operation = thread_local_rng() % 4;
             switch (operation) {
                 case 0:
-                    subtree.operation = ADDITION;
-                    break;
+                    if (function_set->addition) {
+                        subtree.operation = ADDITION;
+                        break;
+                    }
                 case 1:
-                    subtree.operation = SUBTRACTION;
-                    break;
+                    if (function_set->subtraction) {
+                        subtree.operation = SUBTRACTION;
+                        break;
+                    }
                 case 2:
-                    subtree.operation = MULTIPLICATION;
-                    break;
+                    if (function_set->multiplication) {
+                        subtree.operation = MULTIPLICATION;
+                        break;
+                    }
                 case 3:
-                    subtree.operation = DIVISION;
+                    if (function_set->division) {
+                        subtree.operation = DIVISION;
+                        break;
+                    }
+                default:
+                    std::cerr << "Invalid state" << __LINE__ << std::endl;
+                    abort();
                     break;
             }
         }

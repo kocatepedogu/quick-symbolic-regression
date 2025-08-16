@@ -12,15 +12,14 @@ namespace qsr {
 
 class GrowInitializer : public BaseInitializer {
 public:
-    constexpr GrowInitializer(int nvars, int nweights, int max_depth, int npopulation) :
-        generator(nvars, nweights, max_depth), npopulation(npopulation) {}
+    GrowInitializer(int nvars, int nweights, int max_depth, int npopulation, std::shared_ptr<FunctionSet> function_set);
 
     void initialize(std::vector<Expression>& population) override;
 
 private:
     const int npopulation;
 
-    const ExpressionGenerator generator;
+    ExpressionGenerator generator;
 };
 
 }

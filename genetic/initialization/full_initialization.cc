@@ -5,7 +5,7 @@
 #include "initializer/full_initializer.hpp"
 
 namespace qsr {
-    std::shared_ptr<BaseInitializer> FullInitialization::get_initializer(int nvars, int nweights, int npopulation, int max_depth) {
+    std::shared_ptr<BaseInitializer> FullInitialization::get_initializer(int nvars, int nweights, int npopulation, int max_depth, std::shared_ptr<FunctionSet> function_set) {
         int depth;
 
         if (init_depth.has_value() && init_depth.value() >= 1 && init_depth.value() <= max_depth) {
@@ -14,7 +14,7 @@ namespace qsr {
             depth = max_depth;
         }
 
-        return std::make_shared<FullInitializer>(nvars, nweights, depth, npopulation);
+        return std::make_shared<FullInitializer>(nvars, nweights, depth, npopulation, function_set);
     }
 }
 

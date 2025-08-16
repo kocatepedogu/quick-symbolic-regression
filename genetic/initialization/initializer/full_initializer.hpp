@@ -11,15 +11,14 @@
 namespace qsr {
     class FullInitializer : public BaseInitializer {
     public:
-        constexpr FullInitializer(int nvars, int nweights, int depth, int npopulation) 
-            : npopulation(npopulation), generator(nvars, nweights, depth) {}
+        FullInitializer(int nvars, int nweights, int depth, int npopulation, std::shared_ptr<FunctionSet> function_set);
 
         void initialize(std::vector<Expression>& population) override;
 
     private:
         const int npopulation;
 
-        const FullExpressionGenerator generator;
+        FullExpressionGenerator generator;
     };
 }
 

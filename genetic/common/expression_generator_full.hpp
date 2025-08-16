@@ -5,34 +5,29 @@
 #define EXPRESSION_GENERATOR_FULL_HPP
 
 #include "../../expressions/expression.hpp"
+#include "function_set.hpp"
+
+#include <memory>
+#include <random>
 
 namespace qsr {
 
 class FullExpressionGenerator {
-    public:
-        constexpr FullExpressionGenerator(int nvars, int nweights, int depth) : 
-            nvars(nvars), nweights(nweights), depth(depth) {
-    
-            if (depth <= 0) {
-                fprintf(stderr, "FullExpressionGenerator: depth must be greater than zero.\n");
-                abort();
-            }
+public:
+    FullExpressionGenerator(int nvars, int nweights, int depth, std::shared_ptr<FunctionSet> function_set);
 
-            if (nvars <= 0) {
-                fprintf(stderr, "FullExpressionGenerator: number of variables must be greater than zero.\n");
-                abort();
-            }
-        }
+    Expression generate(int remaining_depth) noexcept;
 
-        Expression generate(int remaining_depth) const noexcept;
+    Expression generate() noexcept;
 
-        Expression generate() const noexcept;
+private:
+    const int nvars;
+    const int nweights;
+    const int depth;
 
-    private:
-        const int nvars;
-        const int nweights;
-        const int depth;
-
+    std::shared_ptr<FunctionSet> function_set;
+    std::discrete_distribution<> depth_one_distribution;
+    std::discrete_distribution<> depth_two_distribution;
 };
 
 }

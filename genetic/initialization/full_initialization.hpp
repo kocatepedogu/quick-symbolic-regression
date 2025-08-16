@@ -5,6 +5,7 @@
 #define INITIALIZATION_FULL_HPP
 
 #include "base.hpp"
+#include <memory>
 
 namespace qsr {
     class FullInitialization : public BaseInitialization {
@@ -12,7 +13,7 @@ namespace qsr {
         constexpr FullInitialization(std::optional<int> init_depth = std::nullopt) 
             : init_depth(init_depth) {}
 
-        std::shared_ptr<BaseInitializer> get_initializer(int nvars, int nweights, int npopulation, int max_depth) override;
+        std::shared_ptr<BaseInitializer> get_initializer(int nvars, int nweights, int npopulation, int max_depth, std::shared_ptr<FunctionSet> function_set) override;
 
     private:
         const std::optional<int> init_depth;

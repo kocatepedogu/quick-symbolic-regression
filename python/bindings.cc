@@ -8,6 +8,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
+#include "../genetic/common/function_set.hpp"
 #include "../genetic/genetic_programming_islands.hpp"
 
 #include "../genetic/initialization/grow_initialization.hpp"
@@ -121,6 +122,12 @@ PYBIND11_MODULE(libquicksr, m) {
     py::class_<hybrid::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<hybrid::RunnerGenerator>>(m, "HybridRunnerGenerator")
         .def(py::init<>());
 
+    /* Function Set Class */
+
+    py::class_<FunctionSet, std::shared_ptr<FunctionSet>>(m, "FunctionSet")
+        .def(py::init<std::vector<std::string>>(),
+            py::arg("functions"));
+
     /* Genetic Programming Algorithm Classes */
 
     py::class_<GeneticProgrammingIslands>(m, "GeneticProgrammingIslands")
@@ -132,7 +139,8 @@ PYBIND11_MODULE(libquicksr, m) {
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseRecombination>,
             std::shared_ptr<BaseSelection>,
-            std::shared_ptr<BaseRunnerGenerator>>(),
+            std::shared_ptr<BaseRunnerGenerator>,
+            std::shared_ptr<FunctionSet>>(),
             py::arg("dataset"),
             py::arg("nislands"),
             py::arg("nweights"),
@@ -143,7 +151,8 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("mutation"),
             py::arg("recombination"),
             py::arg("selection"),
-            py::arg("runner_generator"))
+            py::arg("runner_generator"),
+            py::arg("function_set"))
 
         // Fit method
         .def("fit", &GeneticProgrammingIslands::fit,

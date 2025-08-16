@@ -19,7 +19,8 @@ int main(void) {
 
     Expression f = w0 + w1*Cos(x) + w2*Sin(y);
 
-    SubtreeMutator mutation(2, 3, 3, 10, 0.7);
+    SubtreeMutator mutation(2, 3, 3, 10, 0.7, std::make_shared<FunctionSet>(
+            std::vector<std::string>{"+", "-", "*", "/", "sin", "cos", "exp", "relu"}));
 
     for (int i = 0; i < 1000; ++i) {
         std::cout << mutation.mutate(f) << std::endl;

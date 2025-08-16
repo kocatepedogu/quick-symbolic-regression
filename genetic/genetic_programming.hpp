@@ -8,6 +8,7 @@
 #include "../expressions/expression.hpp"
 #include "../runners/base.hpp"
 
+#include "common/function_set.hpp"
 #include "recombination/base.hpp"
 #include "initialization/base.hpp"
 #include "mutation/base.hpp"
@@ -29,7 +30,8 @@ public:
                        std::shared_ptr<BaseMutation> mutator,
                        std::shared_ptr<BaseRecombination> recombination,
                        std::shared_ptr<BaseSelection> selection,
-                       std::shared_ptr<BaseRunner> runner) noexcept;
+                       std::shared_ptr<BaseRunner> runner,
+                       std::shared_ptr<FunctionSet> function_set) noexcept;
 
     LearningHistory fit(int ngenerations, int nepochs, float learning_rate) noexcept;
 
@@ -54,6 +56,7 @@ private:
     std::shared_ptr<BaseSelector> selector;
 
     std::shared_ptr<BaseRunner> runner;
+    std::shared_ptr<FunctionSet> function_set;
 
     const int nvars;
     const int nweights;

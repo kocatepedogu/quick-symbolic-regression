@@ -6,12 +6,14 @@
 
 #include "../dataset/dataset.hpp"
 
+#include "common/function_set.hpp"
 #include "recombination/base.hpp"
 #include "genetic_programming.hpp"
 #include "initialization/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
 #include "../runners/runner_generator_base.hpp"
+#include <memory>
 
 namespace qsr {
 
@@ -27,7 +29,8 @@ public:
                               std::shared_ptr<BaseMutation> mutation,
                               std::shared_ptr<BaseRecombination> recombination,
                               std::shared_ptr<BaseSelection> selection,
-                              std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept;
+                              std::shared_ptr<BaseRunnerGenerator> runner_generator,
+                              std::shared_ptr<FunctionSet> function_set) noexcept;
 
     ~GeneticProgrammingIslands() noexcept;
 
@@ -69,6 +72,9 @@ private:
 
     /// Maximum depth of expressions
     const int max_depth;
+
+    // Function set
+    std::shared_ptr<FunctionSet> function_set;
 };
 
 }

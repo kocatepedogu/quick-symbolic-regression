@@ -7,6 +7,15 @@
 
 namespace qsr {
 
+SubtreeMutator::SubtreeMutator(int nvars, int nweights, 
+                        int max_depth_increment, int max_depth, 
+                        float mutation_probability,
+                        std::shared_ptr<FunctionSet> function_set)  :
+    max_depth(max_depth),
+    mutation_probability(mutation_probability),
+    expression_generator(nvars, nweights, max_depth_increment, function_set) {}
+
+    
 Expression SubtreeMutator::mutate(const Expression &expr) noexcept {
     if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > mutation_probability) {
         return expr;

@@ -21,7 +21,7 @@ y = [1/(1 + x0**(-4)) + 1/(1 + x1**(-4))
      for x0, x1 in X]
 
 # Create model
-model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS)
+model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS, functions=["+", "/", 'cos', 'relu'])
 
 # Fit model
 solution, history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=0)

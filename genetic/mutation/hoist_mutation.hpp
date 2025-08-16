@@ -15,7 +15,7 @@ public:
     constexpr HoistMutation(float mutation_probability) :
         mutation_probability(mutation_probability) {}
 
-    virtual std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights, int max_depth) override;
+    virtual std::shared_ptr<BaseMutator> get_mutator(int nvars, int nweights, int max_depth, std::shared_ptr<FunctionSet> function_set) override;
 
 private:
     float mutation_probability;

@@ -16,12 +16,10 @@ namespace qsr {
 
 class SubtreeMutator : public BaseMutator {
 public:
-    constexpr SubtreeMutator(int nvars, int nweights, 
+    SubtreeMutator(int nvars, int nweights, 
                             int max_depth_increment, int max_depth, 
-                            float mutation_probability)  :
-        max_depth(max_depth),
-        mutation_probability(mutation_probability),
-        expression_generator(nvars, nweights, max_depth_increment) {}
+                            float mutation_probability,
+                            std::shared_ptr<FunctionSet> function_set);
 
     Expression mutate(const Expression &expr) noexcept override;
 
