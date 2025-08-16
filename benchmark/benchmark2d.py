@@ -8,7 +8,7 @@ from quicksr import *
 
 # Define constants
 NPOPULATION=11200
-NISLANDS=8
+NISLANDS=28
 NWEIGHTS=1
 
 # Generate dataset
@@ -24,7 +24,7 @@ y = [1/(1 + x0**(-4)) + 1/(1 + x1**(-4))
 model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS)
 
 # Fit model
-solution, history = model.fit(X, y, ngenerations=20, nsupergenerations=15, nepochs=1)
+solution, history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=0)
 
 # Print best solution
 print("Best solution: {}".format(solution))
