@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef FUNCTION_SET_HPP
 #define FUNCTION_SET_HPP
 
