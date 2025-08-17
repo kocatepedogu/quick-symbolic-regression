@@ -16,31 +16,36 @@ namespace qsr {
 GeneticProgrammingIslands::GeneticProgrammingIslands (
     std::shared_ptr<Dataset> dataset, 
     int nislands, 
-    int nweights, 
-    int npopulation, 
-    int noffspring,
-    int max_depth,
+    const Config &config,
     std::shared_ptr<BaseInitialization> initialization, 
     std::shared_ptr<BaseMutation> mutation, 
     std::shared_ptr<BaseRecombination> recombination, 
     std::shared_ptr<BaseSelection> selection,
-    std::shared_ptr<BaseRunnerGenerator> runner_generator,
-    std::shared_ptr<FunctionSet> function_set) noexcept :
+    std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
         dataset(dataset),
         initialization(initialization),
         mutation(mutation),
         recombination(recombination),
         selection(selection),
         runner_generator(runner_generator),
-        function_set(function_set),
-        nweights(nweights),
         nislands(nislands),
-        npopulation(npopulation),
-        noffspring(noffspring),
-        max_depth(max_depth)
+        global_config(config)
 {
     // Create empty island array
     islands = new GeneticProgramming*[nislands];
+
+    // Create local configuration from global configuration
+
+    const int population_per_island = global_config.npopulation / nislands;
+    const int offspring_per_island = global_config.noffspring / nislands;
+
+    local_config = Config(
+        dataset->n, 
+        global_config.nweights, 
+        global_config.max_depth, 
+        population_per_island, 
+        offspring_per_island, 
+        global_config.function_set);
 }
 
 GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept 
@@ -67,23 +72,17 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(int nge
     #pragma omp parallel num_threads(nislands)
     {
         const int threadIdx = omp_get_thread_num();
-        const int population_per_island = npopulation / nislands;
-        const int offspring_per_island = noffspring / nislands;
-
-        auto runner = runner_generator->generate(dataset, nweights);
+        
+        auto runner = runner_generator->generate(dataset, local_config.nweights);
 
         islands[threadIdx] = new GeneticProgramming(
             dataset, 
-            nweights, 
-            population_per_island, 
-            offspring_per_island,
-            max_depth,
+            local_config,
             initialization,
             mutation,
             recombination,
             selection,
-            runner,
-            function_set);
+            runner);
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Run island

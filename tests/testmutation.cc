@@ -20,7 +20,7 @@ int main(void) {
     Expression f = w0 + w1*Cos(x) + w2*Sin(y);
 
     Config config(
-        2, 3, 10, 11200,
+        2, 3, 10, 11200, 11200,
         std::make_shared<FunctionSet>(
             std::vector<std::string>{"+", "-", "*", "/", "sin", "cos", "exp", "relu"})
     );

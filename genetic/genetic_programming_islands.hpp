@@ -6,13 +6,14 @@
 
 #include "../dataset/dataset.hpp"
 
-#include "common/function_set.hpp"
 #include "recombination/base.hpp"
 #include "genetic_programming.hpp"
 #include "initialization/base.hpp"
 #include "mutation/base.hpp"
 #include "selection/base.hpp"
+
 #include "../runners/runner_generator_base.hpp"
+
 #include <memory>
 
 namespace qsr {
@@ -21,16 +22,12 @@ class GeneticProgrammingIslands {
 public:
     GeneticProgrammingIslands(std::shared_ptr<Dataset> dataset, 
                               int nislands, 
-                              int nweights, 
-                              int npopulation, 
-                              int noffspring,
-                              int max_depth,
+                              const Config &config,
                               std::shared_ptr<BaseInitialization> initialization,
                               std::shared_ptr<BaseMutation> mutation,
                               std::shared_ptr<BaseRecombination> recombination,
                               std::shared_ptr<BaseSelection> selection,
-                              std::shared_ptr<BaseRunnerGenerator> runner_generator,
-                              std::shared_ptr<FunctionSet> function_set) noexcept;
+                              std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept;
 
     ~GeneticProgrammingIslands() noexcept;
 
@@ -55,26 +52,17 @@ private:
     /// Runner generator shared by all islands
     std::shared_ptr<BaseRunnerGenerator> runner_generator;
 
-    /// Properties of solutions
-    const int nweights;
-
-    /// Total population size
-    const int npopulation;
-
-    /// Total offspring size
-    const int noffspring;
-
     /// Array of islands
     GeneticProgramming **islands;
 
     /// Number of islands
     const int nislands;
 
-    /// Maximum depth of expressions
-    const int max_depth;
+    /// Global configuration (contains total population size and total offspring size)
+    Config global_config;
 
-    // Function set
-    std::shared_ptr<FunctionSet> function_set;
+    /// Local configuration (contains per island population size and per island offspring size)
+    Config local_config;
 };
 
 }

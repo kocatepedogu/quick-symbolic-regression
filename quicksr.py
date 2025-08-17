@@ -8,6 +8,7 @@ from libquicksr import *
 
 class SymbolicRegressionModel:
     def __init__(self, 
+        nvars,
         nweights, 
         npopulation,
         nislands,
@@ -35,20 +36,18 @@ class SymbolicRegressionModel:
         if noffspring is None:
             noffspring = npopulation
 
-        # Create function set
-        self.function_set = FunctionSet(functions)
+        # Create configuration
+        self.config = Config(nvars, nweights, max_depth, npopulation, noffspring, FunctionSet(functions))
 
         # Save the given parameters
         self.nislands = nislands
-        self.nweights = nweights
-        self.npopulation = npopulation
-        self.noffspring = noffspring
-        self.max_depth = max_depth
         self.initialization = initialization
         self.mutation = mutation
         self.recombination = recombination
         self.selection = selection
         self.runner_generator = runner_generator
+
+        # Set the solution, history and compiled solution to None
         self.solution = None
         self.history = None
         self.compiled_solution = None
@@ -71,16 +70,12 @@ class SymbolicRegressionModel:
         islands = GeneticProgrammingIslands(
             dataset, 
             nislands=self.nislands, 
-            nweights=self.nweights, 
-            npopulation=self.npopulation, 
-            noffspring=self.noffspring,
-            max_depth=self.max_depth,
+            config=self.config,
             initialization=self.initialization,
             mutation=self.mutation,
             recombination=self.recombination,
             selection=self.selection,
-            runner_generator=self.runner_generator,
-            function_set=self.function_set
+            runner_generator=self.runner_generator
         )
 
         # Fit an expression

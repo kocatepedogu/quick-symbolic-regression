@@ -10,12 +10,14 @@
 namespace qsr {
     struct Config {
         Config();
-        Config(int nvars, int nweights, int max_depth, int npopulation, std::shared_ptr<FunctionSet> function_set);
+        
+        Config(int nvars, int nweights, int max_depth, int npopulation, int noffspring, std::shared_ptr<FunctionSet> function_set);
 
         int nvars;
         int nweights;
         int max_depth;
         int npopulation;
+        int noffspring;
 
         std::shared_ptr<FunctionSet> function_set;
     };

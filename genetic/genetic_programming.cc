@@ -12,43 +12,39 @@ namespace qsr {
 
 GeneticProgramming::GeneticProgramming(
                std::shared_ptr<const Dataset> dataset, 
-               int nweights, 
-               int npopulation, 
-               int noffspring,
-               int max_depth,
+               const Config &config,
                std::shared_ptr<BaseInitialization> initialization,
                std::shared_ptr<BaseMutation> mutation,
                std::shared_ptr<BaseRecombination> recombination,
                std::shared_ptr<BaseSelection> selection,
-               std::shared_ptr<BaseRunner> runner,
-               std::shared_ptr<FunctionSet> function_set) noexcept : 
+               std::shared_ptr<BaseRunner> runner) noexcept : 
+               config(config),
                dataset(dataset), 
-               nvars(dataset->n), 
-               nweights(nweights), 
-               npopulation(npopulation % 2 == 0 ? npopulation : npopulation + 1), 
-               noffspring(noffspring % 2 == 0 ? noffspring : noffspring + 1),
-               max_depth(max_depth),
                initialization(initialization),
                mutation(mutation),
                recombination(recombination),
                selection(selection),
-               runner(runner),
-               function_set(function_set)
+               runner(runner)
 {
-    // Create config
-    Config config(nvars, nweights, max_depth, npopulation, function_set);
+    // Ensure population size and offspring size are even
+    if (config.npopulation % 2 != 0) {
+        this->config.npopulation++;
+    }
+    if (config.noffspring % 2 != 0) {
+        this->config.noffspring++;
+    }
 
     // Get selector
-    selector = selection->get_selector(npopulation);
+    selector = selection->get_selector(this->config.npopulation);
 
     // Get mutator
-    mutator = mutation->get_mutator(config);
+    mutator = mutation->get_mutator(this->config);
 
     // Get recombiner
-    recombiner = recombination->get_recombiner(max_depth);
+    recombiner = recombination->get_recombiner(this->config.max_depth);
 
     // Get initializer
-    initializer = initialization->get_initializer(config);
+    initializer = initialization->get_initializer(this->config);
 
     // Initialize island with a population of random expressions
     initializer->initialize(population);
@@ -129,7 +125,7 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
-        for (int i = 0; i < noffspring / 2; ++i) {
+        for (int i = 0; i < config.noffspring / 2; ++i) {
             const auto &parent1 = selector->select(&population[0]);
             const auto &parent2 = selector->select(&population[0]);
             const auto &children = recombiner->recombine(parent1, parent2);
@@ -152,7 +148,7 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
         std::sort(population.begin(), population.end(), std::greater<Expression>());
 
         // Remove the worst half of the population
-        population.resize(npopulation);
+        population.resize(config.npopulation);
 
         // Find new best
         const Expression best = *get_best_solution();

@@ -128,31 +128,37 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<std::vector<std::string>>(),
             py::arg("functions"));
 
+    /* Config Class */
+
+    py::class_<Config>(m, "Config")
+        .def(py::init<int, int, int, int, int, std::shared_ptr<FunctionSet>>(),
+            py::arg("nvars"),
+            py::arg("nweights"),
+            py::arg("max_depth"),
+            py::arg("npopulation"),
+            py::arg("noffspring"),
+            py::arg("function_set"));
+
     /* Genetic Programming Algorithm Classes */
 
     py::class_<GeneticProgrammingIslands>(m, "GeneticProgrammingIslands")
         // Constructor
         .def(py::init<
             std::shared_ptr<Dataset>, 
-            int, int, int, int, int,
+            int, const Config &,
             std::shared_ptr<BaseInitialization>,
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseRecombination>,
             std::shared_ptr<BaseSelection>,
-            std::shared_ptr<BaseRunnerGenerator>,
-            std::shared_ptr<FunctionSet>>(),
+            std::shared_ptr<BaseRunnerGenerator>>(),
             py::arg("dataset"),
             py::arg("nislands"),
-            py::arg("nweights"),
-            py::arg("npopulation"),
-            py::arg("noffspring"),
-            py::arg("max_depth"),
+            py::arg("config"),
             py::arg("initialization"),
             py::arg("mutation"),
             py::arg("recombination"),
             py::arg("selection"),
-            py::arg("runner_generator"),
-            py::arg("function_set"))
+            py::arg("runner_generator"))
 
         // Fit method
         .def("fit", &GeneticProgrammingIslands::fit,

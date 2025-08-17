@@ -10,11 +10,12 @@ namespace qsr {
         npopulation(0),
         function_set(nullptr) {}
 
-    Config::Config(int nvars, int nweights, int max_depth, int npopulation, std::shared_ptr<FunctionSet> function_set) :
+    Config::Config(int nvars, int nweights, int max_depth, int npopulation, int noffspring, std::shared_ptr<FunctionSet> function_set) :
         nvars(nvars),
         nweights(nweights),
         max_depth(max_depth),
         npopulation(npopulation),
+        noffspring(noffspring),
         function_set(function_set)
     {
         if (max_depth <= 0) {

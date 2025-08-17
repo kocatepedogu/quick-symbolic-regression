@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from quicksr import *
 
 # Define constants
+NVARS=2
 NPOPULATION=11200
 NISLANDS=28
 NWEIGHTS=1
@@ -21,7 +22,7 @@ y = [1/(1 + x0**(-4)) + 1/(1 + x1**(-4))
      for x0, x1 in X]
 
 # Create model
-model = SymbolicRegressionModel(NWEIGHTS, NPOPULATION, NISLANDS, functions=["+", "/", 'cos', 'relu'])
+model = SymbolicRegressionModel(NVARS, NWEIGHTS, NPOPULATION, NISLANDS, functions=["+", "/", 'cos', 'relu'])
 
 # Fit model
 solution, history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=0)

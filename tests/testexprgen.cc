@@ -9,7 +9,7 @@ using namespace qsr;
 
 int main(void) {
     Config config(
-        2, 3, 4, 11200,
+        2, 3, 4, 11200, 11200,
         std::make_shared<FunctionSet>(
             std::vector<std::string>{"+", "-", "*", "/", "sin", "cos", "exp", "relu"})
     );

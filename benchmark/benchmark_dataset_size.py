@@ -37,6 +37,7 @@ def fit_model(dataset_size, runner_generator):
 
     # Create model
     model = SymbolicRegressionModel(
+        nvars=1, 
         nweights=NWEIGHTS, 
         npopulation=NPOPULATION, 
         nislands=NISLANDS, 
