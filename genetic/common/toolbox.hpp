@@ -12,6 +12,10 @@
 #include "../selection/base.hpp"
 
 namespace qsr {
+    /**
+     * @brief The set of genetic operators used in a QuickSR model
+     */
+
     class Toolbox {
     public:
         Toolbox(std::shared_ptr<BaseInitialization> initialization,

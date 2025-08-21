@@ -10,6 +10,16 @@
 
 namespace qsr {
 
+/**
+ * @brief Hoist mutation strategy
+ *
+ * @details
+ * This mutation strategy randomly selects a subtree from the expression and replaces it
+ * with a randomly chosen, smaller subtree within that subtree. This can lead to expressions
+ * becoming more simple, fighting the bloat problem.
+ *
+ * @param mutation_probability The probability of performing the mutation on an individual.
+ */
 class HoistMutation : public BaseMutation {
 public:
     constexpr HoistMutation(float mutation_probability) :

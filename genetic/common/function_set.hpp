@@ -9,7 +9,14 @@
 #include <algorithm>
 
 namespace qsr {
+    /**
+     * @brief Set of functions that can be present in the generated expressions
+     */
     struct FunctionSet {
+        /**
+         * @brief Creates a function set from the given function names
+         * @param functions A subset of "+", "-", "*", "/", "sin", "cos", "exp", "relu"
+         */
         constexpr FunctionSet(std::vector<std::string> functions) {
             addition = std::find(functions.begin(), functions.end(), "+") != functions.end();
             subtraction = std::find(functions.begin(), functions.end(), "-") != functions.end();

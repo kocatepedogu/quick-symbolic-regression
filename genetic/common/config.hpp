@@ -8,17 +8,51 @@
 #include <memory>
 
 namespace qsr {
+    /**
+     * @brief Stores common configuration options required by many genetic operators and algoritms
+     */
     struct Config {
         Config();
         
+        /**
+         * @brief All arguments constructor
+         */
         Config(int nvars, int nweights, int max_depth, int npopulation, int noffspring, std::shared_ptr<FunctionSet> function_set);
 
+        /**
+         * @brief Number of variables (features) in the training data
+         */
         int nvars;
+
+        /**
+         * @brief Maximum number of trainable parameters (weights) allowed in an expression
+         */
         int nweights;
+
+        /**
+         * @brief The maximum depth expression parse trees are allowed to reach
+         */
         int max_depth;
+
+        /**
+         * @brief The number of expressions in a single generation
+         * @details
+         * This is the population size commmonly denoted by the Greek letter
+         * mu in the literature.
+         */
         int npopulation;
+
+        /**
+         * @brief The number of expressions generated in a single generation
+         * @details
+         * This is the offspring size commonly denoted by the Greek letter
+         * lambda in the literature.
+         */
         int noffspring;
 
+        /**
+         * @brief The function_set stores the set of unary and binary functions that can be present in the evolving functions.
+         */
         std::shared_ptr<FunctionSet> function_set;
     };
 }
