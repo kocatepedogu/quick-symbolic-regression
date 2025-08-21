@@ -21,15 +21,14 @@ namespace qsr {
 
 class GeneticProgramming {
 public:
-    GeneticProgramming(std::shared_ptr<const Dataset> dataset, 
-                       const Config &config,
+    GeneticProgramming(const Config &config,
                        std::shared_ptr<BaseInitialization> initializer,
                        std::shared_ptr<BaseMutation> mutator,
                        std::shared_ptr<BaseRecombination> recombination,
                        std::shared_ptr<BaseSelection> selection,
                        std::shared_ptr<BaseRunner> runner) noexcept;
 
-    LearningHistory fit(int ngenerations, int nepochs, float learning_rate) noexcept;
+    LearningHistory fit(std::shared_ptr<const Dataset> dataset, int ngenerations, int nepochs, float learning_rate) noexcept;
 
     void insert_solution(Expression e);
 
@@ -37,8 +36,6 @@ public:
     Expression *get_worst_solution();
 
 private:
-    std::shared_ptr<const Dataset> dataset;
-
     std::vector<Expression> population;
 
     std::shared_ptr<BaseInitialization> initialization;

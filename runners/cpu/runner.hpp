@@ -11,13 +11,11 @@
 namespace qsr::cpu {
     class Runner : public BaseRunner {
     private:
-        std::shared_ptr<const Dataset> dataset;
-
         const int nweights;
 
     public:
-        Runner(std::shared_ptr<const Dataset> dataset, int nweights);
+        Runner(int nweights);
 
-        void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
+        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
     };
 }

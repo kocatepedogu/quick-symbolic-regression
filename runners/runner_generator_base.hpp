@@ -13,7 +13,7 @@ namespace qsr {
 
 class BaseRunnerGenerator {
 public:
-    virtual std::shared_ptr<BaseRunner> generate(std::shared_ptr<const Dataset> dataset, int nweights);
+    virtual std::shared_ptr<BaseRunner> generate(int nweights);
 };
 
 }

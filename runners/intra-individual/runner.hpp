@@ -18,8 +18,6 @@ namespace qsr {
 namespace intra_individual {
     class Runner : public BaseRunner {
     private:
-        std::shared_ptr<const Dataset> dataset;
-
         const int nweights;
 
         HIPState hipState;
@@ -36,11 +34,13 @@ namespace intra_individual {
         Array2D<float> weights_grad_d;
 
     public:
-        Runner(std::shared_ptr<const Dataset> dataset, const int nweights);
+        Runner(const int nweights);
 
-        void run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, int epochs, float learning_rate);
+        void calculate_reduction_kernel_dimensions(int m);
 
-        void run(std::vector<Expression>& population, int epochs, float learning_rate) override;
+        void run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
+
+        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
     };
 }
 }

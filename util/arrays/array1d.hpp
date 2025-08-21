@@ -82,6 +82,21 @@ namespace qsr {
 
             return *this;
         }
+
+        // Resizes the array. Contents are discarded.
+        void resize(int new_dim1) {
+            if (new_dim1 > ptr.dim1) {
+                if (ptr.ptr != nullptr) {
+                    HIP_CALL(DEALLOC(ptr.ptr));
+                }
+
+                // Allocate the larger array                
+                ptr.dim1 = new_dim1;
+                ptr.ptr = nullptr;
+
+                HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
+            }
+        }
     };
 };
 

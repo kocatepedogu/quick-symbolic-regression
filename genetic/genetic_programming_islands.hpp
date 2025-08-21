@@ -20,8 +20,7 @@ namespace qsr {
 
 class GeneticProgrammingIslands {
 public:
-    GeneticProgrammingIslands(std::shared_ptr<Dataset> dataset, 
-                              int nislands, 
+    GeneticProgrammingIslands(int nislands, 
                               const Config &config,
                               std::shared_ptr<BaseInitialization> initialization,
                               std::shared_ptr<BaseMutation> mutation,
@@ -31,12 +30,9 @@ public:
 
     ~GeneticProgrammingIslands() noexcept;
 
-    std::tuple<Expression,std::vector<float>> fit(int ngenerations, int nsupergenerations, int nepochs, float learning_rate, bool verbose = false) noexcept;
+    std::tuple<Expression,std::vector<float>> fit(std::shared_ptr<Dataset> dataset, int ngenerations, int nsupergenerations, int nepochs, float learning_rate, bool verbose = false) noexcept;
 
 private:
-    /// Dataset shared by all islands
-    std::shared_ptr<Dataset> dataset;
-
     /// Population initializer shared by all islands
     std::shared_ptr<BaseInitialization> initialization;
 

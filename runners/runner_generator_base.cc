@@ -7,7 +7,7 @@
 
 namespace qsr {
 
-std::shared_ptr<BaseRunner> BaseRunnerGenerator::generate(std::shared_ptr<const Dataset> dataset, int nweights) {
+std::shared_ptr<BaseRunner> BaseRunnerGenerator::generate(int nweights) {
     fprintf(stderr, "Unimplemented base method called.");
     abort();
 }

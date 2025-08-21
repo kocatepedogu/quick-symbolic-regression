@@ -23,8 +23,8 @@
 // #define CHECK_BUFFER_OVERFLOW
 
 namespace qsr::inter_individual {
-    Runner::Runner(std::shared_ptr<const Dataset> dataset, int nweights) :
-        dataset(dataset), nweights(nweights) {}
+    Runner::Runner(int nweights) :
+        nweights(nweights) {}
 
     template <typename... Debug>
     __global__
@@ -108,7 +108,7 @@ namespace qsr::inter_individual {
         }
     }
 
-    void Runner::run(const Program &program, int epochs, float learning_rate, 
+    void Runner::run(const Program &program, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate, 
                      Array1D<float> &loss_d, Ptr2D<float> &weights_d) {
         const int threadsPerBlock = min(program.num_of_individuals, config.props.maxThreadsPerBlock);
         const int blocks = (program.num_of_individuals + threadsPerBlock - 1) / threadsPerBlock;
@@ -139,7 +139,7 @@ namespace qsr::inter_individual {
         HIP_CALL(hipStreamSynchronize(config.stream));
     }
 
-    void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
+    void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
         // Convert symbolic expression to bytecode program
         Program program_pop(population);
 
@@ -167,7 +167,7 @@ namespace qsr::inter_individual {
         }
 
         // Run virtual machine
-        run(program_pop, epochs, learning_rate, loss_d, weights_d.ptr);
+        run(program_pop, dataset, epochs, learning_rate, loss_d, weights_d.ptr);
 
         // Write loss values to the original expressions
         for (int i = 0; i < population.size(); ++i) {

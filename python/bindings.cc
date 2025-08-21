@@ -144,14 +144,12 @@ PYBIND11_MODULE(libquicksr, m) {
     py::class_<GeneticProgrammingIslands>(m, "GeneticProgrammingIslands")
         // Constructor
         .def(py::init<
-            std::shared_ptr<Dataset>, 
             int, const Config &,
             std::shared_ptr<BaseInitialization>,
             std::shared_ptr<BaseMutation>,
             std::shared_ptr<BaseRecombination>,
             std::shared_ptr<BaseSelection>,
             std::shared_ptr<BaseRunnerGenerator>>(),
-            py::arg("dataset"),
             py::arg("nislands"),
             py::arg("config"),
             py::arg("initialization"),
@@ -162,6 +160,7 @@ PYBIND11_MODULE(libquicksr, m) {
 
         // Fit method
         .def("fit", &GeneticProgrammingIslands::fit,
+            py::arg("dataset"),
             py::arg("ngenerations"),
             py::arg("nsupergenerations"),
             py::arg("nepochs") = 1,

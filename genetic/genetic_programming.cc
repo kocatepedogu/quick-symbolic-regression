@@ -11,7 +11,6 @@
 namespace qsr {
 
 GeneticProgramming::GeneticProgramming(
-               std::shared_ptr<const Dataset> dataset, 
                const Config &config,
                std::shared_ptr<BaseInitialization> initialization,
                std::shared_ptr<BaseMutation> mutation,
@@ -19,7 +18,6 @@ GeneticProgramming::GeneticProgramming(
                std::shared_ptr<BaseSelection> selection,
                std::shared_ptr<BaseRunner> runner) noexcept : 
                config(config),
-               dataset(dataset), 
                initialization(initialization),
                mutation(mutation),
                recombination(recombination),
@@ -106,13 +104,13 @@ static void calculate_fitnesses(std::vector<Expression> &pop) {
     }
 }
 
-LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float learning_rate) noexcept {
+LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, int ngenerations, int nepochs, float learning_rate) noexcept {
     // Create empty learning history
     LearningHistory history;
 
     // Compute initial fitnesses if not initialized
     if (!initialized) {
-        runner->run(population, nepochs, learning_rate);
+        runner->run(population, dataset, nepochs, learning_rate);
         calculate_fitnesses(population);
         initialized = true;
     }
@@ -136,7 +134,7 @@ LearningHistory GeneticProgramming::fit(int ngenerations, int nepochs, float lea
         }
 
         // Compute losses
-        runner->run(offspring, nepochs, learning_rate);
+        runner->run(offspring, dataset, nepochs, learning_rate);
 
         // Insert offspring into population
         population.insert(population.end(), offspring.begin(), offspring.end());

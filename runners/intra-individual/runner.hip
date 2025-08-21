@@ -15,6 +15,13 @@
 
 namespace qsr::intra_individual {
     constexpr int reduction_threads_per_block = 1024;
+    constexpr int initial_array_size = 128;
+
+    Runner::Runner(const int nweights) : nweights(nweights) {
+        weights_d = Array1D<float>(nweights);
+        weights_grad_d = Array2D<float>(nweights, initial_array_size);
+        loss_d = Array1D<float>(initial_array_size);
+    }
 
     __global__ 
     void weight_update(c_real_1d weight_grads, real_1d weight, int m, float learning_rate) {
@@ -105,25 +112,7 @@ namespace qsr::intra_individual {
             weights_d, weights_grad_d, debug...);
     }
 
-    Runner::Runner(std::shared_ptr<const Dataset> dataset, const int nweights) : dataset(dataset), nweights(nweights) {
-        const int threadsPerBlock = min(dataset->m, hipState.props.maxThreadsPerBlock);
-        const int blocks = (dataset->m + threadsPerBlock - 1) / threadsPerBlock;
-
-        gridDim = dim3(blocks);
-        blockDim = dim3(threadsPerBlock);
-
-        int reduction_blocks_per_grid = (dataset->m + reduction_threads_per_block - 1) / 
-            reduction_threads_per_block;
-
-        reduction_grid_dim = dim3(reduction_blocks_per_grid);
-        reduction_block_dim = dim3(reduction_threads_per_block);
-
-        weights_d = Array1D<float>(nweights);
-        weights_grad_d = Array2D<float>(nweights, dataset->m);
-        loss_d = Array1D<float>(dataset->m);
-    }
-
-    void Runner::run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, int epochs, float learning_rate) {
+    void Runner::run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
         for (int epoch = 0; epoch < epochs + 1; ++epoch) {
             // Run forward propagation and backpropagation to compute
             // weight gradients for each weight and for each data point
@@ -154,7 +143,27 @@ namespace qsr::intra_individual {
         HIP_CALL(hipStreamSynchronize(hipState.stream));
     }
 
-    void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
+    void Runner::calculate_reduction_kernel_dimensions(int m) {
+        const int threadsPerBlock = min(m, hipState.props.maxThreadsPerBlock);
+        const int blocks = (m + threadsPerBlock - 1) / threadsPerBlock;
+
+        gridDim = dim3(blocks);
+        blockDim = dim3(threadsPerBlock);
+
+        int reduction_blocks_per_grid = (m + reduction_threads_per_block - 1) / 
+            reduction_threads_per_block;
+
+        reduction_grid_dim = dim3(reduction_blocks_per_grid);
+        reduction_block_dim = dim3(reduction_threads_per_block);
+    }
+
+    void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+        calculate_reduction_kernel_dimensions(dataset->m);
+
+        // Resize arrays to match dataset size if dataset is larger than current capacity
+        weights_grad_d.resize(nweights, dataset->m);
+        loss_d.resize(dataset->m);
+
         // Convert symbolic expressions to bytecode program
         Program program_pop(population);
 
@@ -184,7 +193,7 @@ namespace qsr::intra_individual {
             }
 
             // Do the work
-            run(code, code_length, stack_length, intermediate_length, epochs, learning_rate);
+            run(code, code_length, stack_length, intermediate_length, dataset, epochs, learning_rate);
 
             // Compute total loss
             float total_loss = 0;

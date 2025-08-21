@@ -4,10 +4,11 @@
 #include "base.hpp"
 
 #include <cstdio>
+#include <memory>
 
 namespace qsr {
 
-void BaseRunner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
+void BaseRunner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
     fprintf(stderr, "Unimplemented base method called.");
     abort();
 }

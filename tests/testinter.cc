@@ -43,9 +43,9 @@ int main(void) {
     std::vector<Expression> expression_pop = {f1, f2, f3,};
 
     // Fit expressions
-    inter_individual::Runner runner(dataset, 3);
+    inter_individual::Runner runner(3);
     for (int i = 0; i < 60; ++i) {
-        runner.run(expression_pop, 10, 1e-3);
+        runner.run(expression_pop, dataset, 10, 1e-3);
     }
 
     // Print losses

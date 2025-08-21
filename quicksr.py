@@ -68,7 +68,6 @@ class SymbolicRegressionModel:
 
         # Create islands
         islands = GeneticProgrammingIslands(
-            dataset, 
             nislands=self.nislands, 
             config=self.config,
             initialization=self.initialization,
@@ -79,7 +78,7 @@ class SymbolicRegressionModel:
         )
 
         # Fit an expression
-        solution, history = islands.fit(ngenerations, nsupergenerations, nepochs, learning_rate, verbose)
+        solution, history = islands.fit(dataset, ngenerations, nsupergenerations, nepochs, learning_rate, verbose)
 
         # Save the solution and history
         self.solution = solution

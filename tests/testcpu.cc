@@ -42,10 +42,10 @@ int main(void) {
     std::vector<Expression> expression_pop = {f1, f2, f3};
 
     // Fit expressions
-    cpu::Runner runner(dataset, 3);
+    cpu::Runner runner(3);
 
     for (int i = 0; i < 60; ++i) {
-        runner.run(expression_pop, 10, 1e-3);
+        runner.run(expression_pop, dataset, 10, 1e-3);
     }
 
     // Print losses

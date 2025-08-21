@@ -9,10 +9,7 @@
 #include "../../vm/vm_control.hpp"
 
 namespace qsr::hybrid {
-    Runner::Runner(std::shared_ptr<const Dataset> dataset, int nweights) :
-        dataset(dataset),
-        nweights(nweights) {
-    }
+    Runner::Runner(int nweights) : nweights(nweights) {}
 
     template <typename... Debug>
     __global__
@@ -122,7 +119,7 @@ namespace qsr::hybrid {
         }
     }
 
-    void Runner::run(const inter_individual::Program &program, int epochs, float learning_rate, Array1D<float> &loss_d, Ptr2D<float> &weights_d) {
+    void Runner::run(const inter_individual::Program &program, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate, Array1D<float> &loss_d, Ptr2D<float> &weights_d) {
         const int total_threads = program.num_of_individuals * 32;
         const int threadsPerBlock = min(total_threads, config.props.maxThreadsPerBlock);
         const int blocks = (total_threads + threadsPerBlock - 1) / threadsPerBlock;
@@ -153,7 +150,7 @@ namespace qsr::hybrid {
         HIP_CALL(hipStreamSynchronize(config.stream));
     }
 
-    void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
+    void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
         // Convert symbolic expression to bytecode program
         inter_individual::Program program_pop(population);
 
@@ -181,7 +178,7 @@ namespace qsr::hybrid {
         }
 
         // Run virtual machine
-        run(program_pop, epochs, learning_rate, loss_d, weights_d.ptr);
+        run(program_pop, dataset, epochs, learning_rate, loss_d, weights_d.ptr);
 
         // Write loss values to the original expressions
         for (int i = 0; i < population.size(); ++i) {

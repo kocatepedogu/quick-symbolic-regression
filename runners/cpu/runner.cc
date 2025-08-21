@@ -14,10 +14,10 @@
 // #define CHECK_BUFFER_OVERFLOW
 
 namespace qsr::cpu {
-    Runner::Runner(std::shared_ptr<const Dataset> dataset, int nweights) :
-        dataset(dataset), nweights(nweights) {}
+    Runner::Runner(int nweights) :
+        nweights(nweights) {}
 
-    void Runner::run(std::vector<Expression>& population, int epochs, float learning_rate) {
+    void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
         // Convert symbolic expressions to bytecode program
         intra_individual::Program program_pop(population);
 
