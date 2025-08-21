@@ -7,7 +7,9 @@
 namespace qsr {
 
 
-// Intermediate compiler state
+/**
+ * @brief Intermediate compiler state
+ */ 
 struct CompilerState {
     /// At which location forward propagation instructions begin
     int forward_offset;
@@ -48,7 +50,7 @@ struct CompilerState {
 static void compile(const Expression& e, IntermediateRepresentation* p, CompilerState& s) noexcept;
 
 
-// Generates a single instruction
+// Generates IR for a single instruction and delegates the handling of operands using recursion
 template <int opcount, typename ...T>
 static void compile(const Expression& e, IntermediateRepresentation *p, CompilerState& s, T... args) {
     // In backpropagation, operation comes first, operands come afterwards
@@ -62,7 +64,7 @@ static void compile(const Expression& e, IntermediateRepresentation *p, Compiler
         s.max_sp_backward = s.expected_sp_backward;
     }
 
-    // Operands
+    // Compile the operands
     #pragma unroll
     for (int i = 0; i < opcount; ++i) {
         compile(e.operands[i], p, s);
