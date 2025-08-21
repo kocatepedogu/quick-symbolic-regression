@@ -6,7 +6,6 @@
 #include <pybind11/numpy.h>
 
 #include "dataset.hpp"
-#include "../util/hip.hpp"
 
 namespace qsr {
 
@@ -65,7 +64,7 @@ Dataset::Dataset(pybind11::array_t<float> numpy_X, pybind11::array_t<float> nump
     * The dimensions are X[m * n + n]
 
     * The goal is to convert X to X_d on device, which is in structure of array form.
-    * The dimensions should be X_d[n][m]
+    * The dimensions should be X_d[n * m + m]
     */
     X_d = Array2D<float>(n, m);
 
