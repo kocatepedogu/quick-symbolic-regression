@@ -5,24 +5,14 @@
 
 #include "../expressions/expression.hpp"
 
+#include "common/toolbox.hpp"
 #include "learning_history.hpp"
 #include <cmath>
 
 namespace qsr {
 
-GeneticProgramming::GeneticProgramming(
-               const Config &config,
-               std::shared_ptr<BaseInitialization> initialization,
-               std::shared_ptr<BaseMutation> mutation,
-               std::shared_ptr<BaseRecombination> recombination,
-               std::shared_ptr<BaseSelection> selection,
-               std::shared_ptr<BaseRunner> runner) noexcept : 
-               config(config),
-               initialization(initialization),
-               mutation(mutation),
-               recombination(recombination),
-               selection(selection),
-               runner(runner)
+GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &toolbox, std::shared_ptr<BaseRunner> runner) 
+    noexcept : config(config), runner(runner)
 {
     // Ensure population size and offspring size are even
     if (config.npopulation % 2 != 0) {
@@ -33,16 +23,16 @@ GeneticProgramming::GeneticProgramming(
     }
 
     // Get selector
-    selector = selection->get_selector(this->config.npopulation);
+    selector = toolbox.selection->get_selector(this->config.npopulation);
 
     // Get mutator
-    mutator = mutation->get_mutator(this->config);
+    mutator = toolbox.mutation->get_mutator(this->config);
 
     // Get recombiner
-    recombiner = recombination->get_recombiner(this->config.max_depth);
+    recombiner = toolbox.recombination->get_recombiner(this->config.max_depth);
 
     // Get initializer
-    initializer = initialization->get_initializer(this->config);
+    auto initializer = toolbox.initialization->get_initializer(this->config);
 
     // Initialize island with a population of random expressions
     initializer->initialize(population);

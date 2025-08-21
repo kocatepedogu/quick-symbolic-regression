@@ -32,19 +32,18 @@ class SymbolicRegressionModel:
         :param runner_generator: Runner generator (CPURunnerGenerator, HybridRunnerGenerator, InterIndividualRunnerGenerator, IntraIndividualRunnerGenerator)
         """
 
-        # Set offspring size to population size if not specified
-        if noffspring is None:
-            noffspring = npopulation
+        # Save the number of islands
+        self.nislands = nislands
 
         # Create configuration
+        if noffspring is None:
+            noffspring = npopulation
         self.config = Config(nvars, nweights, max_depth, npopulation, noffspring, FunctionSet(functions))
 
-        # Save the given parameters
-        self.nislands = nislands
-        self.initialization = initialization
-        self.mutation = mutation
-        self.recombination = recombination
-        self.selection = selection
+        # Create toolbox consisting of the given genetic operators
+        self.toolbox = Toolbox(initialization, mutation, recombination, selection)
+
+        # Save the runner
         self.runner_generator = runner_generator
 
         # Set the solution, history and compiled solution to None
@@ -70,10 +69,7 @@ class SymbolicRegressionModel:
         islands = GeneticProgrammingIslands(
             nislands=self.nislands, 
             config=self.config,
-            initialization=self.initialization,
-            mutation=self.mutation,
-            recombination=self.recombination,
-            selection=self.selection,
+            toolbox=self.toolbox,
             runner_generator=self.runner_generator
         )
 

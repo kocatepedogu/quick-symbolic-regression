@@ -13,21 +13,9 @@
 
 namespace qsr {
 
-GeneticProgrammingIslands::GeneticProgrammingIslands (
-    int nislands, 
-    const Config &config,
-    std::shared_ptr<BaseInitialization> initialization, 
-    std::shared_ptr<BaseMutation> mutation, 
-    std::shared_ptr<BaseRecombination> recombination, 
-    std::shared_ptr<BaseSelection> selection,
-    std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
-        initialization(initialization),
-        mutation(mutation),
-        recombination(recombination),
-        selection(selection),
-        runner_generator(runner_generator),
-        nislands(nislands),
-        global_config(config)
+GeneticProgrammingIslands::GeneticProgrammingIslands (int nislands, const Config &config, const Toolbox &toolbox,
+                                                      std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
+        toolbox(toolbox), runner_generator(runner_generator), nislands(nislands), global_config(config)
 {
     // Create empty island array
     islands = new GeneticProgramming*[nislands];
@@ -73,13 +61,7 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(std::sh
         
         auto runner = runner_generator->generate(local_config.nweights);
 
-        islands[threadIdx] = new GeneticProgramming(
-            local_config,
-            initialization,
-            mutation,
-            recombination,
-            selection,
-            runner);
+        islands[threadIdx] = new GeneticProgramming(local_config, toolbox, runner);
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Run island

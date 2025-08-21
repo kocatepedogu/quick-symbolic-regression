@@ -139,23 +139,29 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("noffspring"),
             py::arg("function_set"));
 
+    /* Toolbox Class */
+
+    py::class_<Toolbox>(m, "Toolbox")
+        .def(py::init<
+            std::shared_ptr<BaseInitialization>,
+            std::shared_ptr<BaseMutation>,
+            std::shared_ptr<BaseRecombination>,
+            std::shared_ptr<BaseSelection>>(),
+            py::arg("initialization"),
+            py::arg("mutation"),
+            py::arg("recombination"),
+            py::arg("selection"));
+
     /* Genetic Programming Algorithm Classes */
 
     py::class_<GeneticProgrammingIslands>(m, "GeneticProgrammingIslands")
         // Constructor
         .def(py::init<
-            int, const Config &,
-            std::shared_ptr<BaseInitialization>,
-            std::shared_ptr<BaseMutation>,
-            std::shared_ptr<BaseRecombination>,
-            std::shared_ptr<BaseSelection>,
+            int, const Config &, const Toolbox &,
             std::shared_ptr<BaseRunnerGenerator>>(),
             py::arg("nislands"),
             py::arg("config"),
-            py::arg("initialization"),
-            py::arg("mutation"),
-            py::arg("recombination"),
-            py::arg("selection"),
+            py::arg("toolbox"),
             py::arg("runner_generator"))
 
         // Fit method

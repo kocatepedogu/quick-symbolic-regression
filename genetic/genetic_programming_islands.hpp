@@ -6,11 +6,8 @@
 
 #include "../dataset/dataset.hpp"
 
-#include "recombination/base.hpp"
+#include "common/toolbox.hpp"
 #include "genetic_programming.hpp"
-#include "initialization/base.hpp"
-#include "mutation/base.hpp"
-#include "selection/base.hpp"
 
 #include "../runners/runner_generator_base.hpp"
 
@@ -20,39 +17,28 @@ namespace qsr {
 
 class GeneticProgrammingIslands {
 public:
-    GeneticProgrammingIslands(int nislands, 
-                              const Config &config,
-                              std::shared_ptr<BaseInitialization> initialization,
-                              std::shared_ptr<BaseMutation> mutation,
-                              std::shared_ptr<BaseRecombination> recombination,
-                              std::shared_ptr<BaseSelection> selection,
+    GeneticProgrammingIslands(int nislands, const Config &config, const Toolbox &toolbox,
                               std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept;
+
+    std::tuple<Expression,std::vector<float>> fit(std::shared_ptr<Dataset> dataset, 
+                                                  int ngenerations, int nsupergenerations, 
+                                                  int nepochs, float learning_rate, 
+                                                  bool verbose = false) noexcept;
 
     ~GeneticProgrammingIslands() noexcept;
 
-    std::tuple<Expression,std::vector<float>> fit(std::shared_ptr<Dataset> dataset, int ngenerations, int nsupergenerations, int nepochs, float learning_rate, bool verbose = false) noexcept;
-
 private:
-    /// Population initializer shared by all islands
-    std::shared_ptr<BaseInitialization> initialization;
-
-    /// Mutation operator shared by all islands
-    std::shared_ptr<BaseMutation> mutation;
-
-    /// Crossover operator shared by all islands
-    std::shared_ptr<BaseRecombination> recombination;
-
-    /// Selection operator shared by all islands
-    std::shared_ptr<BaseSelection> selection;
+    /// Genetic operators shared by all islands
+    const Toolbox toolbox;
 
     /// Runner generator shared by all islands
-    std::shared_ptr<BaseRunnerGenerator> runner_generator;
-
-    /// Array of islands
-    GeneticProgramming **islands;
+    const std::shared_ptr<BaseRunnerGenerator> runner_generator;
 
     /// Number of islands
     const int nislands;
+
+    /// Array of islands
+    GeneticProgramming **islands;
 
     /// Global configuration (contains total population size and total offspring size)
     Config global_config;
