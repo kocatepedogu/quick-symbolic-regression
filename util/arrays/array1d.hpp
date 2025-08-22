@@ -13,7 +13,7 @@ namespace qsr {
         int dim1;
         T *ptr;
 
-        __host__ __device__ T &operator[](int i) {
+        __host__ __device__ T &operator[](int i) const {
             #ifdef SANITIZE_MEMORY
             if (dim1 <= 0) {
                 printf("Error [%s:%d]: Array1D dimension is not positive (dim1=%d)\n", __FILE__, __LINE__, dim1);

@@ -16,7 +16,7 @@ struct Ptr2D {
 
     T *ptr;
 
-    __host__ __device__ T &operator[](int i1, int i2) {
+    __host__ __device__ T &operator[](int i1, int i2) const {
         #ifdef SANITIZE_MEMORY
         if (dim1 <= 0) {
             printf("Error [%s:%d]: Array2D dimension 1 is not positive (dim1=%d)\n", __FILE__, __LINE__, dim1);
@@ -47,7 +47,7 @@ struct Ptr2D {
         return ptr[i1 * dim2 + i2];
     }
 
-    __host__ __device__ T *operator[](int i1) {
+    __host__ __device__ T *operator[](int i1) const {
         #ifdef SANITIZE_MEMORY
         if (dim1 <= 0) {
             printf("Error [%s:%d]: Array2D dimension 1 is not positive (dim1=%d)\n", __FILE__, __LINE__, dim1);
