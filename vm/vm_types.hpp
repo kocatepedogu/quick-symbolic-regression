@@ -37,6 +37,9 @@ enum PropagationType {
     BACK
 };
 
+/**
+ * @brief Represents the stack and intermediate array state of the virtual machine.
+ */
 struct StackState {
     Ptr2D<float> &stack_d;
     Ptr2D<float> &intermediate_d;
