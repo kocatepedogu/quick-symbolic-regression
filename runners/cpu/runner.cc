@@ -72,24 +72,20 @@ namespace qsr::cpu {
 
             // Sequential loop over datapoints
             for (int tid = 0; tid < dataset->m; ++tid) {
+                int program_counter = 0;
                 int stack_pointer = 0;
                 int intermediate_pointer = 0;
 
-                const StackState s(
-                    stack_d.ptr,
-                    intermediate_d.ptr,
-                    stack_pointer,
-                    intermediate_pointer
-                );
-
-                int program_counter = 0;
+                const StackState s(stack_d.ptr, intermediate_d.ptr, stack_pointer, intermediate_pointer);
+                const ControlState c(tid, tid, num_of_instructions, bytecode, program_counter);
 
                 // Forward propagate and evaluate loss
                 vm_debug_print(tid, "Forward propagation");
-                vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
-                    tid, tid, bytecode, num_of_instructions, 
+                vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(
+                    c,
                     dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                    s, program_counter, weights_d.ptr, weights_grad_d.ptr
+                    s, 
+                    weights_d.ptr, weights_grad_d.ptr
                 
                     // Optional arguments for buffer overflow checking
                     #ifdef CHECK_BUFFER_OVERFLOW
@@ -106,10 +102,11 @@ namespace qsr::cpu {
 
                 if (epochs > 0) {
                     vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
-                        tid, tid, bytecode, num_of_instructions, 
+                    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(
+                        c,
                         dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                        s, program_counter, weights_d.ptr, weights_grad_d.ptr
+                        s, 
+                        weights_d.ptr, weights_grad_d.ptr
 
                         // Optional arguments for buffer overflow checking
                         #ifdef CHECK_BUFFER_OVERFLOW

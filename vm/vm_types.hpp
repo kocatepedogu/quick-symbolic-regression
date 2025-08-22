@@ -54,6 +54,46 @@ struct StackState {
         intermediate_pointer(intermediate_pointer) {}
 };
 
+/**
+ * @brief Represents the control state of the virtual machine.
+ */
+template <typename Code>
+struct ControlState {
+    /**
+      * @brief Global Thread ID of the current thread.
+     */
+    const int  &tid;
+
+    /**
+      * @brief The index of the datapoint currently being processed by the thread.
+     */
+    const int  &datapoint_idx;
+
+    /**
+      * @brief The length of the bytecode array.
+     */
+    const int  &bytecode_length;
+
+    /**
+      * @brief The bytecode array containing the instructions for the virtual machine.
+     */
+    const Code &bytecode;
+
+    /**
+      * @brief The current program counter of the virtual machine.
+     */
+    int  &program_counter;
+
+    /**
+      * @brief All arguments constructor
+     */
+    constexpr ControlState(
+        const int  &tid, const int  &datapoint_idx,
+        const int  &bytecode_length, const Code &bytecode, int  &program_counter) :
+        tid(tid), datapoint_idx(datapoint_idx),
+        bytecode(bytecode), bytecode_length(bytecode_length), program_counter(program_counter) {}
+};
+
 }
 
 #endif

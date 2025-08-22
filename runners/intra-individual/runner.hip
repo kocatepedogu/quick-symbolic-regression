@@ -78,24 +78,19 @@ namespace qsr::intra_individual {
             weights_grad_d[j,tid] = 0;
         }
 
+        int program_counter = 0;
         int stack_pointer = 0;
         int intermediate_pointer = 0;
 
-        const StackState s(
-            stack_d,
-            intermediate_d,
-            stack_pointer,
-            intermediate_pointer
-        );
-
-        int program_counter = 0;
+        const StackState s(stack_d, intermediate_d, stack_pointer, intermediate_pointer);
+        const ControlState c(tid, tid, bytecode_length, bytecode, program_counter);
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
-            tid, tid, bytecode, bytecode_length, 
+        vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(
+            c,
             m, X_d, y_d, 
-            s, program_counter, weights_d, weights_grad_d, debug...);
+            s, weights_d, weights_grad_d, debug...);
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
@@ -105,10 +100,10 @@ namespace qsr::intra_individual {
 
         // Backpropagate
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
-            tid, tid, bytecode, bytecode_length, 
+        vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(
+            c,
             m, X_d, y_d, 
-            s, program_counter, 
+            s, 
             weights_d, weights_grad_d, debug...);
     }
 

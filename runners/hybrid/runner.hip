@@ -65,24 +65,19 @@ namespace qsr::hybrid {
 
             // For all datapoints, compute and sum weight gradients
             for (int datapoint_idx = datapoint_block_idx; datapoint_idx < m; datapoint_idx += datapoint_block_dim) {
+                int program_counter = 0;
                 int stack_pointer = 0;
                 int intermediate_pointer = 0;
 
-                const StackState s(
-                    stack_d,
-                    intermediate_d,
-                    stack_pointer,
-                    intermediate_pointer
-                );
-
-                int program_counter = 0;
+                const StackState s(stack_d, intermediate_d, stack_pointer, intermediate_pointer);
+                const ControlState c(tid, datapoint_idx, max_num_of_instructions, bytecode, program_counter);
 
                 // Forward propagate and evaluate loss
                 vm_debug_print(tid, "Forward propagation");
-                vm_control<FORWARD, HYBRID, Ptr2D<Instruction>, Ptr2D<float>>(
-                    tid, datapoint_idx, bytecode, max_num_of_instructions, 
+                vm_control<FORWARD, HYBRID, Ptr2D<float>>(
+                    c, 
                     m, X_d, y_d, 
-                    s, program_counter, 
+                    s,
                     weights_d, weights_grad_d, debug...);
 
                 // Print an empty line in between forward propagation output and backpropagation output
@@ -96,10 +91,10 @@ namespace qsr::hybrid {
                 // Backpropagate
                 if (epoch < nepochs) {
                     vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, HYBRID, Ptr2D<Instruction>, Ptr2D<float>>(
-                        tid, datapoint_idx, bytecode, max_num_of_instructions, 
+                    vm_control<BACK, HYBRID, Ptr2D<float>>(
+                        c, 
                         m, X_d, y_d, 
-                        s, program_counter, 
+                        s,
                         weights_d, weights_grad_d, debug...);
                 }
             }

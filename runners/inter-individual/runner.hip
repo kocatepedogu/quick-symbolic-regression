@@ -59,24 +59,19 @@ namespace qsr::inter_individual {
 
                 // For all datapoints, compute and sum weight gradients
                 for (int datapoint_idx = 0; datapoint_idx < m; ++datapoint_idx) {
+                    int program_counter = 0;
                     int stack_pointer = 0;
                     int intermediate_pointer = 0;
 
-                    const StackState s(
-                        stack_d,
-                        intermediate_d,
-                        stack_pointer,
-                        intermediate_pointer
-                    );
-
-                    int program_counter = 0;
+                    const StackState s(stack_d, intermediate_d, stack_pointer, intermediate_pointer);
+                    const ControlState c(tid, datapoint_idx, max_num_of_instructions, bytecode, program_counter);
 
                     // Forward propagate and evaluate loss
                     vm_debug_print(tid, "Forward propagation");
-                    vm_control<FORWARD, INTER_INDIVIDUAL, Ptr2D<Instruction>, Ptr2D<float>>(
-                        tid, datapoint_idx, bytecode, max_num_of_instructions, 
+                    vm_control<FORWARD, INTER_INDIVIDUAL, Ptr2D<float>>(
+                        c, 
                         m, X_d, y_d, 
-                        s, program_counter, 
+                        s, 
                         weights_d, weights_grad_d, debug...);
 
                     // Print an empty line in between forward propagation output and backpropagation output
@@ -88,10 +83,10 @@ namespace qsr::inter_individual {
                     // Backpropagate
                     if (epoch < nepochs) {
                         vm_debug_print(tid, "Backpropagation");
-                        vm_control<BACK, INTER_INDIVIDUAL, Ptr2D<Instruction>, Ptr2D<float>>(
-                            tid, datapoint_idx, bytecode, max_num_of_instructions, 
+                        vm_control<BACK, INTER_INDIVIDUAL, Ptr2D<float>>(
+                            c, 
                             m, X_d, y_d, 
-                            s, program_counter, 
+                            s, 
                             weights_d, weights_grad_d, debug...);
                     }
                 }
