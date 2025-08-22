@@ -10,7 +10,7 @@
 namespace qsr {
 
 /**
- * Produces the intermedate representation for a single expression.
+ * Produces the intermediate representation for a single expression.
  */
 IntermediateRepresentation compile(const Expression& e) noexcept;
 
