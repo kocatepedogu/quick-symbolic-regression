@@ -8,6 +8,17 @@
 #include "../../vm/vm_debug.hpp"
 #include "../../vm/vm_control.hpp"
 
+// Uncomment to enable buffer overflow checks
+// #define CHECK_BUFFER_OVERFLOW
+
+#ifdef CHECK_BUFFER_OVERFLOW
+    #define DEBUGARGS ,\
+        program.stack_req ,\
+        program.intermediate_req
+#else
+    #define DEBUGARGS
+#endif
+
 namespace qsr::hybrid {
     Runner::Runner(int nweights) : nweights(nweights) {}
 
@@ -128,12 +139,7 @@ namespace qsr::hybrid {
             dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
             stack_d.ptr, intermediate_d.ptr,
             weights_d, weights_grad_d.ptr, nweights,
-            epochs, learning_rate, loss_d.ptr
-
-            // Optional arguments for buffer overflow checking
-            #ifdef CHECK_BUFFER_OVERFLOW
-            , program.stack_req, program.intermediate_req
-            #endif
+            epochs, learning_rate, loss_d.ptr DEBUGARGS
         );
 
         HIP_CALL(hipStreamSynchronize(config.stream));
