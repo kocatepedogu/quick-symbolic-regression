@@ -5,7 +5,6 @@
 #define RUNNER_GENERATOR_BASE_HPP
 
 #include "base.hpp"
-#include "../dataset/dataset.hpp"
 
 #include <memory>
 
