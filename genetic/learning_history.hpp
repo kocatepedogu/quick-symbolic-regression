@@ -12,18 +12,41 @@ namespace qsr {
 
 class LearningHistory {
 public:
-    // Adds a fitness value to the learning history
+    /**
+     * @brief Adds a loss value to the learning history
+     * @param expression The expression whose loss value is to be added
+     *
+     * @details
+     * The loss of the given expression is simply appended to the history.
+     *
+     * Note that the new value can be higher than the previous one if the algorithm
+     * allows for increase in loss over time.
+     */ 
     void add_to_history(const Expression& expression);
 
-    // Combines two LearningHistory objects
-    // For each iteration, take the best fitness value from either of the histories
+    /**
+     * @brief Combines two LearningHistory objects
+     * @param other The other LearningHistory object to combine with
+     *
+     * @details
+     * For every iteration, takes the best fitness value from either of the histories.
+     */
     LearningHistory combine_with(LearningHistory other);
 
-    // Concatenates two LearningHistory objects
-    // Append the other's history to this one
+    /**
+     * @brief Concatenates two LearningHistory objects
+     * @param other The other LearningHistory object to concatenate with
+     *
+     * @details
+     * Appends the other's history to the end of this one.
+     */
     LearningHistory concatenate_with(LearningHistory other);
 
-    // Returns the learning history
+    /**
+     * @brief Returns the learning history
+     *
+     * @return A constant reference to the vector of fitness values
+     */
     constexpr const std::vector<float>& get_learning_history() const {
         return history;
     }
