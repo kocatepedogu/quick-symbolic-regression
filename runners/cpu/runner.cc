@@ -13,6 +13,14 @@
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW
 
+#ifdef CHECK_BUFFER_OVERFLOW
+    #define DEBUGARGS ,\
+        stack_req ,\
+        intermediate_req
+#else
+    #define DEBUGARGS
+#endif
+
 namespace qsr::cpu {
     Runner::Runner(int nweights) :
         nweights(nweights) {
@@ -61,7 +69,8 @@ namespace qsr::cpu {
         }
     }
 
-    float Runner::train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+    float Runner::train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate,
+                        int stack_req, int intermediate_req) {
         float final_loss = 0;
 
         for (int epoch = 0; epoch < epochs + 1; ++epoch) {
@@ -83,13 +92,7 @@ namespace qsr::cpu {
 
                 // Forward propagate and evaluate loss
                 vm_debug_print(tid, "Forward propagation");
-                vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w
-                    // Optional arguments for buffer overflow checking
-                    #ifdef CHECK_BUFFER_OVERFLOW
-                    , program_pop.stack_req.ptr[program_idx], 
-                        program_pop.intermediate_req.ptr[program_idx]
-                    #endif
-                );
+                vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
 
                 // Print an empty line in between forward propagation output and backpropagation output
                 vm_debug_print(tid, "");
@@ -99,13 +102,7 @@ namespace qsr::cpu {
 
                 if (epochs > 0) {
                     vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w
-                        // Optional arguments for buffer overflow checking
-                        #ifdef CHECK_BUFFER_OVERFLOW
-                        , program_pop.stack_req.ptr[program_idx], 
-                        program_pop.intermediate_req.ptr[program_idx]
-                        #endif
-                    );
+                    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
                 }
             }
 
@@ -141,8 +138,13 @@ namespace qsr::cpu {
             auto instructions = program_pop.bytecode.ptr[program_idx];
             auto num_instructions = program_pop.num_of_instructions.ptr[program_idx];
 
+            // Get stack and intermediate requirements for the current program
+            auto stack_req = program_pop.stack_req.ptr[program_idx];
+            auto intermediate_req = program_pop.intermediate_req.ptr[program_idx];
+
             // Apply gradient descent for the current program
-            float loss = train(instructions, num_instructions, dataset, epochs, learning_rate);
+            float loss = train(instructions, num_instructions, dataset, epochs, learning_rate, 
+                               stack_req, intermediate_req);
 
             // Write loss back to the original expression
             population[program_idx].loss = loss;

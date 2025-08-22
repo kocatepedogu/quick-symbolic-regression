@@ -27,7 +27,8 @@ namespace qsr::cpu {
 
         void reset_gradients();
 
-        float train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
+        float train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate,
+                    int stack_req, int intermediate_req);
 
     public:
         Runner(int nweights);
