@@ -51,9 +51,6 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(std::sh
     // Local learning histories
     auto local_histories = new LearningHistory[nislands];
 
-    // Enable nested parallelism
-    omp_set_max_active_levels(2);
-
     // Fit
     #pragma omp parallel num_threads(nislands)
     {
