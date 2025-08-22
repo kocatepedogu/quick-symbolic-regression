@@ -72,14 +72,11 @@ namespace qsr::hybrid {
                 const StackState s(stack_d, intermediate_d, stack_pointer, intermediate_pointer);
                 const ControlState c(tid, datapoint_idx, max_num_of_instructions, bytecode, program_counter);
                 const DataState d(X_d, y_d);
+                const WeightState w(weights_d, weights_grad_d);
 
                 // Forward propagate and evaluate loss
                 vm_debug_print(tid, "Forward propagation");
-                vm_control<FORWARD, HYBRID, Ptr2D<float>>(
-                    c, 
-                    d, 
-                    s,
-                    weights_d, weights_grad_d, debug...);
+                vm_control<FORWARD, HYBRID, Ptr2D<float>>(c, d, s,w, debug...);
 
                 // Print an empty line in between forward propagation output and backpropagation output
                 vm_debug_print(tid, "");
@@ -92,11 +89,7 @@ namespace qsr::hybrid {
                 // Backpropagate
                 if (epoch < nepochs) {
                     vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, HYBRID, Ptr2D<float>>(
-                        c, 
-                        d, 
-                        s,
-                        weights_d, weights_grad_d, debug...);
+                    vm_control<BACK, HYBRID, Ptr2D<float>>(c, d, s, w, debug...);
                 }
             }
 

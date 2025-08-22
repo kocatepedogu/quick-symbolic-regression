@@ -85,13 +85,11 @@ namespace qsr::intra_individual {
         const StackState s(stack_d, intermediate_d, stack_pointer, intermediate_pointer);
         const ControlState c(tid, tid, bytecode_length, bytecode, program_counter);
         const DataState d(X_d, y_d);
+        const WeightState w(weights_d, weights_grad_d);
 
         // Forward propagate and evaluate loss
         vm_debug_print(tid, "Forward propagation");
-        vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(
-            c,
-            d, 
-            s, weights_d, weights_grad_d, debug...);
+        vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w, debug...);
 
         // Print an empty line in between forward propagation output and backpropagation output
         vm_debug_print(tid, "");
@@ -100,12 +98,9 @@ namespace qsr::intra_individual {
         loss_d[tid] = powf(stack_d[0,tid], 2);
 
         // Backpropagate
+        /// TODO: Do not run in the first epoch
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(
-            c,
-            d, 
-            s, 
-            weights_d, weights_grad_d, debug...);
+        vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w, debug...);
     }
 
     void Runner::run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {

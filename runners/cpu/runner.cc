@@ -79,15 +79,11 @@ namespace qsr::cpu {
                 const StackState s(stack_d.ptr, intermediate_d.ptr, stack_pointer, intermediate_pointer);
                 const ControlState c(tid, tid, num_of_instructions, bytecode, program_counter);
                 const DataState d(dataset->X_d.ptr, dataset->y_d.ptr);
+                const WeightState w(weights_d.ptr, weights_grad_d.ptr);
 
                 // Forward propagate and evaluate loss
                 vm_debug_print(tid, "Forward propagation");
-                vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(
-                    c,
-                    d, 
-                    s, 
-                    weights_d.ptr, weights_grad_d.ptr
-                
+                vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w
                     // Optional arguments for buffer overflow checking
                     #ifdef CHECK_BUFFER_OVERFLOW
                     , program_pop.stack_req.ptr[program_idx], 
@@ -103,12 +99,7 @@ namespace qsr::cpu {
 
                 if (epochs > 0) {
                     vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(
-                        c,
-                        d, 
-                        s, 
-                        weights_d.ptr, weights_grad_d.ptr
-
+                    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w
                         // Optional arguments for buffer overflow checking
                         #ifdef CHECK_BUFFER_OVERFLOW
                         , program_pop.stack_req.ptr[program_idx], 

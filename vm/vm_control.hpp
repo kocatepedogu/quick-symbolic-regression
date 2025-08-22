@@ -12,20 +12,10 @@
 #include "vm_propagation.hpp"
 #include "vm_types.hpp"
 
-#include "../../../util/arrays/array2d.hpp"
-#include "../../../util/arrays/array1d.hpp"
-
-
 namespace qsr {
 
 template <PropagationType propType, ParallelismType paraType, typename Weights, typename Code, typename... Debug> __device__ __host__
-void vm_control(
-                const ControlState<Code> c,
-                const DataState &d,
-                const StackState& s, 
-                Weights weights_d,
-                Ptr2D<float> weights_grad_d,
-                Debug ...debug)
+void vm_control(const ControlState<Code> c, const DataState &d, const StackState &s, const WeightState<Weights> &w, Debug ...debug)
 {
     bool exit = false;
 
@@ -56,8 +46,7 @@ void vm_control(
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(c.tid, "param %d", instruction.argindex);
-                propagate_parameter<propType, paraType, Weights>(c.tid, instruction.argindex, s, 
-                    weights_d, weights_grad_d, debug...);
+                propagate_parameter<propType, paraType, Weights>(c.tid, instruction.argindex, s, w, debug...);
                 break;
 
             /* Binary Operations */

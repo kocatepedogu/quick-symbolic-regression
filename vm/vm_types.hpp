@@ -119,6 +119,29 @@ struct DataState {
         X_d(X_d), y_d(y_d) {}
 };
 
+/**
+ * @brief Represents the state of the virtual machine with respect to trainable weights.
+ */
+template <typename Weights>
+struct WeightState {
+    /**
+      * @brief The weights array.
+     */
+    Weights &weights_d;
+
+    /**
+      * @brief The gradients array.
+     */
+    Ptr2D<float> &weights_grad_d;
+
+    /**
+      * @brief All arguments constructor
+     */
+    constexpr WeightState(
+        Weights &weights_d, Ptr2D<float> &weights_grad_d) :
+        weights_d(weights_d), weights_grad_d(weights_grad_d) {}
+};
+
 }
 
 #endif
