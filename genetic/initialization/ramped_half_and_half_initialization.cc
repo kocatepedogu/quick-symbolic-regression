@@ -6,14 +6,14 @@
 
 namespace qsr {
     std::shared_ptr<BaseInitializer> RampedHalfAndHalfInitialization::get_initializer(const Config &config) {
-        int depth;
+        Config overriden_config = config;
 
         if (init_depth.has_value() && init_depth.value() >= 1 && init_depth.value() <= config.max_depth) {
-            depth = init_depth.value();
+            overriden_config.max_depth = init_depth.value();
         } else {
-            depth = config.max_depth;
+            overriden_config.max_depth = config.max_depth;
         }
 
-        return std::make_shared<RampedHalfAndHalfInitializer>(config);
+        return std::make_shared<RampedHalfAndHalfInitializer>(overriden_config);
     }
 }
