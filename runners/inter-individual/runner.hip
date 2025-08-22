@@ -65,12 +65,13 @@ namespace qsr::inter_individual {
 
                     const StackState s(stack_d, intermediate_d, stack_pointer, intermediate_pointer);
                     const ControlState c(tid, datapoint_idx, max_num_of_instructions, bytecode, program_counter);
+                    const DataState d(X_d, y_d);
 
                     // Forward propagate and evaluate loss
                     vm_debug_print(tid, "Forward propagation");
                     vm_control<FORWARD, INTER_INDIVIDUAL, Ptr2D<float>>(
                         c, 
-                        m, X_d, y_d, 
+                        d, 
                         s, 
                         weights_d, weights_grad_d, debug...);
 
@@ -85,7 +86,7 @@ namespace qsr::inter_individual {
                         vm_debug_print(tid, "Backpropagation");
                         vm_control<BACK, INTER_INDIVIDUAL, Ptr2D<float>>(
                             c, 
-                            m, X_d, y_d, 
+                            d, 
                             s, 
                             weights_d, weights_grad_d, debug...);
                     }

@@ -6,6 +6,7 @@
 
 #include "../compiler/ir.hpp"
 
+#include "../../../util/arrays/array1d.hpp"
 #include "../../../util/arrays/array2d.hpp"
 
 namespace qsr {
@@ -95,6 +96,27 @@ struct ControlState {
         const int  &bytecode_length, const Code &bytecode, int  &program_counter) :
         tid(tid), datapoint_idx(datapoint_idx),
         bytecode(bytecode), bytecode_length(bytecode_length), program_counter(program_counter) {}
+};
+
+/**
+ * @brief Represents the dataset of the virtual machine.
+ */
+struct DataState {
+    /**
+      * @brief Input feature matrix
+     */
+    const Ptr2D<float> &X_d;
+
+    /**
+      * @brief Target vector
+     */
+    const Ptr1D<float> &y_d;
+
+    /**
+      * @brief All arguments constructor
+     */
+    constexpr DataState(const Ptr2D<float> &X_d, const Ptr1D<float> &y_d) :
+        X_d(X_d), y_d(y_d) {}
 };
 
 }

@@ -21,9 +21,7 @@ namespace qsr {
 template <PropagationType propType, ParallelismType paraType, typename Weights, typename Code, typename... Debug> __device__ __host__
 void vm_control(
                 const ControlState<Code> c,
-                const int m, 
-                Ptr2D<float> X_d, 
-                Ptr1D<float> y_d,
+                const DataState &d,
                 const StackState& s, 
                 Weights weights_d,
                 Ptr2D<float> weights_grad_d,
@@ -54,7 +52,7 @@ void vm_control(
             /* Operations with index operands */
             case PUSH_VARIABLE:
                 vm_debug_print(c.tid, "var %d", instruction.argindex);
-                propagate_immediate<propType>(c.tid, X_d[instruction.argindex,c.datapoint_idx], s, debug...);
+                propagate_immediate<propType>(c.tid, d.X_d[instruction.argindex,c.datapoint_idx], s, debug...);
                 break;
             case PUSH_PARAMETER:
                 vm_debug_print(c.tid, "param %d", instruction.argindex);
@@ -112,9 +110,9 @@ void vm_control(
                 float& stack_value = s.stack_d[0,c.tid];
 
                 const float y_predicted = stack_value;
-                const float y_target = y_d[c.datapoint_idx];
+                const float y_target = d.y_d[c.datapoint_idx];
 
-                stack_value = (y_predicted - y_target) / m;
+                stack_value = (y_predicted - y_target) / d.y_d.dim1;
 
                 // Forward propagation has finished.
 
