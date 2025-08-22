@@ -15,115 +15,148 @@
 
 namespace qsr::cpu {
     Runner::Runner(int nweights) :
-        nweights(nweights) {}
+        nweights(nweights) {
+        weights_d.resize(nweights);
+        weights_grad_d.resize(nweights, initial_array_size);
+    }
+
+    void Runner::initialize_weights(Expression& expression) {
+        // If the expression has no weights yet, initialize them randomly
+        if (expression.weights.empty()) {
+            for (int j = 0; j < nweights; ++j) {
+                weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+            }
+        } 
+        // If the expression already has weights, use them
+        else {
+            for (int j = 0; j < nweights; ++j) {
+                weights_d.ptr[j] = expression.weights[j];
+            }
+        }
+    }
+
+    void Runner::reset_gradients() {
+        // For every weight
+        for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+            // Set weight gradient from each datapoint to zero
+            #pragma omp simd
+            for (int tid = 0; tid < weights_grad_d.ptr.dim2; ++tid) {
+                weights_grad_d.ptr[weight_idx,tid] = 0;
+            }
+        }
+    }
+
+    void Runner::update_weights(float learning_rate) {
+        // For every weight
+        for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
+            // Reduce weight gradients from all datapoints to a single gradient
+            float total_grad = 0;
+            #pragma omp simd reduction(+:total_grad)
+            for (int tid = 0; tid < weights_grad_d.ptr.dim2; ++tid) {
+                total_grad += weights_grad_d.ptr[weight_idx,tid];
+            }
+
+            // Apply gradient descent
+            weights_d.ptr[weight_idx] -= learning_rate * total_grad;
+        }
+    }
+
+    float Runner::train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+        float final_loss = 0;
+
+        for (int epoch = 0; epoch < epochs + 1; ++epoch) {
+            float loss = 0;
+
+            // Reset gradients
+            reset_gradients();
+
+            // Sequential loop over datapoints
+            for (int tid = 0; tid < dataset->m; ++tid) {
+                int stack_pointer = 0;
+                int intermediate_pointer = 0;
+
+                const StackState s(
+                    stack_d.ptr,
+                    intermediate_d.ptr,
+                    stack_pointer,
+                    intermediate_pointer
+                );
+
+                int program_counter = 0;
+
+                // Forward propagate and evaluate loss
+                vm_debug_print(tid, "Forward propagation");
+                vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
+                    tid, tid, bytecode, num_of_instructions, 
+                    dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
+                    s, program_counter, weights_d.ptr, weights_grad_d.ptr
+                
+                    // Optional arguments for buffer overflow checking
+                    #ifdef CHECK_BUFFER_OVERFLOW
+                    , program_pop.stack_req.ptr[program_idx], 
+                        program_pop.intermediate_req.ptr[program_idx]
+                    #endif
+                );
+
+                // Print an empty line in between forward propagation output and backpropagation output
+                vm_debug_print(tid, "");
+
+                // Save squared difference as the loss
+                loss += powf(stack_d.ptr[0,tid], 2);
+
+                if (epochs > 0) {
+                    vm_debug_print(tid, "Backpropagation");
+                    vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
+                        tid, tid, bytecode, num_of_instructions, 
+                        dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
+                        s, program_counter, weights_d.ptr, weights_grad_d.ptr
+
+                        // Optional arguments for buffer overflow checking
+                        #ifdef CHECK_BUFFER_OVERFLOW
+                        , program_pop.stack_req.ptr[program_idx], 
+                        program_pop.intermediate_req.ptr[program_idx]
+                        #endif
+                    );
+                }
+            }
+
+            // Save current loss
+            final_loss = loss;
+
+            // Compute total gradients with reduction and apply gradient descent
+            if (epochs > 0) {
+                update_weights(learning_rate);
+            }
+        }
+
+        return final_loss;
+    }
 
     void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
         // Convert symbolic expressions to bytecode program
         intra_individual::Program program_pop(population);
 
-        Array2D<float> stack_d;
-        Array2D<float> intermediate_d;
-        Array1D<float> weights_d(nweights);
-        Array2D<float> weights_grad_d(nweights, dataset->m);
+        // Resize the array for storing gradients to dataset size
+        weights_grad_d.resize(nweights, dataset->m);
 
         // Loop over programs
         for (int program_idx = 0; program_idx < program_pop.num_of_individuals; ++program_idx) {
+            // Resize stack and intermediate arrays for the current program
             stack_d.resize(program_pop.stack_req.ptr[program_idx], dataset->m);
             intermediate_d.resize(program_pop.intermediate_req.ptr[program_idx], dataset->m);
 
-            // If the expression has no weights yet, initialize them randomly
-            if (population[program_idx].weights.empty()) {
-                for (int j = 0; j < nweights; ++j) {
-                    weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
-                }
-            } 
-            // If the expression already has weights, use them
-            else {
-                for (int j = 0; j < nweights; ++j) {
-                    weights_d.ptr[j] = population[program_idx].weights[j];
-                }
-            }
+            // Initialize weights for the current program
+            initialize_weights(population[program_idx]);
 
-            for (int epoch = 0; epoch < epochs + 1; ++epoch) {
-                float loss = 0;
+            // Get bytecode and number of instructions for the current program
+            auto instructions = program_pop.bytecode.ptr[program_idx];
+            auto num_instructions = program_pop.num_of_instructions.ptr[program_idx];
 
-                // Reset gradients
-                for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
-                    #pragma omp simd
-                    for (int tid = 0; tid < dataset->m; ++tid) {
-                        weights_grad_d.ptr[weight_idx,tid] = 0;
-                    }
-                }
+            // Apply gradient descent for the current program
+            float loss = train(instructions, num_instructions, dataset, epochs, learning_rate);
 
-                // Sequential loop over datapoints (parallelize with AVX if possible)
-                #pragma omp simd reduction(+:loss)
-                for (int tid = 0; tid < dataset->m; ++tid) {
-                    int stack_pointer = 0;
-                    int intermediate_pointer = 0;
-
-                    const StackState s(
-                        stack_d.ptr,
-                        intermediate_d.ptr,
-                        stack_pointer,
-                        intermediate_pointer
-                    );
-
-                    int program_counter = 0;
-
-                    // Forward propagate and evaluate loss
-                    vm_debug_print(tid, "Forward propagation");
-                    vm_control<FORWARD, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
-                        tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
-                        dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                        s, program_counter, weights_d.ptr, weights_grad_d.ptr
-                    
-                        // Optional arguments for buffer overflow checking
-                        #ifdef CHECK_BUFFER_OVERFLOW
-                        , program_pop.stack_req.ptr[program_idx], 
-                          program_pop.intermediate_req.ptr[program_idx]
-                        #endif
-                    );
-
-                    // Print an empty line in between forward propagation output and backpropagation output
-                    vm_debug_print(tid, "");
-
-                    // Save squared difference as the loss
-                    loss += powf(stack_d.ptr[0,tid], 2);
-
-                    if (epochs > 0) {
-                        vm_debug_print(tid, "Backpropagation");
-                        vm_control<BACK, INTRA_INDIVIDUAL, c_inst_1d, Ptr1D<float>>(
-                            tid, tid, program_pop.bytecode.ptr[program_idx], program_pop.num_of_instructions.ptr[program_idx], 
-                            dataset->m, dataset->X_d.ptr, dataset->y_d.ptr, 
-                            s, program_counter, weights_d.ptr, weights_grad_d.ptr
-
-                            // Optional arguments for buffer overflow checking
-                            #ifdef CHECK_BUFFER_OVERFLOW
-                            , program_pop.stack_req.ptr[program_idx], 
-                            program_pop.intermediate_req.ptr[program_idx]
-                            #endif
-                        );
-                    }
-                }
-
-                // Write loss to the original expression
-                population[program_idx].loss = loss;
-
-                // Compute total gradients with reduction and apply gradient descent
-                if (epochs > 0) {
-                    for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
-                        // Reduce gradients
-                        float total_grad = 0;
-                        #pragma omp simd reduction(+:total_grad)
-                        for (int tid = 0; tid < dataset->m; ++tid) {
-                            total_grad += weights_grad_d.ptr[weight_idx,tid];
-                        }
-
-                        // Apply gradient descent
-                        weights_d.ptr[weight_idx] -= learning_rate * total_grad;
-                    }
-                }
-            }
+            // Write loss back to the original expression
+            population[program_idx].loss = loss;
 
             // Write final weights back to the original expression
             population[program_idx].weights = std::vector<float>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
