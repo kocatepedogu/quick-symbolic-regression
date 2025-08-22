@@ -32,23 +32,21 @@ class SymbolicRegressionModel:
         :param runner_generator: Runner generator (CPURunnerGenerator, HybridRunnerGenerator, InterIndividualRunnerGenerator, IntraIndividualRunnerGenerator)
         """
 
-        # Save the number of islands
-        self.nislands = nislands
-
-        # Create configuration
+        # Let offspring size equal to population size if not specified
         if noffspring is None:
             noffspring = npopulation
-        self.config = Config(nvars, nweights, max_depth, npopulation, noffspring, FunctionSet(functions))
 
-        # Create toolbox consisting of the given genetic operators
-        self.toolbox = Toolbox(initialization, mutation, recombination, selection)
+        # Create model
+        self.model = GeneticProgrammingIslands(
+            nislands=nislands, 
+            config=Config(nvars, nweights, max_depth, npopulation, noffspring, FunctionSet(functions)),
+            toolbox=Toolbox(initialization, mutation, recombination, selection),
+            runner_generator=runner_generator
+        )
 
-        # Save the runner
-        self.runner_generator = runner_generator
-
-        # Set the solution, history and compiled solution to None
-        self.solution = None
+        # Initialize history, solution and compiled solution to None
         self.history = None
+        self.solution = None
         self.compiled_solution = None
 
 
@@ -65,16 +63,8 @@ class SymbolicRegressionModel:
         # Create a dataset that is availabe to both the CPU and the GPU
         dataset = Dataset(X, y)
 
-        # Create islands
-        islands = GeneticProgrammingIslands(
-            nislands=self.nislands, 
-            config=self.config,
-            toolbox=self.toolbox,
-            runner_generator=self.runner_generator
-        )
-
-        # Fit an expression
-        solution, history = islands.fit(dataset, ngenerations, nsupergenerations, nepochs, learning_rate, verbose)
+        # Fit the model
+        solution, history = self.model.fit(dataset, ngenerations, nsupergenerations, nepochs, learning_rate, verbose)
 
         # Save the solution and history
         self.solution = solution
