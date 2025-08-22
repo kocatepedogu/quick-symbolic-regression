@@ -103,7 +103,7 @@ void GeneticProgrammingIslands::update_global_best() noexcept {
         const Expression local_best = *islands[i]->get_best_solution();
 
         // Update the global best solution if the local best solution is better
-        if (global_best == nullptr || local_best > *global_best) {
+        if (global_best == nullptr || local_best.loss < global_best->loss) {
             global_best = std::make_shared<Expression>(local_best);
         }
     }
