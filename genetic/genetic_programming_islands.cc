@@ -15,28 +15,31 @@ namespace qsr {
 
 GeneticProgrammingIslands::GeneticProgrammingIslands (int nislands, const Config &config, const Toolbox &toolbox,
                                                       std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
-        toolbox(toolbox), runner_generator(runner_generator), nislands(nislands), global_config(config)
-{
-    // Create empty island array
-    islands = new GeneticProgramming*[nislands];
+        toolbox(toolbox), runner_generator(runner_generator), nislands(nislands), global_config(config) {
 
     // Create local configuration from global configuration
-
-    const int population_per_island = global_config.npopulation / nislands;
-    const int offspring_per_island = global_config.noffspring / nislands;
-
-    local_config = Config(
+    // Let population size and offspring size be the size per island instead of the total size
+    const Config local_config = Config(
         global_config.nvars,
         global_config.nweights, 
         global_config.max_depth, 
-        population_per_island, 
-        offspring_per_island, 
+        global_config.npopulation / nislands, 
+        global_config.noffspring / nislands, 
         global_config.function_set);
+
+    // Initialize islands
+    islands = new GeneticProgramming*[nislands];
+    for (int i = 0; i < nislands; ++i) {
+        islands[i] = new GeneticProgramming(local_config, toolbox, 
+            runner_generator->generate(local_config.nweights));
+    }
 }
 
-GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept 
-{
-    // Delete island array
+GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept {
+    // Delete islands
+    for (int i = 0; i < nislands; ++i) {
+        delete islands[i];
+    }
     delete[] islands;
 }
 
@@ -55,10 +58,6 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(std::sh
     #pragma omp parallel num_threads(nislands)
     {
         const int threadIdx = omp_get_thread_num();
-        
-        auto runner = runner_generator->generate(local_config.nweights);
-
-        islands[threadIdx] = new GeneticProgramming(local_config, toolbox, runner);
         
         for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
             // Run island
@@ -115,8 +114,6 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(std::sh
             // Synchronize all islands
             #pragma omp barrier
         }
-
-        delete islands[threadIdx];
     }
 
     // Get total learning history
