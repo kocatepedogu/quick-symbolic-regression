@@ -22,14 +22,17 @@ class SymbolicRegressionModel:
         functions=['+','-','*', '/', 'sin', 'cos', 'exp', 'relu']):
         """
         Initialize the SymbolicRegressionModel with the given parameters.
+        :param nvars: Number of input variables/features.
         :param nweights: Maximum number of trainable weights in candidate expressions.
         :param npopulation: Population size within each island.
         :param nislands: Number of islands in the genetic algorithm.
+        :param noffspring: Number of offspring generated per generation.
         :param initialization: Initialization strategy for the genetic algorithm.
         :param mutation: Mutation operator for the genetic algorithm.
         :param recombination: Recombination operator for the genetic algorithm.
         :param selection: Selection strategy for the genetic algorithm.
         :param runner_generator: Runner generator (CPURunnerGenerator, HybridRunnerGenerator, InterIndividualRunnerGenerator, IntraIndividualRunnerGenerator)
+        :param functions: List of allowed functions in the candidate expressions.
         """
 
         # Let offspring size equal to population size if not specified
@@ -58,6 +61,7 @@ class SymbolicRegressionModel:
         :param ngenerations: Number of generations to run within each supergeneration.
         :param nsupergenerations: Number of supergenerations to run.
         :param nepochs: Number of epochs in gradient descent.
+        :param learning_rate: Learning rate for gradient descent.
         :param verbose: Whether to print progress.
         """
         # Create a dataset that is availabe to both the CPU and the GPU
