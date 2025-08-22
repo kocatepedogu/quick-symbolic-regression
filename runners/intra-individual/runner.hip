@@ -13,6 +13,14 @@
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW
 
+#ifdef CHECK_BUFFER_OVERFLOW
+    #define DEBUGARGS ,\
+        stack_length ,\
+        intermediate_length
+#else
+    #define DEBUGARGS
+#endif
+
 namespace qsr::intra_individual {
     constexpr int reduction_threads_per_block = 1024;
     constexpr int initial_array_size = 128;
@@ -112,13 +120,7 @@ namespace qsr::intra_individual {
                 code, code_length, 
                 dataset->m, dataset->X_d.ptr, dataset->y_d.ptr,
                 stack_d.ptr, intermediate_d.ptr,
-                weights_d.ptr, weights_grad_d.ptr, nweights, loss_d.ptr
-
-                // Optional arguments for buffer overflow checking
-                #ifdef CHECK_BUFFER_OVERFLOW
-                , stack_length, intermediate_length
-                #endif
-            );
+                weights_d.ptr, weights_grad_d.ptr, nweights, loss_d.ptr DEBUGARGS);
 
             // For every weight, sum gradient contributions from all data points using reduction
             // Apply gradient descent rule
