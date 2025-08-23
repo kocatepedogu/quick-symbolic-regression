@@ -5,6 +5,7 @@
 #define ARRAY2D_HPP
 
 #include "../hip.hpp"
+#include "array1d.hpp"
 #include "memory.hpp"
 
 namespace qsr {
@@ -71,6 +72,10 @@ struct Ptr2D {
         #endif
 
         return ptr + i1 * dim2;
+    }
+
+    __host__ __device__ Ptr1D<T> operator()(int i1) const {
+        return Ptr1D<T>{dim2, ptr + i1 * dim2};
     }
 };
 
