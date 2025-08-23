@@ -20,6 +20,10 @@ sudo dnf install python3 python3-devel
 sudo dnf install libasan libubsan
 sudo dnf install doxygen
 
+git clone https://github.com/kocatepedogu/quick-symbolic-regression.git
+cd quick-symbolic-regression
+git submodule update --init --recursive
+
 cmake .
 make -j$(nproc)
 export PYTHONPATH=$(pwd)
