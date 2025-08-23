@@ -65,6 +65,7 @@ train(Ptr1D<Instruction> bytecode,
       Ptr1D<float> weights_d,
       Ptr2D<float> weights_grad_d,
       Ptr1D<float> loss_d,
+      bool enable_backpropagation,
       int stack_length, 
       int intermediate_length)
 {
@@ -100,22 +101,27 @@ train(Ptr1D<Instruction> bytecode,
     loss_d[tid] = powf(stack_d[0,tid], 2);
 
     // Backpropagate
-    /// TODO: Do not run in the first epoch
-    vm_debug_print(tid, "Backpropagation");
-    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
+    if (enable_backpropagation) {
+        vm_debug_print(tid, "Backpropagation");
+        vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
+    }
 }
 
 void Runner::run(Ptr1D<Instruction> bytecode, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
     for (int epoch = 0; epoch < epochs + 1; ++epoch) {
+        bool enable_backpropagation = (epoch < epochs);
+
         // Run forward propagation and backpropagation to compute
         // weight gradients for each weight and for each data point
         launch_kernel(train, bytecode, dataset->X_d.ptr, dataset->y_d.ptr,
                       stack_d.ptr, intermediate_d.ptr,
-                      weights_d.ptr, weights_grad_d.ptr, loss_d.ptr, stack_length, intermediate_length);
+                      weights_d.ptr, weights_grad_d.ptr, loss_d.ptr, 
+                      enable_backpropagation,
+                      stack_length, intermediate_length);
 
         // For every weight, sum gradient contributions from all data points using reduction
         // Apply gradient descent rule
-        if (epoch < epochs) {
+        if (enable_backpropagation) {
             for (int i = 0; i < nweights; ++i) {
                 launch_kernel(update_weights, weights_grad_d.ptr(i), &weights_d.ptr[i], learning_rate);
             }
