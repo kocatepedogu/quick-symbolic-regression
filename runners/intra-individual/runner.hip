@@ -24,8 +24,9 @@ using namespace qsr::intra_individual;
 
 constexpr int reduction_threads_per_block = 1024;
 
-Runner::Runner(const int nweights) 
-    : GPUBaseRunner(nweights) {}
+Runner::Runner(const int nweights) : GPUBaseRunner(nweights) {
+    weights_d.resize(nweights);
+}
 
 __global__ static void
 update_weights(Ptr1D<float> weight_grads, float *weight, float learning_rate) 
@@ -107,17 +108,17 @@ train(Ptr1D<Instruction> bytecode,
     }
 }
 
-void Runner::run(Ptr1D<Instruction> bytecode, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void Runner::run(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
     for (int epoch = 0; epoch < epochs + 1; ++epoch) {
         bool enable_backpropagation = (epoch < epochs);
 
         // Run forward propagation and backpropagation to compute
         // weight gradients for each weight and for each data point
-        launch_kernel(train, bytecode, dataset->X_d.ptr, dataset->y_d.ptr,
+        launch_kernel(train, p.bytecode, dataset->X_d.ptr, dataset->y_d.ptr,
                       stack_d.ptr, intermediate_d.ptr,
                       weights_d.ptr, weights_grad_d.ptr, loss_d.ptr, 
                       enable_backpropagation,
-                      stack_length, intermediate_length);
+                      p.stack_req, p.intermediate_req);
 
         // For every weight, sum gradient contributions from all data points using reduction
         // Apply gradient descent rule
@@ -181,27 +182,18 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     Program program_pop(population);
 
     // Sequential loop over programs
-    for (int i = 0; i < population.size(); ++i)
+    for (auto p : program_pop)
     {
-        // Get bytecode and number of instructions
-        auto code = program_pop.bytecode.ptr(i);
-        auto code_length = program_pop.num_of_instructions.ptr[i];
-
-        // Get stack and intermediate requirements
-        auto stack_length = program_pop.stack_req.ptr[i];
-        auto intermediate_length = program_pop.intermediate_req.ptr[i];
-
-        // Resize arrays
-        weights_d.resize(nweights);
-        resize_arrays(stack_length, intermediate_length, dataset->m, dataset->m);
+        // Resize VM memory
+        resize_arrays(p.stack_req, p.intermediate_req, dataset->m, dataset->m);
 
         // If the expression has no weights yet, initialize them randomly
-        initialize_weights_and_losses(population[i]);
+        initialize_weights_and_losses(population[p.index]);
 
-        // Do the work
-        run(code, stack_length, intermediate_length, dataset, epochs, learning_rate);
+        // Run the epoch loop and train the program
+        run(p, dataset, epochs, learning_rate);
 
         // Save weights and losses to the original expression
-        save_weights_and_losses(population[i]);
+        save_weights_and_losses(population[p.index]);
     }
 }

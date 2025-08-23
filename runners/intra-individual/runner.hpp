@@ -6,14 +6,15 @@
 
 #include "../gpu.hpp"
 
-
 #include "../../expressions/expression.hpp"
 #include "../../dataset/dataset.hpp"
+#include "program/program.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
 
 #include "../../util/hip.hpp"
 #include "../../vm/vm_types.hpp"
+
 
 namespace qsr {
 namespace intra_individual {
@@ -24,6 +25,8 @@ namespace intra_individual {
         dim3 reduction_block_dim;
         
         Array1D<float> weights_d;
+
+        void run(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
         
         void calculate_kernel_dims(int m);
 
@@ -33,8 +36,6 @@ namespace intra_individual {
 
     public:
         Runner(const int nweights);
-
-        void run(Ptr1D<Instruction> bytecode, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
 
         void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
     };
