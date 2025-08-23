@@ -16,17 +16,7 @@
 namespace qsr::hybrid {
     class Runner : public BaseRunner {
     private:
-        const int nweights;
-
         Array2D<float> weights_d;
-
-        Array1D<float> loss_d;
-
-        Array2D<float> stack_d;
-
-        Array2D<float> intermediate_d;
-
-        Array2D<float> weights_grad_d;
 
         HIPState config;
 

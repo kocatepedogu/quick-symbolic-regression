@@ -6,6 +6,7 @@
 
 #include "../base.hpp"
 
+
 #include "../../expressions/expression.hpp"
 #include "../../dataset/dataset.hpp"
 
@@ -18,21 +19,15 @@ namespace qsr {
 namespace intra_individual {
     class Runner : public BaseRunner {
     private:
-        const int nweights;
-
         HIPState hipState;
 
         dim3 gridDim;
         dim3 blockDim;
         dim3 reduction_grid_dim;
         dim3 reduction_block_dim;
-
-        Array1D<float> loss_d;
-        Array2D<float> stack_d;
-        Array2D<float> intermediate_d;
+        
         Array1D<float> weights_d;
-        Array2D<float> weights_grad_d;
-
+        
         void calculate_kernel_dims(int m);
 
         void initialize_weights_and_losses(Expression &expression);

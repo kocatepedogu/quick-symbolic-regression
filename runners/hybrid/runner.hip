@@ -23,7 +23,7 @@ using namespace qsr;
 using namespace qsr::hybrid;
 
 Runner::Runner(int nweights) : 
-    nweights(nweights) {}
+    BaseRunner(nweights) {}
 
 static inline __device__ void 
 reset_gradients_and_losses(int program_idx, Ptr2D<float> &weights_grad_d, Ptr1D<float> &loss_d) 

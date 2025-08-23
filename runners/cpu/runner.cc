@@ -23,9 +23,7 @@
 
 namespace qsr::cpu {
     Runner::Runner(int nweights) :
-        nweights(nweights) {
-        weights_d.resize(nweights);
-    }
+        BaseRunner(nweights) {}
 
     void Runner::reset_gradients_and_losses() {
         // For every weight
@@ -124,6 +122,7 @@ namespace qsr::cpu {
         intra_individual::Program program(population);
 
         // Resize the array for storing gradients to dataset size
+        weights_d.resize(nweights);
         weights_grad_d.resize(nweights, dataset->m);
 
         // Loop over programs

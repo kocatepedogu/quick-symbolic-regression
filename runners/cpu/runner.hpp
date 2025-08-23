@@ -12,12 +12,7 @@
 namespace qsr::cpu {
     class Runner : public BaseRunner {
     private:
-        const int nweights;
-
-        Array2D<float> stack_d;
-        Array2D<float> intermediate_d;
         Array1D<float> weights_d;
-        Array2D<float> weights_grad_d;
 
         float loss;
 

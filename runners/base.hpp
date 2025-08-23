@@ -13,6 +13,19 @@
 namespace qsr {
 
 class BaseRunner {
+protected:
+    const int nweights;
+
+    Array1D<float> loss_d;
+
+    Array2D<float> stack_d;
+
+    Array2D<float> intermediate_d;
+
+    Array2D<float> weights_grad_d;
+
+    BaseRunner(int nweights);
+
 public:
     virtual void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
 };

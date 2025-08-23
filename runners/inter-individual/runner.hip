@@ -34,7 +34,7 @@ using namespace qsr;
 using namespace qsr::inter_individual;
 
 Runner::Runner(int nweights) :
-    nweights(nweights) {}
+    BaseRunner(nweights) {}
 
 static inline __device__ void
 reset_gradients_and_losses(const int tid, Ptr2D<float> weights_grad_d, float& total_loss) 
