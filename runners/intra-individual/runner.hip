@@ -58,7 +58,7 @@ update_weights(Ptr1D<float> weight_grads, float &weight, float learning_rate)
     }
 }
 
-template <typename... Debug> __global__ static void 
+__global__ static void 
 train(Ptr1D<Instruction> bytecode, 
       Ptr2D<float> X_d, 
       Ptr1D<float> y_d, 
@@ -67,7 +67,8 @@ train(Ptr1D<Instruction> bytecode,
       Ptr1D<float> weights_d,
       Ptr2D<float> weights_grad_d,
       Ptr1D<float> loss_d,
-      Debug ...debug)
+      int stack_length, 
+      int intermediate_length)
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -92,7 +93,7 @@ train(Ptr1D<Instruction> bytecode,
 
     // Forward propagate and evaluate loss
     vm_debug_print(tid, "Forward propagation");
-    vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w, debug...);
+    vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
 
     // Print an empty line in between forward propagation output and backpropagation output
     vm_debug_print(tid, "");
@@ -103,32 +104,27 @@ train(Ptr1D<Instruction> bytecode,
     // Backpropagate
     /// TODO: Do not run in the first epoch
     vm_debug_print(tid, "Backpropagation");
-    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w, debug...);
+    vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
 }
 
 void Runner::run(Ptr1D<Instruction> bytecode, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
     for (int epoch = 0; epoch < epochs + 1; ++epoch) {
         // Run forward propagation and backpropagation to compute
         // weight gradients for each weight and for each data point
-        hipLaunchKernelGGL(
-            train, gridDim, blockDim, 0, hipState.stream,
-            bytecode,
-            dataset->X_d.ptr, dataset->y_d.ptr,
-            stack_d.ptr, intermediate_d.ptr,
-            weights_d.ptr, weights_grad_d.ptr, loss_d.ptr DEBUGARGS);
+        launch_kernel(train, bytecode, dataset->X_d.ptr, dataset->y_d.ptr,
+                      stack_d.ptr, intermediate_d.ptr,
+                      weights_d.ptr, weights_grad_d.ptr, loss_d.ptr, stack_length, intermediate_length);
 
         // For every weight, sum gradient contributions from all data points using reduction
         // Apply gradient descent rule
         if (epoch < epochs) {
             for (int i = 0; i < nweights; ++i) {
-                hipLaunchKernelGGL(
-                    update_weights, reduction_grid_dim, reduction_block_dim, 0, hipState.stream, 
-                    weights_grad_d.ptr(i), weights_d.ptr[i], learning_rate);
+                launch_kernel(update_weights, weights_grad_d.ptr(i), weights_d.ptr[i], learning_rate);
             }
         }
     }
 
-    HIP_CALL(hipStreamSynchronize(hipState.stream));
+    synchronize();
 }
 
 void Runner::calculate_kernel_dims(int m) {

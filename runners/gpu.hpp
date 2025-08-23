@@ -6,6 +6,8 @@
 
 #include "base.hpp"
 
+#include "../util/hip.hpp"
+
 namespace qsr {
 
 class GPUBaseRunner : public BaseRunner {
@@ -17,6 +19,15 @@ protected:
     dim3 blockDim;
 
     GPUBaseRunner(int nweights);
+
+    template <typename K, typename ...T>
+    inline void launch_kernel(K kernel, T... args) {
+        hipLaunchKernelGGL(kernel, gridDim, blockDim, 0, hipState.stream, args...);
+    }
+
+    inline void synchronize() {
+        HIP_CALL(hipStreamSynchronize(hipState.stream));
+    }
 };
 
 }

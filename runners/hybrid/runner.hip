@@ -13,8 +13,8 @@
 
 #ifdef CHECK_BUFFER_OVERFLOW
     #define DEBUGARGS ,\
-        program.stack_req ,\
-        program.intermediate_req
+        stack_req ,\
+        intermediate_req
 #else
     #define DEBUGARGS
 #endif
@@ -47,11 +47,12 @@ update_weights(int program_idx, float learning_rate, Ptr2D<float> &weights_d, Pt
     }
 }
 
-template <typename... Debug> __global__ static void 
+__global__ static void 
 train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d, 
       Ptr2D<float> stack_d, Ptr2D<float> intermediate_d,
       Ptr2D<float> weights_d, Ptr2D<float> weights_grad_d, Ptr1D<float> loss_d,
-      const int nepochs, const float learning_rate, Debug... debug) 
+      const int nepochs, const float learning_rate,
+      int stack_req, int intermediate_req) 
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     
@@ -84,7 +85,7 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d,
 
             // Forward propagate and evaluate loss
             vm_debug_print(tid, "Forward propagation");
-            vm_control<FORWARD, HYBRID, Ptr2D<float>>(c, d, s,w, debug...);
+            vm_control<FORWARD, HYBRID, Ptr2D<float>>(c, d, s,w DEBUGARGS);
 
             // Print an empty line in between forward propagation output and backpropagation output
             vm_debug_print(tid, "");
@@ -97,7 +98,7 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d,
             // Backpropagate
             if (epoch < nepochs) {
                 vm_debug_print(tid, "Backpropagation");
-                vm_control<BACK, HYBRID, Ptr2D<float>>(c, d, s, w, debug...);
+                vm_control<BACK, HYBRID, Ptr2D<float>>(c, d, s, w DEBUGARGS);
             }
         }
 
@@ -177,17 +178,18 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     initialize_weights_and_losses(population);
 
     // Run virtual machine
-    hipLaunchKernelGGL(
-        train, gridDim, blockDim, 0, hipState.stream,
+    launch_kernel(
+        train,
         program.bytecode.ptr, 
         dataset->X_d.ptr, dataset->y_d.ptr,
         stack_d.ptr, intermediate_d.ptr,
         weights_d.ptr, weights_grad_d.ptr, loss_d.ptr,
-        nepochs, learning_rate DEBUGARGS
+        nepochs, learning_rate,
+        program.stack_req, program.intermediate_req
     );
 
     // Wait for the kernel to finish
-    HIP_CALL(hipStreamSynchronize(hipState.stream));
+    synchronize();
 
     // Save weights and losses to the original expressions
     save_weights_and_losses(population);
