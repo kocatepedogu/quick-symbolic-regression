@@ -28,7 +28,7 @@ Runner::Runner(const int nweights)
     : GPUBaseRunner(nweights) {}
 
 __global__ static void
-update_weights(Ptr1D<float> weight_grads, float &weight, float learning_rate) 
+update_weights(Ptr1D<float> weight_grads, float *weight, float learning_rate) 
 {
     // Shared memory for block-level reduction
     __shared__ float sharedMem[reduction_threads_per_block];
@@ -52,7 +52,7 @@ update_weights(Ptr1D<float> weight_grads, float &weight, float learning_rate)
     
     // First thread of each block writes block sum to output
     if (tid == 0) {
-        atomicAdd(&weight, -learning_rate * sharedMem[0]);
+        atomicAdd(weight, -learning_rate * sharedMem[0]);
     }
 }
 
@@ -117,7 +117,7 @@ void Runner::run(Ptr1D<Instruction> bytecode, int code_length, int stack_length,
         // Apply gradient descent rule
         if (epoch < epochs) {
             for (int i = 0; i < nweights; ++i) {
-                launch_kernel(update_weights, weights_grad_d.ptr(i), weights_d.ptr[i], learning_rate);
+                launch_kernel(update_weights, weights_grad_d.ptr(i), &weights_d.ptr[i], learning_rate);
             }
         }
     }
