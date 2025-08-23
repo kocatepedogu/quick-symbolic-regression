@@ -33,12 +33,16 @@ namespace intra_individual {
         Array1D<float> weights_d;
         Array2D<float> weights_grad_d;
 
+        void calculate_kernel_dims(int m);
+
+        void initialize_weights_and_losses(Expression &expression);
+
+        void save_weights_and_losses(Expression &expression);
+
     public:
         Runner(const int nweights);
 
-        void calculate_reduction_kernel_dimensions(int m);
-
-        void run(c_inst_1d code, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
+        void run(Ptr1D<Instruction> bytecode, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
 
         void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
     };
