@@ -156,11 +156,8 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     calculate_kernel_dims(program.num_of_individuals * 32);
 
     // Resize arrays
-    loss_d.resize(population.size());
     weights_d.resize(nweights, population.size());
-    weights_grad_d.resize(nweights, population.size());
-    stack_d.resize(program.stack_req, nthreads);
-    intermediate_d.resize(program.intermediate_req, nthreads);
+    resize_arrays(program.stack_req, program.intermediate_req, population.size(), nthreads);
 
     // Initialize weights and losses
     initialize_weights_and_losses(population);

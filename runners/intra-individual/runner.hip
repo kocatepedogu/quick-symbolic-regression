@@ -186,11 +186,8 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
         auto intermediate_length = program_pop.intermediate_req.ptr[i];
 
         // Resize arrays
-        loss_d.resize(dataset->m);
         weights_d.resize(nweights);
-        weights_grad_d.resize(nweights, dataset->m);
-        stack_d.resize(stack_length, dataset->m);
-        intermediate_d.resize(intermediate_length, dataset->m);
+        resize_arrays(stack_length, intermediate_length, dataset->m, dataset->m);
 
         // If the expression has no weights yet, initialize them randomly
         initialize_weights_and_losses(population[i]);

@@ -23,8 +23,10 @@ protected:
     Array2D<float> intermediate_d;
 
     Array2D<float> weights_grad_d;
-
+    
     BaseRunner(int nweights);
+
+    void resize_arrays(int stack_length, int intermediate_length, int nproblem, int nthreads);
 
 public:
     virtual void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
