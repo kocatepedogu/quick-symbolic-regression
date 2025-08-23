@@ -14,11 +14,11 @@ Hybrid CPU/GPU implementation of symbolic regression with genetic programming, b
 ## Installation
 ```
 # On Fedora
-sudo dnf install gcc gcc-c++ make cmake
-sudo dnf install rocminfo rocm-opencl rocm-clinfo rocm-hip rocm-hip-devel amd-smi
-sudo dnf install python3 python3-devel
-sudo dnf install libasan libubsan
-sudo dnf install doxygen
+sudo dnf install gcc gcc-c++ make cmake -y
+sudo dnf install rocminfo rocm-opencl rocm-clinfo rocm-hip rocm-hip-devel amd-smi -y
+sudo dnf install python3 python3-devel -y
+sudo dnf install libasan libubsan -y
+sudo dnf install doxygen -y
 
 git clone https://github.com/kocatepedogu/quick-symbolic-regression.git
 cd quick-symbolic-regression
