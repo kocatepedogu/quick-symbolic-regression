@@ -36,7 +36,7 @@ namespace qsr::cpu {
         }
 
         // Set the most recent loss to zero
-        loss = 0;
+        loss_d.ptr[0] = 0;
     }
 
     void Runner::update_weights(float learning_rate) {
@@ -79,7 +79,7 @@ namespace qsr::cpu {
                 vm_debug_print(tid, "");
 
                 // Save squared difference as the loss
-                loss += powf(stack_d.ptr[0,tid], 2);
+                loss_d.ptr[0] += powf(stack_d.ptr[0,tid], 2);
 
                 if (epochs > 0) {
                     vm_debug_print(tid, "Backpropagation");
@@ -111,7 +111,7 @@ namespace qsr::cpu {
 
     void Runner::save_weights_and_losses(Expression& expression) {
         // Write loss back to the original expression
-        expression.loss = loss;
+        expression.loss = loss_d.ptr[0];
 
         // Write final weights back to the original expression
         expression.weights = std::vector<float>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
@@ -120,10 +120,6 @@ namespace qsr::cpu {
     void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
         // Convert symbolic expressions to bytecode program
         intra_individual::Program program(population);
-
-        // Resize the array for storing gradients to dataset size
-        weights_d.resize(nweights);
-        weights_grad_d.resize(nweights, dataset->m);
 
         // Loop over programs
         for (int i = 0; i < program.num_of_individuals; ++i) {
@@ -138,7 +134,10 @@ namespace qsr::cpu {
             auto stack_req = program.stack_req.ptr[i];
             auto intermediate_req = program.intermediate_req.ptr[i];
 
-            // Resize stack and intermediate arrays
+            // Resize arrays
+            loss_d.resize(1);
+            weights_d.resize(nweights);
+            weights_grad_d.resize(nweights, dataset->m);
             stack_d.resize(stack_req, dataset->m);
             intermediate_d.resize(intermediate_req, dataset->m);
 

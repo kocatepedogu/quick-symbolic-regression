@@ -14,8 +14,6 @@ namespace qsr::cpu {
     private:
         Array1D<float> weights_d;
 
-        float loss;
-
         void reset_gradients_and_losses();
 
         void update_weights(float learning_rate);
