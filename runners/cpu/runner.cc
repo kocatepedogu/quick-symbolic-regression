@@ -25,25 +25,9 @@ namespace qsr::cpu {
     Runner::Runner(int nweights) :
         nweights(nweights) {
         weights_d.resize(nweights);
-        weights_grad_d.resize(nweights, initial_array_size);
     }
 
-    void Runner::initialize_weights(Expression& expression) {
-        // If the expression has no weights yet, initialize them randomly
-        if (expression.weights.empty()) {
-            for (int j = 0; j < nweights; ++j) {
-                weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
-            }
-        } 
-        // If the expression already has weights, use them
-        else {
-            for (int j = 0; j < nweights; ++j) {
-                weights_d.ptr[j] = expression.weights[j];
-            }
-        }
-    }
-
-    void Runner::reset_gradients() {
+    void Runner::reset_gradients_and_losses() {
         // For every weight
         for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
             // Set weight gradient from each datapoint to zero
@@ -52,6 +36,9 @@ namespace qsr::cpu {
                 weights_grad_d.ptr[weight_idx,tid] = 0;
             }
         }
+
+        // Set the most recent loss to zero
+        loss = 0;
     }
 
     void Runner::update_weights(float learning_rate) {
@@ -69,15 +56,11 @@ namespace qsr::cpu {
         }
     }
 
-    float Runner::train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate,
+    void Runner::train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate,
                         int stack_req, int intermediate_req) {
-        float final_loss = 0;
-
         for (int epoch = 0; epoch < epochs + 1; ++epoch) {
-            float loss = 0;
-
-            // Reset gradients
-            reset_gradients();
+            // Reset gradients and losses
+            reset_gradients_and_losses();
 
             // Sequential loop over datapoints
             for (int tid = 0; tid < dataset->m; ++tid) {
@@ -106,51 +89,69 @@ namespace qsr::cpu {
                 }
             }
 
-            // Save current loss
-            final_loss = loss;
-
             // Compute total gradients with reduction and apply gradient descent
             if (epochs > 0) {
                 update_weights(learning_rate);
             }
         }
+    }
 
-        return final_loss;
+    void Runner::initialize_weights(Expression& expression) {
+        // If the expression has no weights yet, initialize them randomly
+        if (expression.weights.empty()) {
+            for (int j = 0; j < nweights; ++j) {
+                weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+            }
+        } 
+        // If the expression already has weights, use them
+        else {
+            for (int j = 0; j < nweights; ++j) {
+                weights_d.ptr[j] = expression.weights[j];
+            }
+        }
+    }
+
+    void Runner::save_weights_and_losses(Expression& expression) {
+        // Write loss back to the original expression
+        expression.loss = loss;
+
+        // Write final weights back to the original expression
+        expression.weights = std::vector<float>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
     }
 
     void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
         // Convert symbolic expressions to bytecode program
-        intra_individual::Program program_pop(population);
+        intra_individual::Program program(population);
 
         // Resize the array for storing gradients to dataset size
         weights_grad_d.resize(nweights, dataset->m);
 
         // Loop over programs
-        for (int program_idx = 0; program_idx < program_pop.num_of_individuals; ++program_idx) {
-            // Resize stack and intermediate arrays for the current program
-            stack_d.resize(program_pop.stack_req.ptr[program_idx], dataset->m);
-            intermediate_d.resize(program_pop.intermediate_req.ptr[program_idx], dataset->m);
+        for (int i = 0; i < program.num_of_individuals; ++i) {
+            // Get the corresponding expression
+            auto& expression = population[i];
 
-            // Initialize weights for the current program
-            initialize_weights(population[program_idx]);
+            // Get bytecode and number of instructions
+            auto instructions = program.bytecode.ptr[i];
+            auto num_instructions = program.num_of_instructions.ptr[i];
 
-            // Get bytecode and number of instructions for the current program
-            auto instructions = program_pop.bytecode.ptr[program_idx];
-            auto num_instructions = program_pop.num_of_instructions.ptr[program_idx];
+            // Get stack and intermediate requirements
+            auto stack_req = program.stack_req.ptr[i];
+            auto intermediate_req = program.intermediate_req.ptr[i];
 
-            // Get stack and intermediate requirements for the current program
-            auto stack_req = program_pop.stack_req.ptr[program_idx];
-            auto intermediate_req = program_pop.intermediate_req.ptr[program_idx];
+            // Resize stack and intermediate arrays
+            stack_d.resize(stack_req, dataset->m);
+            intermediate_d.resize(intermediate_req, dataset->m);
 
-            // Apply gradient descent for the current program
-            float loss = train(instructions, num_instructions, dataset, epochs, learning_rate, 
-                               stack_req, intermediate_req);
+            // Initialize weights
+            initialize_weights(expression);
 
-            // Write loss back to the original expression
-            population[program_idx].loss = loss;
+            // Apply gradient descent
+            train(instructions, num_instructions, dataset, epochs, learning_rate, 
+                  stack_req, intermediate_req);
 
-            // Write final weights back to the original expression
-            population[program_idx].weights = std::vector<float>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
+            // Save weights and losses
+            save_weights_and_losses(expression);
         }
     }
 }
