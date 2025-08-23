@@ -47,7 +47,9 @@ python3 ./benchmark/benchmark2d.py # Two features
 
 ## Documentation
 
-Information on supported genetic operators, algorithms and usage of the Python API can be found at https://quick-symbolic-regression-docs.readthedocs.io/en/latest/usage.html. To generate low-level documentation of the codebase and the project internals, run `doxygen Doxyfile` in the root directory.
+Documentation of QuickSR can be found at [quick-symbolic-regression-docs.readthedocs.io](https://quick-symbolic-regression-docs.readthedocs.io). 
+
+To generate low-level documentation of the codebase and the project internals, run `doxygen Doxyfile` in the root directory.
 
 ## Algorithm
 
