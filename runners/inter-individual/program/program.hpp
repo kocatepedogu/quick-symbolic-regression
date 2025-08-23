@@ -12,7 +12,8 @@
 #include <vector>
 
 namespace qsr::inter_individual {
-    struct Program {
+    class Program {
+    public:
         /// Programs
         Array2D<Instruction> bytecode;
 
@@ -33,6 +34,13 @@ namespace qsr::inter_individual {
 
         /// Default constructor
         Program() = default;
+        
+    private:
+        std::vector<IntermediateRepresentation> irs;
+
+        void compile_expressions(const std::vector<Expression>& population);
+
+        void copy_to_gpu_memory();
     };
 }
 
