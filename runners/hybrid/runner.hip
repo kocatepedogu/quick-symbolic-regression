@@ -47,7 +47,7 @@ update_weights(int program_idx, float learning_rate, Ptr2D<float> &weights_d, Pt
     }
 }
 
-template <typename... Debug> __global__ void 
+template <typename... Debug> __global__ static void 
 train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d, 
       Ptr2D<float> stack_d, Ptr2D<float> intermediate_d,
       Ptr2D<float> weights_d, Ptr2D<float> weights_grad_d, Ptr1D<float> loss_d,
