@@ -3,7 +3,7 @@
 
 #include "../base.hpp"
 
-#include "../../../compiler/ir.hpp"
+#include "../intra-individual/program/program.hpp"
 #include "../../expressions/expression.hpp"
 #include "../../dataset/dataset.hpp"
 
@@ -18,8 +18,7 @@ namespace qsr::cpu {
 
         void update_weights(float learning_rate);
 
-        void train(Instruction *bytecode, int num_of_instructions, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate,
-                    int stack_req, int intermediate_req);
+        void train(const intra_individual::ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
 
         void initialize_weights(Expression& expression);
 
