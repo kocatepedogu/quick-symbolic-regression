@@ -7,6 +7,7 @@
 #include "../../vm/vm_types.hpp"
 #include "../../vm/vm_debug.hpp"
 #include "../../vm/vm_control.hpp"
+#include "../inter-individual/program/program.hpp"
 
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW
@@ -109,19 +110,6 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d,
     }
 }
 
-void Runner::calculate_kernel_dims(const inter_individual::Program &program) {
-    // Every warp/wave executes a single expression, which takes 32 threads per expression
-    nthreads = program.num_of_individuals * 32;
-
-    // Use the maximum possible number of threads per block, unless population requires fewer threads
-    int threads_per_block = std::min(nthreads, hipState.props.maxThreadsPerBlock);
-    blockDim = dim3(threads_per_block);
-
-    // Calculate number of blocks needed
-    int nblocks = (nthreads + threads_per_block - 1) / threads_per_block;
-    gridDim = dim3(nblocks);
-}
-
 void Runner::initialize_weights_and_losses(std::vector<Expression>& population) {
     // Initialize weights array
     for (int i = 0; i < nweights; ++i) {
@@ -164,8 +152,8 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     // Convert symbolic expressions to bytecode program
     inter_individual::Program program(population);
 
-    // Calculate kernel launch configuraton
-    calculate_kernel_dims(program);
+    // Every warp/wave executes a single expression, which takes 32 threads per expression
+    calculate_kernel_dims(program.num_of_individuals * 32);
 
     // Resize arrays
     loss_d.resize(population.size());

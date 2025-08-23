@@ -112,14 +112,6 @@ train(Ptr2D<Instruction> bytecode,
     }
 }
 
-void Runner::calculate_kernel_dims(const Program &program) {
-    const int threadsPerBlock = min(program.num_of_individuals, hipState.props.maxThreadsPerBlock);
-    const int blocks = (program.num_of_individuals + threadsPerBlock - 1) / threadsPerBlock;
-
-    gridDim = dim3(blocks);
-    blockDim = dim3(threadsPerBlock);
-}
-
 void Runner::initialize_weights_and_losses(std::vector<Expression>& population) {
     // Initialize weights
     for (int i = 0; i < nweights; ++i) {
@@ -163,7 +155,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     Program program(population);
 
     // Calculate kernel launch parameters
-    calculate_kernel_dims(program);
+    calculate_kernel_dims(program.num_of_individuals);
 
     // Resize arrays
     loss_d.resize(population.size());

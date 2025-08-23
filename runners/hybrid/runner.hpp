@@ -6,8 +6,6 @@
 
 #include "../gpu.hpp"
 
-#include "../inter-individual/program/program.hpp"
-
 #include "../../expressions/expression.hpp"
 #include "../../dataset/dataset.hpp"
 
@@ -17,10 +15,6 @@ namespace qsr::hybrid {
     class Runner : public GPUBaseRunner {
     private:
         Array2D<float> weights_d;
-
-        int nthreads;
-
-        void calculate_kernel_dims(const inter_individual::Program &program);
 
         void initialize_weights_and_losses(std::vector<Expression>& population);
 

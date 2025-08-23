@@ -5,14 +5,8 @@
 #define INTER_RUNNER_HPP
 
 #include "../gpu.hpp"
-
-#include "./program/program.hpp"
-
 #include "../../expressions/expression.hpp"
 #include "../../dataset/dataset.hpp"
-
-#include "../../../util/hip.hpp"
-#include "../../../util/arrays/array1d.hpp"
 #include "../../../util/arrays/array2d.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
@@ -22,8 +16,6 @@ namespace inter_individual {
     class Runner : public GPUBaseRunner {
     private:
         Array2D<float> weights_d;
-
-        void calculate_kernel_dims(const Program &program);
 
         void initialize_weights_and_losses(std::vector<Expression>& population);
 

@@ -4,10 +4,8 @@
 #include "runner.hpp"
 
 #include "./program/program.hpp"
-
 #include "../../vm/vm_debug.hpp"
 #include "../../vm/vm_control.hpp"
-
 #include "../../util/rng.hpp"
 
 // Uncomment to enable buffer overflow checks
@@ -128,11 +126,7 @@ void Runner::run(Ptr1D<Instruction> bytecode, int code_length, int stack_length,
 }
 
 void Runner::calculate_kernel_dims(int m) {
-    const int threads_per_block = min(m, hipState.props.maxThreadsPerBlock);
-    blockDim = dim3(threads_per_block);
-
-    const int nblocks = (m + threads_per_block - 1) / threads_per_block;
-    gridDim = dim3(nblocks);
+    GPUBaseRunner::calculate_kernel_dims(m);
 
     int reduction_blocks_per_grid = (m + reduction_threads_per_block - 1) / 
         reduction_threads_per_block;
@@ -174,6 +168,7 @@ void Runner::save_weights_and_losses(Expression &expression) {
 }
 
 void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+    // Configure as many threads as data points
     calculate_kernel_dims(dataset->m);
 
     // Convert symbolic expressions to bytecode program

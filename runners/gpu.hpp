@@ -9,27 +9,29 @@
 #include "../util/hip.hpp"
 
 namespace qsr {
+    class GPUBaseRunner : public BaseRunner {
+    protected:
+        HIPState hipState;
 
-class GPUBaseRunner : public BaseRunner {
-protected:
-    HIPState hipState;
+        dim3 gridDim;
 
-    dim3 gridDim;
+        dim3 blockDim;
 
-    dim3 blockDim;
+        int nthreads;
 
-    GPUBaseRunner(int nweights);
+        GPUBaseRunner(int nweights);
 
-    template <typename K, typename ...T>
-    inline void launch_kernel(K kernel, T... args) {
-        hipLaunchKernelGGL(kernel, gridDim, blockDim, 0, hipState.stream, args...);
-    }
+        template <typename K, typename ...T>
+        inline void launch_kernel(K kernel, T... args) {
+            hipLaunchKernelGGL(kernel, gridDim, blockDim, 0, hipState.stream, args...);
+        }
 
-    inline void synchronize() {
-        HIP_CALL(hipStreamSynchronize(hipState.stream));
-    }
-};
+        inline void synchronize() {
+            HIP_CALL(hipStreamSynchronize(hipState.stream));
+        }
 
+        void calculate_kernel_dims(int nthreads);
+    };
 }
 
 #endif
