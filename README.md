@@ -49,7 +49,7 @@ python3 ./benchmark/benchmark2d.py # Two features
 
 Documentation of QuickSR can be found at [quick-symbolic-regression-docs.readthedocs.io](https://quick-symbolic-regression-docs.readthedocs.io). 
 
-To generate low-level documentation of the codebase and the project internals, run `doxygen Doxyfile` in the root directory.
+To generate low-level documentation of the codebase, run `doxygen Doxyfile` in the root directory.
 
 ## Algorithm
 
