@@ -4,7 +4,7 @@
 #ifndef INTER_RUNNER_HPP
 #define INTER_RUNNER_HPP
 
-#include "../base.hpp"
+#include "../gpu.hpp"
 
 #include "./program/program.hpp"
 
@@ -19,15 +19,9 @@
 
 namespace qsr {
 namespace inter_individual {
-    class Runner : public BaseRunner {
+    class Runner : public GPUBaseRunner {
     private:
         Array2D<float> weights_d;
-
-        dim3 gridDim;
-
-        dim3 blockDim;
-
-        HIPState config;
 
         void calculate_kernel_dims(const Program &program);
 

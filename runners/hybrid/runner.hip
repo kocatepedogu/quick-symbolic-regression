@@ -23,7 +23,7 @@ using namespace qsr;
 using namespace qsr::hybrid;
 
 Runner::Runner(int nweights) : 
-    BaseRunner(nweights) {}
+    GPUBaseRunner(nweights) {}
 
 static inline __device__ void 
 reset_gradients_and_losses(int program_idx, Ptr2D<float> &weights_grad_d, Ptr1D<float> &loss_d) 
@@ -113,7 +113,7 @@ void Runner::calculate_kernel_dims(const inter_individual::Program &program) {
     nthreads = program.num_of_individuals * 32;
 
     // Use the maximum possible number of threads per block, unless population requires fewer threads
-    int threads_per_block = std::min(nthreads, config.props.maxThreadsPerBlock);
+    int threads_per_block = std::min(nthreads, hipState.props.maxThreadsPerBlock);
     blockDim = dim3(threads_per_block);
 
     // Calculate number of blocks needed
@@ -178,7 +178,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
 
     // Run virtual machine
     hipLaunchKernelGGL(
-        train, gridDim, blockDim, 0, config.stream,
+        train, gridDim, blockDim, 0, hipState.stream,
         program.bytecode.ptr, 
         dataset->X_d.ptr, dataset->y_d.ptr,
         stack_d.ptr, intermediate_d.ptr,
@@ -187,7 +187,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     );
 
     // Wait for the kernel to finish
-    HIP_CALL(hipStreamSynchronize(config.stream));
+    HIP_CALL(hipStreamSynchronize(hipState.stream));
 
     // Save weights and losses to the original expressions
     save_weights_and_losses(population);

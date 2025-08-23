@@ -4,7 +4,7 @@
 #ifndef INTRA_RUNNER_HPP
 #define INTRA_RUNNER_HPP
 
-#include "../base.hpp"
+#include "../gpu.hpp"
 
 
 #include "../../expressions/expression.hpp"
@@ -17,13 +17,10 @@
 
 namespace qsr {
 namespace intra_individual {
-    class Runner : public BaseRunner {
+    class Runner : public GPUBaseRunner {
     private:
-        HIPState hipState;
-
-        dim3 gridDim;
-        dim3 blockDim;
         dim3 reduction_grid_dim;
+        
         dim3 reduction_block_dim;
         
         Array1D<float> weights_d;

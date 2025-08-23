@@ -4,7 +4,7 @@
 #ifndef HYBRID_RUNNER_HPP
 #define HYBRID_RUNNER_HPP
 
-#include "../base.hpp"
+#include "../gpu.hpp"
 
 #include "../inter-individual/program/program.hpp"
 
@@ -14,15 +14,9 @@
 #include <memory>
 
 namespace qsr::hybrid {
-    class Runner : public BaseRunner {
+    class Runner : public GPUBaseRunner {
     private:
         Array2D<float> weights_d;
-
-        HIPState config;
-
-        dim3 gridDim;
-
-        dim3 blockDim;
 
         int nthreads;
 

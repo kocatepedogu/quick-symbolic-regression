@@ -27,7 +27,7 @@ using namespace qsr::intra_individual;
 constexpr int reduction_threads_per_block = 1024;
 
 Runner::Runner(const int nweights) 
-    : BaseRunner(nweights) {}
+    : GPUBaseRunner(nweights) {}
 
 __global__ static void
 update_weights(Ptr1D<float> weight_grads, float &weight, float learning_rate) 

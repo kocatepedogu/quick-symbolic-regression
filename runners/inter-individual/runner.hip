@@ -34,7 +34,7 @@ using namespace qsr;
 using namespace qsr::inter_individual;
 
 Runner::Runner(int nweights) :
-    BaseRunner(nweights) {}
+    GPUBaseRunner(nweights) {}
 
 static inline __device__ void
 reset_gradients_and_losses(const int tid, Ptr2D<float> weights_grad_d, float& total_loss) 
@@ -113,7 +113,7 @@ train(Ptr2D<Instruction> bytecode,
 }
 
 void Runner::calculate_kernel_dims(const Program &program) {
-    const int threadsPerBlock = min(program.num_of_individuals, config.props.maxThreadsPerBlock);
+    const int threadsPerBlock = min(program.num_of_individuals, hipState.props.maxThreadsPerBlock);
     const int blocks = (program.num_of_individuals + threadsPerBlock - 1) / threadsPerBlock;
 
     gridDim = dim3(blocks);
@@ -177,7 +177,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     
     // Run virtual machine
     hipLaunchKernelGGL(
-        train, gridDim, blockDim, 0, config.stream,
+        train, gridDim, blockDim, 0, hipState.stream,
         program.bytecode.ptr, 
         dataset->X_d.ptr, dataset->y_d.ptr,
         stack_d.ptr, intermediate_d.ptr,
@@ -186,7 +186,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     );
 
     // Wait for the kernel to finish
-    HIP_CALL(hipStreamSynchronize(config.stream));
+    HIP_CALL(hipStreamSynchronize(hipState.stream));
 
     // Save weights and losses
     save_weights_and_losses(population);
