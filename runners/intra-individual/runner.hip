@@ -107,7 +107,7 @@ train(Ptr1D<Instruction> bytecode,
     }
 }
 
-void Runner::run(Ptr1D<Instruction> bytecode, int code_length, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void Runner::run(Ptr1D<Instruction> bytecode, int stack_length, int intermediate_length, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
     for (int epoch = 0; epoch < epochs + 1; ++epoch) {
         bool enable_backpropagation = (epoch < epochs);
 
@@ -199,7 +199,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
         initialize_weights_and_losses(population[i]);
 
         // Do the work
-        run(code, code_length, stack_length, intermediate_length, dataset, epochs, learning_rate);
+        run(code, stack_length, intermediate_length, dataset, epochs, learning_rate);
 
         // Save weights and losses to the original expression
         save_weights_and_losses(population[i]);
