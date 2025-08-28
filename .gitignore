@@ -5,6 +5,11 @@ Makefile
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
+.cmake/
+.idea/
+.ninja_deps
+.ninja_log
+build.ninja
 
 testinter
 testintra
