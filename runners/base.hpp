@@ -4,8 +4,8 @@
 #ifndef RUNNERS_BASE_HPP
 #define RUNNERS_BASE_HPP
 
-#include "../expressions/expression.hpp"
-#include "../dataset/dataset.hpp"
+#include "expressions/expression.hpp"
+#include "dataset/dataset.hpp"
 
 #include <memory>
 #include <vector>

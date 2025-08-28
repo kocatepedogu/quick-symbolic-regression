@@ -4,8 +4,8 @@
 #ifndef INTRA_VM_TYPES_HPP
 #define INTRA_VM_TYPES_HPP
 
-#include "../../../util/arrays/array1d.hpp"
-#include "../../../util/arrays/array2d.hpp"
+#include "util/arrays/array1d.hpp"
+#include "util/arrays/array2d.hpp"
 
 namespace qsr {
 

@@ -6,15 +6,15 @@
 #include <cmath>
 #include <hip/hip_runtime.h>
 
-#include "../../../vm/vm_debug.hpp"
-#include "../../../vm/vm_types.hpp"
-#include "../../../vm/vm_control.hpp"
-#include "../../../util/rng.hpp"
-#include "../../../util/hip.hpp"
-#include "../../../util/arrays/array1d.hpp"
-#include "../../../util/arrays/array2d.hpp"
+#include "vm/vm_debug.hpp"
+#include "vm/vm_types.hpp"
+#include "vm/vm_control.hpp"
+#include "util/rng.hpp"
+#include "util/hip.hpp"
+#include "util/arrays/array1d.hpp"
+#include "util/arrays/array2d.hpp"
 
-#include "./program/program.hpp"
+#include "runners/inter-individual/program/program.hpp"
 
 #include <hip/hip_runtime.h>
 #include <memory>

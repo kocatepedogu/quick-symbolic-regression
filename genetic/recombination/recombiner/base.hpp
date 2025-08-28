@@ -4,7 +4,7 @@
 #ifndef RECOMBINER_BASE_HPP_DEFINED
 #define RECOMBINER_BASE_HPP_DEFINED
 
-#include "../../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
 #include <tuple>
 

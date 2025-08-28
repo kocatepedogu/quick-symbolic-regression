@@ -4,9 +4,9 @@
 #ifndef GENETIC_PROGRAMMING_HPP
 #define GENETIC_PROGRAMMING_HPP
 
-#include "../dataset/dataset.hpp"
-#include "../expressions/expression.hpp"
-#include "../runners/base.hpp"
+#include "dataset/dataset.hpp"
+#include "expressions/expression.hpp"
+#include "runners/base.hpp"
 
 #include "common/function_set.hpp"
 #include "common/toolbox.hpp"

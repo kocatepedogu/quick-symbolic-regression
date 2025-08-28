@@ -4,7 +4,7 @@
 #ifndef EXPRESSION_PICKER_HPP
 #define EXPRESSION_PICKER_HPP
 
-#include "../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
 namespace qsr {
 

@@ -4,11 +4,11 @@
 #ifndef MUTATOR_POINT_HPP
 #define MUTATOR_POINT_HPP
 
-#include "../../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
-#include "../../common/expression_picker.hpp"
-#include "../../common/expression_reorganizer.hpp"
-#include "../../common/config.hpp"
+#include "genetic/common/expression_picker.hpp"
+#include "genetic/common/expression_reorganizer.hpp"
+#include "genetic/common/config.hpp"
 
 #include "base.hpp"
 

@@ -3,7 +3,7 @@
 
 #include "binary.hpp"
 #include "expression.hpp"
-#include "../util/rng.hpp"
+#include "util/rng.hpp"
 
 #define PROPAGATION_TEMPLATE_INVERSE(OP, INVOP, INVERSE_OPERATION, TYPE) \
     if (left_operand.operation == CONSTANT && right_operand.operation == INVERSE_OPERATION) { \

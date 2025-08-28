@@ -4,16 +4,16 @@
 #ifndef INTRA_RUNNER_HPP
 #define INTRA_RUNNER_HPP
 
-#include "../gpu.hpp"
+#include "runners/gpu.hpp"
 
-#include "../../expressions/expression.hpp"
-#include "../../dataset/dataset.hpp"
-#include "program/program.hpp"
+#include "expressions/expression.hpp"
+#include "dataset/dataset.hpp"
+#include "runners/intra-individual/program/program.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
 
-#include "../../util/hip.hpp"
-#include "../../vm/vm_types.hpp"
+#include "util/hip.hpp"
+#include "vm/vm_types.hpp"
 
 
 namespace qsr {

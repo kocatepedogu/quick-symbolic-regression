@@ -6,8 +6,8 @@
 
 #include "common/toolbox.hpp"
 #include "genetic_programming.hpp"
-#include "../runners/runner_generator_base.hpp"
-#include "../dataset/dataset.hpp"
+#include "runners/runner_generator_base.hpp"
+#include "dataset/dataset.hpp"
 
 #include <memory>
 

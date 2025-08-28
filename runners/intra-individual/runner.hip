@@ -4,9 +4,9 @@
 #include "runner.hpp"
 
 #include "./program/program.hpp"
-#include "../../vm/vm_debug.hpp"
-#include "../../vm/vm_control.hpp"
-#include "../../util/rng.hpp"
+#include "vm/vm_debug.hpp"
+#include "vm/vm_control.hpp"
+#include "util/rng.hpp"
 
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW

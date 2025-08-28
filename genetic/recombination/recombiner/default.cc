@@ -3,9 +3,8 @@
 
 #include "default.hpp"
 
-#include "../../../util/rng.hpp"
-
-#include "../../common/expression_picker.hpp"
+#include "util/rng.hpp"
+#include "genetic/common/expression_picker.hpp"
 
 #include <tuple>
 #include <cassert>

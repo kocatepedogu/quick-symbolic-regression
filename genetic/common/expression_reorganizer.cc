@@ -3,8 +3,8 @@
 
 #include "expression_reorganizer.hpp"
 
-#include "../../../expressions/unary.hpp"
-#include "../../../expressions/binary.hpp"
+#include "expressions/unary.hpp"
+#include "expressions/binary.hpp"
 
 namespace qsr {
     Expression ExpressionReorganizer::reorganize(const Expression& e) const noexcept {

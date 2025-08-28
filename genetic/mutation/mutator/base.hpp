@@ -4,7 +4,7 @@
 #ifndef MUTATOR_BASE_HPP
 #define MUTATOR_BASE_HPP
 
-#include "../../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
 namespace qsr {
 

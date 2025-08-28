@@ -4,7 +4,7 @@
 #ifndef COMPILER_HPP
 #define COMPILER_HPP
 
-#include "../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 #include "ir.hpp"
 
 namespace qsr {

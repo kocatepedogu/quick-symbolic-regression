@@ -6,7 +6,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "../../../util/rng.hpp"
+#include "util/rng.hpp"
 
 namespace qsr {
     PointMutator::PointMutator(const Config &config, float mutation_probability)  :

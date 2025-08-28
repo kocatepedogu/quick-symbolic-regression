@@ -6,10 +6,10 @@
 
 #include <tuple>
 
-#include "../../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
-#include "../../common/expression_picker.hpp"
-#include "../../common/expression_reorganizer.hpp"
+#include "genetic/common/expression_picker.hpp"
+#include "genetic/common/expression_reorganizer.hpp"
 
 #include "base.hpp"
 

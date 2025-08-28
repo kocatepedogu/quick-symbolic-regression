@@ -4,10 +4,10 @@
 #ifndef INTER_RUNNER_HPP
 #define INTER_RUNNER_HPP
 
-#include "../gpu.hpp"
-#include "../../expressions/expression.hpp"
-#include "../../dataset/dataset.hpp"
-#include "../../../util/arrays/array2d.hpp"
+#include "runners/gpu.hpp"
+#include "expressions/expression.hpp"
+#include "dataset/dataset.hpp"
+#include "util/arrays/array2d.hpp"
 
 #include </usr/lib/clang/20/include/omp.h>
 

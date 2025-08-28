@@ -5,7 +5,7 @@
 #define MUTATION_BASE_HPP
 
 #include "mutator/base.hpp"
-#include "../common/config.hpp"
+#include "genetic/common/config.hpp"
 
 #include <memory>
 

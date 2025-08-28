@@ -4,7 +4,7 @@
 #ifndef MUTATOR_DISTRIBUTION_HPP
 #define MUTATOR_DISTRIBUTION_HPP
 
-#include "../../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
 #include <memory>
 #include <vector>

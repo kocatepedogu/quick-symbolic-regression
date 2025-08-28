@@ -76,16 +76,16 @@ add_library(quicksr SHARED ${SOURCES})
 
 # Include directories
 target_include_directories(quicksr PUBLIC
-    ${SOURCE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11/include
     ${HIP_INCLUDE_DIRS}
     ${Python3_INCLUDE_DIRS}
-    extern/pybind11/include
 )
 
 # Link HIP libraries
 target_link_libraries(quicksr
-    ${HIP_LIBRARIES}
     ${Python3_LIBRARIES}
+    ${HIP_LIBRARIES}
     hip::host
     hip::device
     -lomp

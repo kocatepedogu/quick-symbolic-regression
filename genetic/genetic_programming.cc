@@ -3,10 +3,10 @@
 
 #include "genetic_programming.hpp"
 
-#include "../expressions/expression.hpp"
+#include "expressions/expression.hpp"
+#include "genetic/common/toolbox.hpp"
+#include "genetic/learning_history.hpp"
 
-#include "common/toolbox.hpp"
-#include "learning_history.hpp"
 #include <cmath>
 
 namespace qsr {

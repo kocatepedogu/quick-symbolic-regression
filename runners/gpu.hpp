@@ -6,7 +6,7 @@
 
 #include "base.hpp"
 
-#include "../util/hip.hpp"
+#include "util/hip.hpp"
 
 namespace qsr {
     class GPUBaseRunner : public BaseRunner {

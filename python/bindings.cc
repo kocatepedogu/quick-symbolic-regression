@@ -8,27 +8,27 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
-#include "../genetic/common/function_set.hpp"
-#include "../genetic/genetic_programming_islands.hpp"
+#include "genetic/common/function_set.hpp"
+#include "genetic/genetic_programming_islands.hpp"
 
-#include "../genetic/initialization/grow_initialization.hpp"
-#include "../genetic/initialization/full_initialization.hpp"
-#include "../genetic/initialization/ramped_half_and_half_initialization.hpp"
+#include "genetic/initialization/grow_initialization.hpp"
+#include "genetic/initialization/full_initialization.hpp"
+#include "genetic/initialization/ramped_half_and_half_initialization.hpp"
 
-#include "../genetic/selection/fitness_proportional_selection.hpp"
-#include "../genetic/selection/rank_selection.hpp"
+#include "genetic/selection/fitness_proportional_selection.hpp"
+#include "genetic/selection/rank_selection.hpp"
 
-#include "../genetic/mutation/subtree_mutation.hpp"
-#include "../genetic/mutation/hoist_mutation.hpp"
-#include "../genetic/mutation/point_mutation.hpp"
-#include "../genetic/mutation/distribution_mutation.hpp"
+#include "genetic/mutation/subtree_mutation.hpp"
+#include "genetic/mutation/hoist_mutation.hpp"
+#include "genetic/mutation/point_mutation.hpp"
+#include "genetic/mutation/distribution_mutation.hpp"
 
-#include "../genetic/recombination/default.hpp"
+#include "genetic/recombination/default.hpp"
 
-#include "../runners/inter-individual/runner_generator.hpp"
-#include "../runners/intra-individual/runner_generator.hpp"
-#include "../runners/cpu/runner_generator.hpp"
-#include "../runners/hybrid/runner_generator.hpp"
+#include "runners/inter-individual/runner_generator.hpp"
+#include "runners/intra-individual/runner_generator.hpp"
+#include "runners/cpu/runner_generator.hpp"
+#include "runners/hybrid/runner_generator.hpp"
 
 namespace py = pybind11;
 

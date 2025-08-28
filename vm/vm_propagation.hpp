@@ -9,7 +9,7 @@
 #include "vm_debug.hpp"
 #include "vm_types.hpp"
 
-#include "../compiler/ir.hpp"
+#include "compiler/ir.hpp"
 
 namespace qsr {
 

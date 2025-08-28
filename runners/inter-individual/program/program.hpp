@@ -4,10 +4,10 @@
 #ifndef INTER_PROGRAMPOPULATION_HPP
 #define INTER_PROGRAMPOPULATION_HPP
 
-#include "../../../compiler/ir.hpp"
-#include "../../../expressions/expression.hpp"
+#include "compiler/ir.hpp"
+#include "expressions/expression.hpp"
 
-#include "../../../util/arrays/array2d.hpp"
+#include "util/arrays/array2d.hpp"
 
 #include <vector>
 

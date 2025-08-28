@@ -3,9 +3,9 @@
 
 #include "../base.hpp"
 
-#include "../intra-individual/program/program.hpp"
-#include "../../expressions/expression.hpp"
-#include "../../dataset/dataset.hpp"
+#include "runners/intra-individual/program/program.hpp"
+#include "expressions/expression.hpp"
+#include "dataset/dataset.hpp"
 
 #include <memory>
 

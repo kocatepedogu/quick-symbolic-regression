@@ -4,7 +4,7 @@
 #ifndef SELECTOR_BASE_HPP
 #define SELECTOR_BASE_HPP
 
-#include "../../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
 namespace qsr {
 

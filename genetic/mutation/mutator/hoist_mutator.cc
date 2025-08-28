@@ -3,7 +3,7 @@
 
 #include "hoist_mutator.hpp"
 
-#include "../../../util/rng.hpp"
+#include "util/rng.hpp"
 
 namespace qsr {
     Expression HoistMutator::mutate(const Expression &expr) noexcept {

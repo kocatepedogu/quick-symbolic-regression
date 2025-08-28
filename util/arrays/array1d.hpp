@@ -4,7 +4,7 @@
 #ifndef ARRAY1D_HPP
 #define ARRAY1D_HPP
 
-#include "../hip.hpp"
+#include "util/hip.hpp"
 #include "memory.hpp"
 
 namespace qsr {

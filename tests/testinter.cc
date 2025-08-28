@@ -3,12 +3,12 @@
 
 #include "common/testdata.hpp"
 
-#include "../expressions/expression.hpp"
-#include "../expressions/binary.hpp"
-#include "../expressions/unary.hpp"
+#include "expressions/expression.hpp"
+#include "expressions/binary.hpp"
+#include "expressions/unary.hpp"
 
-#include "../dataset/dataset.hpp"
-#include "../runners/inter-individual/runner.hpp"
+#include "dataset/dataset.hpp"
+#include "runners/inter-individual/runner.hpp"
 
 #include <cmath>
 #include <iostream>

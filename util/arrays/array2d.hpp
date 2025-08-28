@@ -4,7 +4,7 @@
 #ifndef ARRAY2D_HPP
 #define ARRAY2D_HPP
 
-#include "../hip.hpp"
+#include "util/hip.hpp"
 #include "array1d.hpp"
 #include "memory.hpp"
 

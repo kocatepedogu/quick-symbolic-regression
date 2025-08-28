@@ -6,7 +6,7 @@
 
 #include "base.hpp"
 
-#include "../../common/expression_generator_full.hpp"
+#include "genetic/common/expression_generator_full.hpp"
 
 namespace qsr {
     class FullInitializer : public BaseInitializer {

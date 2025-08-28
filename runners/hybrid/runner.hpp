@@ -4,10 +4,10 @@
 #ifndef HYBRID_RUNNER_HPP
 #define HYBRID_RUNNER_HPP
 
-#include "../gpu.hpp"
+#include "runners/gpu.hpp"
 
-#include "../../expressions/expression.hpp"
-#include "../../dataset/dataset.hpp"
+#include "expressions/expression.hpp"
+#include "dataset/dataset.hpp"
 
 #include <memory>
 

@@ -3,8 +3,8 @@
 
 #include "expression_picker.hpp"
 
-#include "../../util/rng.hpp"
-#include "../../util/macro.hpp"
+#include "util/rng.hpp"
+#include "util/macro.hpp"
 
 namespace qsr {
 

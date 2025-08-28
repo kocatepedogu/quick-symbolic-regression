@@ -3,10 +3,10 @@
 
 #include "runner.hpp"
 
-#include "../../vm/vm_control.hpp"
-#include "../../vm/vm_types.hpp"
+#include "vm/vm_control.hpp"
+#include "vm/vm_types.hpp"
 
-#include "../../util/rng.hpp"
+#include "util/rng.hpp"
 
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW

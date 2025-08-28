@@ -5,7 +5,7 @@
 
 #include <hip/hip_runtime.h>
 
-#include "../../../compiler/compiler.hpp"
+#include "compiler/compiler.hpp"
 
 using namespace qsr::inter_individual;
 

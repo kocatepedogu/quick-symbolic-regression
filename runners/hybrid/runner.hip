@@ -3,11 +3,11 @@
 
 #include "runner.hpp"
 
-#include "../../util/rng.hpp"
-#include "../../vm/vm_types.hpp"
-#include "../../vm/vm_debug.hpp"
-#include "../../vm/vm_control.hpp"
-#include "../inter-individual/program/program.hpp"
+#include "util/rng.hpp"
+#include "vm/vm_types.hpp"
+#include "vm/vm_debug.hpp"
+#include "vm/vm_control.hpp"
+#include "runners/inter-individual/program/program.hpp"
 
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW

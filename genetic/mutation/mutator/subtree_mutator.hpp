@@ -4,11 +4,11 @@
 #ifndef MUTATOR_SUBTREE_HPP
 #define MUTATOR_SUBTREE_HPP
 
-#include "../../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
-#include "../../common/expression_generator.hpp"
-#include "../../common/expression_picker.hpp"
-#include "../../common/expression_reorganizer.hpp"
+#include "genetic/common/expression_generator.hpp"
+#include "genetic/common/expression_picker.hpp"
+#include "genetic/common/expression_reorganizer.hpp"
 
 #include "base.hpp"
 

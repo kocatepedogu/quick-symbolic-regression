@@ -7,8 +7,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
-#include "../util/arrays/array1d.hpp"
-#include "../util/arrays/array2d.hpp"
+#include "util/arrays/array1d.hpp"
+#include "util/arrays/array2d.hpp"
 
 namespace qsr {
 

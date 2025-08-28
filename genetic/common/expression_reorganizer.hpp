@@ -4,7 +4,7 @@
 #ifndef EXPRESSION_REORGANIZER_HPP
 #define EXPRESSION_REORGANIZER_HPP
 
-#include "../../expressions/expression.hpp"
+#include "expressions/expression.hpp"
 
 namespace qsr {
 

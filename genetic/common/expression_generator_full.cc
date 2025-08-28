@@ -1,9 +1,9 @@
 #include "expression_generator_full.hpp"
 
-#include "../../util/rng.hpp"
-#include "../../util/macro.hpp"
-#include "../../expressions/unary.hpp"
-#include "../../expressions/binary.hpp"
+#include "util/rng.hpp"
+#include "util/macro.hpp"
+#include "expressions/unary.hpp"
+#include "expressions/binary.hpp"
 #include "config.hpp"
 
 #include <cassert>

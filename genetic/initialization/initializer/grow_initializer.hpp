@@ -6,7 +6,7 @@
 
 #include "base.hpp"
 
-#include "../../common/expression_generator.hpp"
+#include "genetic/common/expression_generator.hpp"
 
 namespace qsr {
 

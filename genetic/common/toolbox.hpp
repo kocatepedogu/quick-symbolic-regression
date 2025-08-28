@@ -6,10 +6,10 @@
 
 #include <memory>
 
-#include "../initialization/base.hpp"
-#include "../mutation/base.hpp"
-#include "../recombination/base.hpp"
-#include "../selection/base.hpp"
+#include "genetic/initialization/base.hpp"
+#include "genetic/mutation/base.hpp"
+#include "genetic/recombination/base.hpp"
+#include "genetic/selection/base.hpp"
 
 namespace qsr {
     /**
