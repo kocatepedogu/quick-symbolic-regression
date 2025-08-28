@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2025 Doğu Kocatepe
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef SELECTION_BASE_HPP
+#define SELECTION_BASE_HPP
+
+#include "genetic/selection/selector/base.hpp"
+
+#include <memory>
+
+namespace qsr {
+
+class BaseSelection {
+public:
+    virtual std::shared_ptr<BaseSelector> get_selector(int npopulation);
+};
+
+}
+
+#endif

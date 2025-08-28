@@ -33,32 +33,31 @@ endif()
 
 # Define source directories
 set(SOURCE_DIRS 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/compiler
-    ${CMAKE_CURRENT_SOURCE_DIR}/dataset
-    ${CMAKE_CURRENT_SOURCE_DIR}/expressions
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/initialization
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/initialization/initializer
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/recombination
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/recombination/recombiner
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/mutation
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/mutation/mutator
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/selection
-    ${CMAKE_CURRENT_SOURCE_DIR}/genetic/selection/selector
-    ${CMAKE_CURRENT_SOURCE_DIR}/vm
-    ${CMAKE_CURRENT_SOURCE_DIR}/util
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/arrays
-    ${CMAKE_CURRENT_SOURCE_DIR}/python
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/compiler
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dataset
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/expressions
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/initialization
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/initialization/initializer
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/recombination
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/recombination/recombiner
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/mutation
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/mutation/mutator
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/selection
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/genetic/selection/selector
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/arrays
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/python
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/cpu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/hybrid
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/inter-individual
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/inter-individual/program
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/intra-individual
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/intra-individual/program
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/runners
-    ${CMAKE_CURRENT_SOURCE_DIR}/runners/cpu
-    ${CMAKE_CURRENT_SOURCE_DIR}/runners/hybrid
-    ${CMAKE_CURRENT_SOURCE_DIR}/runners/inter-individual
-    ${CMAKE_CURRENT_SOURCE_DIR}/runners/inter-individual/program
-    ${CMAKE_CURRENT_SOURCE_DIR}/runners/intra-individual
-    ${CMAKE_CURRENT_SOURCE_DIR}/runners/intra-individual/program
 )
 
 # Collect all source files
@@ -76,7 +75,7 @@ add_library(quicksr SHARED ${SOURCES})
 
 # Include directories
 target_include_directories(quicksr PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/quicksr
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11/include
     ${HIP_INCLUDE_DIRS}
     ${Python3_INCLUDE_DIRS}
