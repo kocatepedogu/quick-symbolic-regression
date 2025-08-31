@@ -14,7 +14,7 @@ Hybrid CPU/GPU implementation of symbolic regression with genetic programming, b
 ## Installation
 ```
 # On Fedora
-sudo dnf install gcc gcc-c++ make cmake -y
+sudo dnf install gcc gcc-c++ make cmake ninja -y
 sudo dnf install rocminfo rocm-opencl rocm-clinfo rocm-hip rocm-hip-devel amd-smi -y
 sudo dnf install python3 python3-devel -y
 sudo dnf install libasan libubsan -y
@@ -24,12 +24,12 @@ git clone https://github.com/kocatepedogu/quick-symbolic-regression.git
 cd quick-symbolic-regression
 git submodule update --init --recursive
 
-cmake .
-make -j$(nproc)
+cmake . -G Ninja
+ninja
 export PYTHONPATH=$(pwd)
 ```
 
-The *make* command generates a shared library which can be imported as an extension module to python, and a set of test executables written in C++.
+Compilation generates a shared library which can be imported as an extension module to python, and a set of test executables written in C++.
 
 For performance benchmarks, run
 
