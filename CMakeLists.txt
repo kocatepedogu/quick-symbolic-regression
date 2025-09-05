@@ -87,7 +87,7 @@ target_link_libraries(quicksr
     ${HIP_LIBRARIES}
     hip::host
     hip::device
-    -lomp
+    -fopenmp
     ${SANITIZER_LINKER_FLAGS}
 )
 

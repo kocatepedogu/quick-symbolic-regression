@@ -10,7 +10,7 @@
 #include "dataset/dataset.hpp"
 #include "runners/intra-individual/program/program.hpp"
 
-#include </usr/lib/clang/20/include/omp.h>
+#include <omp.h>
 
 #include "util/hip.hpp"
 #include "vm/vm_types.hpp"

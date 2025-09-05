@@ -1,7 +1,7 @@
 #ifndef ARRAYS_HPP
 #define ARRAYS_HPP
 
-#include </usr/lib/clang/20/include/omp.h>
+#include <omp.h>
 #include <hip/hip_runtime.h>
 
 #include <vector>

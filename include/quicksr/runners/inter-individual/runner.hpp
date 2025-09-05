@@ -9,7 +9,7 @@
 #include "dataset/dataset.hpp"
 #include "util/arrays/array2d.hpp"
 
-#include </usr/lib/clang/20/include/omp.h>
+#include <omp.h>
 
 namespace qsr {
 namespace inter_individual {

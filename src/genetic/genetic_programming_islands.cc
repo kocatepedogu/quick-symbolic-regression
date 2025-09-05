@@ -4,7 +4,7 @@
 #include "genetic/genetic_programming_islands.hpp"
 #include "genetic/learning_history.hpp"
 
-#include </usr/lib/clang/20/include/omp.h>
+#include <omp.h>
 #include <memory>
 #include <ostream>
 #include <iostream>
