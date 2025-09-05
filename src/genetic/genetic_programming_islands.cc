@@ -53,7 +53,7 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept {
     delete[] local_learning_history;
 }
 
-std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(
+std::tuple<Expression, std::vector<float>, std::vector<long>> GeneticProgrammingIslands::fit(
     std::shared_ptr<Dataset> dataset, 
     int ngenerations, int nsupergenerations, 
     int nepochs, float learning_rate, bool verbose) noexcept 
@@ -81,8 +81,17 @@ std::tuple<Expression,std::vector<float>> GeneticProgrammingIslands::fit(
         migrate_solutions();
     }
 
-    // Return tuple of best solution and learning history
-    return std::make_tuple(*global_best, global_learning_history.get_learning_history());
+    std::vector<float> final_learning_history = global_learning_history.get_learning_history();
+    std::vector<long> final_time_history = global_learning_history.get_time_history();
+
+    // Remove start offset from timestamps
+    const long min_time = *std::ranges::min_element(final_time_history);
+    for (long & i : final_time_history) {
+        i -= min_time;
+    }
+
+    // Return tuple of the best solution and learning history
+    return std::make_tuple(*global_best, final_learning_history, final_time_history);
 }
 
 void GeneticProgrammingIslands::migrate_solutions() noexcept {

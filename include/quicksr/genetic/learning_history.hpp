@@ -40,7 +40,7 @@ public:
      * @details
      * Appends the other's history to the end of this one.
      */
-    LearningHistory concatenate_with(LearningHistory other);
+    LearningHistory concatenate_with(LearningHistory other) const;
 
     /**
      * @brief Returns the learning history
@@ -51,8 +51,14 @@ public:
         return history;
     }
 
+    constexpr const std::vector<long>& get_time_history() const {
+        return time;
+    }
+
 private:
     std::vector<float> history;
+
+    std::vector<long> time;
 };
 
 }

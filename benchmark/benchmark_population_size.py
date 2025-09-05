@@ -42,7 +42,7 @@ def fit_model(npopulation, runner_generator):
     )
 
     # Fit model
-    solution, history = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=250)
+    solution, history, time_history = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=250)
 
     # Find elapsed time
     elapsed_time = time.time() - start_time

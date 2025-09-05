@@ -20,21 +20,20 @@ y = 1.0 + 3.0*X + 5.0*X*X + 7.0*X*X*X
 model = SymbolicRegressionModel(NVARS, NWEIGHTS, NPOPULATION, NISLANDS, initialization=GrowInitialization(init_depth=1))
 
 # Fit model
-solution, history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=500)
+solution, history, time_history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=500)
 
 # Print best solution
 print("Best solution: {}".format(solution))
 
-# Print learning history
-print("Learning history: {}".format(history))
+# Print best loss
+print("Best loss: {}".format(solution.loss))
 
 # Plot learning history
 plt.figure(figsize=(10, 6))
-plt.plot(history)
-plt.xlabel('Generation')
+plt.plot(time_history, history)
+plt.xlabel('Time (milliseconds)')
 plt.ylabel('Loss (MSE)')
 plt.title('Learning History')
-plt.xticks(np.arange(0, len(history), 5.0))
 plt.grid()
 plt.savefig('benchmark_learning_history_1d.png')
 

@@ -48,6 +48,7 @@ class SymbolicRegressionModel:
         )
 
         # Initialize history, solution and compiled solution to None
+        self.time_history = None
         self.history = None
         self.solution = None
         self.compiled_solution = None
@@ -68,14 +69,15 @@ class SymbolicRegressionModel:
         dataset = Dataset(X, y)
 
         # Fit the model
-        solution, history = self.model.fit(dataset, ngenerations, nsupergenerations, nepochs, learning_rate, verbose)
+        solution, history, time_history = self.model.fit(dataset, ngenerations, nsupergenerations, nepochs, learning_rate, verbose)
 
         # Save the solution and history
         self.solution = solution
         self.history = history
+        self.time_history = time_history
 
         # Return the solution and history
-        return solution, history
+        return solution, history, time_history
 
 
     def predict(self, X):

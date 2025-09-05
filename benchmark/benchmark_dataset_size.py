@@ -45,7 +45,7 @@ def fit_model(dataset_size, runner_generator):
     )
 
     # Fit model
-    solution, history = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=100, verbose=True)
+    solution, history, time_history = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=100, verbose=True)
 
     # Find elapsed time
     elapsed_time = time.time() - start_time
