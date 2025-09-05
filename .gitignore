@@ -28,5 +28,6 @@ benchmark/benchmark2d.sh
 
 *.log
 *.pyc
+.venv
 
 docs/html
