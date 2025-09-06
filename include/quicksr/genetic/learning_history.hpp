@@ -17,10 +17,8 @@ public:
      * @param expression The expression whose loss value is to be added
      *
      * @details
-     * The loss of the given expression is simply appended to the history.
-     *
-     * Note that the new value can be higher than the previous one if the algorithm
-     * allows for increase in loss over time.
+     * The loss of the given expression is appended to the history.
+     * The value is capped by the previously added loss.
      */ 
     void add_to_history(const Expression& expression);
 
@@ -31,7 +29,7 @@ public:
      * @details
      * For every iteration, takes the best fitness value from either of the histories.
      */
-    LearningHistory combine_with(LearningHistory other);
+    LearningHistory combine_with(LearningHistory other, float previous_best_loss);
 
     /**
      * @brief Concatenates two LearningHistory objects

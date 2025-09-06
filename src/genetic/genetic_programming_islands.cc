@@ -122,7 +122,8 @@ void GeneticProgrammingIslands::update_learning_history() noexcept {
     // Combine learning histories
     LearningHistory history_per_supergeneration;
     for (int i = 0; i < nislands; ++i) {
-        history_per_supergeneration = history_per_supergeneration.combine_with(local_learning_history[i]);
+        history_per_supergeneration = history_per_supergeneration.combine_with(
+            local_learning_history[i], global_best ? global_best->loss : std::numeric_limits<float>::max());
     }
 
     // Append to global learning history
