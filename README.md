@@ -12,13 +12,13 @@ Hybrid CPU/GPU implementation of symbolic regression with genetic programming, b
 </div>
 
 ## Installation
-```
-# On Fedora
-sudo dnf install gcc gcc-c++ make cmake ninja -y
-sudo dnf install rocminfo rocm-opencl rocm-clinfo rocm-hip rocm-hip-devel amd-smi -y
-sudo dnf install python3 python3-devel -y
-sudo dnf install libasan libubsan -y
-sudo dnf install doxygen -y
+The following commands were tested on Ubuntu 24.04 LTS with ROCm 6.4.3 installed according to the [official documentation](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html). 
+
+```shell
+# Install build tools
+sudo apt-get install gcc g++ make cmake ninja-build -y
+sudo apt-get install python3-dev -y
+sudo apt-get install doxygen -y
 
 # Clone the repository
 git clone https://github.com/kocatepedogu/quick-symbolic-regression.git
@@ -35,6 +35,18 @@ export PYTHONPATH=$(pwd)
 cmake . -G Ninja
 ninja
 ```
+
+For Fedora Workstation 42, these should work:
+
+```shell
+sudo dnf install gcc gcc-c++ make cmake ninja -y
+sudo dnf install rocminfo rocm-opencl rocm-clinfo rocm-hip rocm-hip-devel amd-smi -y
+sudo dnf install python3 python3-devel -y
+sudo dnf install libasan libubsan -y
+sudo dnf install doxygen -y
+```
+
+## Usage ##
 
 Compilation generates a shared library which can be imported as an extension module to python, and a set of test executables written in C++.
 
