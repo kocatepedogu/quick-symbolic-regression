@@ -25,6 +25,8 @@ libquicksr.so
 
 benchmark/benchmark1d.sh
 benchmark/benchmark2d.sh
+benchmark/dataset/YearPredictionMSD.csv
+benchmark/dataset/yearpredictionmsd.zip
 
 *.log
 *.pyc
