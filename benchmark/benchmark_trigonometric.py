@@ -14,13 +14,13 @@ NISLANDS=28
 
 # Generate dataset
 X = np.linspace(-5, 5, 25)
-y = 1.0 + 3.0*X + 5.0*X*X + 7.0*X*X*X
+y = 2.5382 * np.cos(X)*X + X*X - 0.5
 
 # Create model
 model = SymbolicRegressionModel(NVARS, NWEIGHTS, NPOPULATION, NISLANDS, initialization=GrowInitialization(init_depth=1))
 
 # Fit model
-solution, history, time_history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=500)
+solution, history, time_history = model.fit(X, y, ngenerations=5, nsupergenerations=4, nepochs=500)
 
 # Print best solution
 print("Best solution: {}".format(solution))
@@ -35,7 +35,7 @@ plt.xlabel('Time (milliseconds)')
 plt.ylabel('Loss (MSE)')
 plt.title('Learning History')
 plt.grid()
-plt.savefig('benchmark_learning_history_1d.png')
+plt.savefig('benchmark_learning_history_trigonometric.png')
 
 # Compute predicted values
 y_predicted = model.predict(X)
@@ -49,4 +49,4 @@ plt.ylabel('y')
 plt.title('Target vs Predicted')
 plt.legend()
 plt.grid()
-plt.savefig('benchmark_target_vs_predicted_1d.png')
+plt.savefig('benchmark_target_vs_predicted_trigonometric.png')

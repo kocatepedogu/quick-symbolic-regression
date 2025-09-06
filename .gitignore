@@ -23,8 +23,8 @@ testisland
 testexprpick
 libquicksr.so
 
-benchmark/benchmark1d.sh
-benchmark/benchmark2d.sh
+benchmark/benchmark_trigonometric.sh
+benchmark/benchmark_pagie_polynomial.sh
 benchmark/dataset/YearPredictionMSD.csv
 benchmark/dataset/yearpredictionmsd.zip
 

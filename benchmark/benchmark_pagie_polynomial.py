@@ -40,7 +40,7 @@ plt.xlabel('Time (milliseconds)')
 plt.ylabel('Loss (MSE)')
 plt.title('Learning History')
 plt.grid()
-plt.savefig('benchmark_learning_history_2d.png')
+plt.savefig('benchmark_learning_history_pagie_polynomial.png')
 
 # Compute predicted values
 y_predicted = model.predict(X)
@@ -54,5 +54,5 @@ ax.scatter(np.array(X)[:, 0], np.array(X)[:, 1], np.array(y_predicted), c='r', m
 ax.legend()
 
 plt.title('Target vs Prediction')
-plt.savefig('benchmark_target_vs_predicted_2d.png')
+plt.savefig('benchmark_target_vs_predicted_pagie_polynomial.png')
 plt.show()
