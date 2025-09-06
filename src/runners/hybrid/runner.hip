@@ -91,9 +91,9 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d,
             // Print an empty line in between forward propagation output and backpropagation output
             vm_debug_print(tid, "");
 
-            // Add squared difference to total loss in the last iteration
+            // Add squared difference divided by m [ (l/m)^2 * m = l^2/m ] to total loss
             if (epoch == nepochs) {
-                atomicAdd(&loss_d[program_idx], powf(stack_d[0,tid], 2));
+                atomicAdd(&loss_d[program_idx], powf(stack_d[0,tid], 2) * (float)y_d.dim1);
             }
 
             // Backpropagate

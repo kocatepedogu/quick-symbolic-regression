@@ -91,8 +91,8 @@ train(Ptr2D<Instruction> bytecode,
                 // Print an empty line in between forward propagation output and backpropagation output
                 vm_debug_print(tid, "");
 
-                // Add squared difference to total loss
-                total_loss += powf(stack_d[0,tid], 2);
+                // Add squared difference divided by m [ (l/m)^2 * m = l^2/m ] as the loss
+                total_loss += powf(stack_d[0,tid], 2) * (float)y_d.dim1;
 
                 // Backpropagate
                 if (epoch < nepochs) {

@@ -80,8 +80,8 @@ void Runner::train(const ProgramIndividual &p, std::shared_ptr<const Dataset> da
             // Print an empty line in between forward propagation output and backpropagation output
             vm_debug_print(tid, "");
 
-            // Save squared difference as the loss
-            loss_d.ptr[0] += powf(stack_d.ptr[0,tid], 2);
+            // Save squared difference divided by m [ (l/m)^2 * m = l^2/m ] as the loss
+            loss_d.ptr[0] += powf(stack_d.ptr[0,tid], 2) * (float)dataset->m;
 
             if (epochs > 0) {
                 vm_debug_print(tid, "Backpropagation");

@@ -98,8 +98,8 @@ train(Ptr1D<Instruction> bytecode,
     // Print an empty line in between forward propagation output and backpropagation output
     vm_debug_print(tid, "");
 
-    // Save squared difference as the loss
-    loss_d[tid] = powf(stack_d[0,tid], 2);
+    // Save squared difference divided by m [ (l/m)^2 * m = l^2/m ] as the loss
+    loss_d[tid] = powf(stack_d[0,tid], 2) * (float)loss_d.dim1;
 
     // Backpropagate
     if (enable_backpropagation) {
