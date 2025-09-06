@@ -20,13 +20,20 @@ sudo dnf install python3 python3-devel -y
 sudo dnf install libasan libubsan -y
 sudo dnf install doxygen -y
 
+# Clone the repository
 git clone https://github.com/kocatepedogu/quick-symbolic-regression.git
 cd quick-symbolic-regression
 git submodule update --init --recursive
 
+# Configure Python environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+export PYTHONPATH=$(pwd)
+
+# Compile
 cmake . -G Ninja
 ninja
-export PYTHONPATH=$(pwd)
 ```
 
 Compilation generates a shared library which can be imported as an extension module to python, and a set of test executables written in C++.
@@ -34,15 +41,17 @@ Compilation generates a shared library which can be imported as an extension mod
 For performance benchmarks, run
 
 ```
-python3 ./benchmark/benchmark_population_size.py
-python3 ./benchmark/benchmark_dataset_size.py
+cd benchmark
+python3 benchmark_population_size.py
+python3 benchmark_dataset_size.py
 ```
 
 For loss benchmarks on test datasets, run
 
 ```
-python3 ./benchmark/benchmark1d.py # Single feature
-python3 ./benchmark/benchmark2d.py # Two features
+cd benchmark
+python3 benchmark_trigonometric.py # Single feature
+python3 benchmark_pagie_polynomial.py # Two features
 ```
 
 ## Documentation
