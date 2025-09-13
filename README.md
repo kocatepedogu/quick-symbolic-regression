@@ -12,31 +12,18 @@ Hybrid CPU/GPU implementation of symbolic regression with genetic programming, b
 </div>
 
 ## Installation
-The following commands were tested on Ubuntu 24.04 LTS with ROCm 6.4.3 installed according to the [official documentation](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html). 
+
+### Prerequisites
+The following commands were tested on Ubuntu 24.04 LTS with ROCm 6.4.3 already installed according to the [official documentation](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html).
 
 ```shell
 # Install build tools
 sudo apt-get install gcc g++ make cmake ninja-build -y
 sudo apt-get install python3-dev -y
 sudo apt-get install doxygen -y
-
-# Clone the repository
-git clone https://github.com/kocatepedogu/quick-symbolic-regression.git
-cd quick-symbolic-regression
-git submodule update --init --recursive
-
-# Configure Python environment
-python3 -m venv .venv
-source .venv/bin/activate
-pip3 install -r requirements.txt
-export PYTHONPATH=$(pwd)
-
-# Compile
-cmake . -G Ninja
-ninja
 ```
 
-For Fedora Workstation 42, these should work:
+On Fedora Workstation 42, these should work for the build tools and ROCm:
 
 ```shell
 sudo dnf install gcc gcc-c++ make cmake ninja -y
@@ -44,6 +31,20 @@ sudo dnf install rocminfo rocm-opencl rocm-clinfo rocm-hip rocm-hip-devel amd-sm
 sudo dnf install python3 python3-devel -y
 sudo dnf install libasan libubsan -y
 sudo dnf install doxygen -y
+```
+
+### Compiling From Source
+
+Using a Python virtual environment is highly recommended.
+
+```shell
+# Clone the repository
+git clone https://github.com/kocatepedogu/quick-symbolic-regression.git
+cd quick-symbolic-regression
+git submodule update --init --recursive
+
+# Compile and install QuickSR together with dependencies
+pip3 install -e .
 ```
 
 ## Usage ##

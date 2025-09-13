@@ -22,6 +22,7 @@ testcrossover
 testisland
 testexprpick
 libquicksr.so
+python/pyquicksr.egg-info
 
 benchmark/benchmark_trigonometric.sh
 benchmark/benchmark_pagie_polynomial.sh
