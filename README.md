@@ -142,3 +142,18 @@ The inter-individual mode was not included as it was inferior in both types of b
 
 Both benchmarks were done on an Intel Core i7 1400KF CPU (64 GB DDR5 5200 MHz RAM) and an AMD Radeon RX 9060 XT (16GB VRAM) GPU. Either with a large dataset size or a large population size, the GPU implementation significantly outperforms the CPU one. However, it is important to note that choosing the correct mode is crucial for performance, which is up to the user.
 
+## Project Information
+
+AMD Open Hardware Design Competition
+
+**Team Number**: AOHW25_1072
+
+**Project Name**: Hybrid CPU/GPU Implementation of Symbolic Regression with Bytecode Virtual Machine
+
+**University Name**: Izmir Institute of Technology
+
+**Supervisor**: Assoc. Prof. Işıl Öz
+
+## Acknowledgements
+
+This work was supported in part by AMD under the [Heterogeneous Accelerated Compute Clusters (HACC)](https://www.amd-haccs.io) program.
