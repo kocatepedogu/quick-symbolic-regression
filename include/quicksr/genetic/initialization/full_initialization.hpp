@@ -14,7 +14,7 @@ namespace qsr {
      * @details
      * This initialization strategy generates individuals by randomly selecting functions and terminals
      * until the maximum depth is reached in every branch of a generated tree. The resulting trees are 
-     * fully grown and symmetric. All of the generated expressions have the exact depth specified by the 
+     * fully grown. All of the generated expressions have the exact depth specified by the
      * init_depth parameter or by the global configuration if the `init_depth` parameter is not specified.
      *
      * The algorithm uses FullExpressionGenerator to construct the trees.
