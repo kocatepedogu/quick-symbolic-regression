@@ -97,32 +97,6 @@ The project's uniqueness comes from the use of backpropagation and gradient desc
 
 The library is implemented in C++/HIP, and the API is provided in Python through pybind11.
 
-## Modes
-
-There are four modes: (1) **inter-individual GPU**, (2) **intra-individual GPU**, (3) **hybrid GPU** and (4) **CPU**.
-
-In the **inter-individual GPU mode** (1), the parallelization is done over individuals. At each generation, a single kernel (per island) is launched on the stream associated with an island. Every GPU thread processes a different individual's bytecode program. When the loss computation/gradient accumulation from one data point is done, the threads move on to the next data point in a sequential loop. The loop over epochs is also moved inside the kernel, eliminating kernel launch overhead. 
-
-The **intra-individual GPU mode** (2) parallelizes over data points. For each individual, a new kernel is launched on the stream associated with the individual's island. The kernel executes the same bytecode program over all data points in parallel. The losses and gradients from different data points are computed by different threads, so the final results are obtained by reduction summation on the GPU. After one individual is done, the next one is processed in a sequential loop.
-
-The **hybrid GPU mode** (3) parallelizes over both individuals and data points. At each generation, a single kernel (per island) is launched with number of threads equal to 32 times the number of individuals per island. Every consecutive set of 32 threads (wave/warp) run the same bytecode program for different data points, with a sequential stride loop over the dataset for the remaining data points. The loop over epochs is also moved inside the kernel, eliminating kernel launch overhead. 
-
-The **CPU mode** (4) uses multiple CPU cores to process multiple islands with no involvement of the GPU. Vectorization using OpenMP SIMD is used for some genetic operations, but the execution of bytecode programs is not currently vectorized. This mode is added for comparison.
-
-## Benchmarks
-
-<img src="./docs/plots/benchmark_elapsed_time_vs_population_size.png" width="600px">
-
-The first plot shows the elapsed time of the algorithm as a function of the population size, measured by *benchmark_population_size.py* script. The hybrid GPU mode significantly outperforms the CPU mode (near 2x speedup) on large populations.
-
-<img src="./docs/plots/benchmark_elapsed_time_vs_dataset_size.png" width="600px">
-
-The second plot shows the elapsed time of the algorithm as a function of dataset size, measured by *benchmark_dataset_size.py* script. While the CPU mode is initially better, the intra-individual GPU mode eventually outperforms the CPU implementation on large dataset sizes.
-
-The inter-individual mode was not included as it was inferior in both types of benchmarks, potentially due to the divergence of control flow in consecutive threads. Nevertheless, it is included as part of QuickSR.
-
-Both benchmarks were done on an Intel Core i7 1400KF CPU (64 GB DDR5 5200 MHz RAM) and an AMD Radeon RX 9060 XT (16GB VRAM) GPU. Either with a large dataset size or a large population size, the GPU implementation significantly outperforms the CPU one. However, it is important to note that choosing the correct mode is crucial for performance, which is up to the user.
-
 ## Project Information
 
 AMD Open Hardware Design Competition
