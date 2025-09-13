@@ -47,26 +47,6 @@ git submodule update --init --recursive
 pip3 install -e .
 ```
 
-## Usage ##
-
-Compilation generates a shared library which can be imported as an extension module to python, and a set of test executables written in C++.
-
-For performance benchmarks, run
-
-```
-cd benchmark
-python3 benchmark_population_size.py
-python3 benchmark_dataset_size.py
-```
-
-For loss benchmarks on test datasets, run
-
-```
-cd benchmark
-python3 benchmark_trigonometric.py # Single feature
-python3 benchmark_pagie_polynomial.py # Two features
-```
-
 ## Documentation
 
 Documentation of QuickSR can be found at [quick-symbolic-regression-docs.readthedocs.io](https://quick-symbolic-regression-docs.readthedocs.io). 
