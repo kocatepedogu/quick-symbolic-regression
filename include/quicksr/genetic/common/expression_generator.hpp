@@ -37,7 +37,7 @@ private:
      * at recursive invocations, meaning that different branches of the generated parse tree can have
      * different depth and structure due to early termination in some branches.
      *
-     * If `max_depth` == 1, it only generates terminals (variables or trainable parameters)
+     * If `max_depth` == 1, it only generates terminals (constants, variables or trainable parameters)
      */
     Expression generate(int max_depth) noexcept;
 

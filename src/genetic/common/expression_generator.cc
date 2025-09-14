@@ -18,15 +18,15 @@ ExpressionGenerator::ExpressionGenerator() {}
 ExpressionGenerator::ExpressionGenerator(const Config &config) : config(config)
 {
     depth_one_distribution = std::discrete_distribution<>({
-        0.0,  /*CONSTANT*/
-        1.0,  /*PARAMETER*/
-        1.0,  /*IDENTITY*/
+        1.0,                                   /*CONSTANT*/
+        static_cast<double>(config.nweights),  /*PARAMETER*/
+        static_cast<double>(config.nvars),     /*IDENTITY*/
     });
 
     depth_two_distribution = std::discrete_distribution<>({
-        0.0,  /*CONSTANT*/
-        1.0,  /*PARAMETER*/
-        1.0,  /*IDENTITY*/
+        1.0,                                   /*CONSTANT*/
+        static_cast<double>(config.nweights),  /*PARAMETER*/
+        static_cast<double>(config.nvars),     /*IDENTITY*/
         config.function_set->addition ? 1.0 : 0.0,
         config.function_set->subtraction ? 1.0 : 0.0,
         config.function_set->multiplication ? 1.0 : 0.0,
@@ -69,6 +69,8 @@ Expression ExpressionGenerator::generate(int max_depth) noexcept {
         generate(max_depth - 1)
 
     switch (operation) {
+        case CONSTANT:
+            return 2 * (thread_local_rng() % RAND_MAX) / (double)RAND_MAX - 1;
         case IDENTITY:
             return Var(thread_local_rng() % config.nvars);
         case PARAMETER:

@@ -12,9 +12,9 @@ namespace qsr {
 
 FullExpressionGenerator::FullExpressionGenerator(const Config &config) : config(config) {
     depth_one_distribution = std::discrete_distribution<>({
-        0.0,  /*CONSTANT*/
-        1.0,  /*PARAMETER*/
-        1.0,  /*IDENTITY*/
+        1.0,                                   /*CONSTANT*/
+        static_cast<double>(config.nweights),  /*PARAMETER*/
+        static_cast<double>(config.nvars)   ,  /*IDENTITY*/
     });
 
     depth_two_distribution = std::discrete_distribution<>({
@@ -41,6 +41,8 @@ Expression FullExpressionGenerator::generate(int remaining_depth) noexcept {
     if (remaining_depth == 1) {
         int operation = depth_one_distribution(thread_local_rng);
         switch (operation) {
+            case CONSTANT:
+                return 2 * (thread_local_rng() % RAND_MAX) / (double)RAND_MAX - 1;
             case IDENTITY:
                 return Var(thread_local_rng() % config.nvars);
             case PARAMETER:

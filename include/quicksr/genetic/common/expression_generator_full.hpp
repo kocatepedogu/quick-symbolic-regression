@@ -39,7 +39,7 @@ private:
      * Terminals/leaf nodes are never generated unless `remaining_depth` is one, meaning that the tree is
      * full and symmetric with no early termination at any branch.
      *
-     * If `remaining_depth` == 1, it only generates terminals (varibles or trainable parameters)
+     * If `remaining_depth` == 1, it only generates terminals (constants, varibles or trainable parameters)
      */
     Expression generate(int remaining_depth) noexcept;
 
