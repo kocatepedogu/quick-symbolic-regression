@@ -28,11 +28,6 @@ namespace qsr {
             abort();
         }
 
-        if (nweights <= 0) {
-            std::cerr << "Config: Number of trainable parameters (nweights) must be greater than zero." << std::endl;
-            abort();
-        }
-
         if (npopulation <= 0) {
             std::cerr << "Config: Population size (npopulation) must be greater than zero." << std::endl;
             abort();
