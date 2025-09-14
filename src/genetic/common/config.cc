@@ -19,22 +19,22 @@ namespace qsr {
         function_set(function_set)
     {
         if (max_depth <= 0) {
-            std::cerr << "ExpressionGenerator: Depth limit of expressions (max_depth) must be greater than zero." << std::endl;
+            std::cerr << "Config: Depth limit of expressions (max_depth) must be greater than zero." << std::endl;
             abort();
         }
 
         if (nvars <= 0) {
-            std::cerr << "ExpressionGenerator: Number of variables (nvars) must be greater than zero." << std::endl;
+            std::cerr << "Config: Number of variables (nvars) must be greater than zero." << std::endl;
             abort();
         }
 
         if (nweights <= 0) {
-            std::cerr << "ExpressionGenerator: Number of trainable parameters (nweights) must be greater than zero." << std::endl;
+            std::cerr << "Config: Number of trainable parameters (nweights) must be greater than zero." << std::endl;
             abort();
         }
 
         if (npopulation <= 0) {
-            std::cerr << "ExpressionGenerator: Population size (npopulation) must be greater than zero." << std::endl;
+            std::cerr << "Config: Population size (npopulation) must be greater than zero." << std::endl;
             abort();
         }
     }
