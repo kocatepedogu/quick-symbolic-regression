@@ -20,7 +20,7 @@ GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &tool
     }
 
     // Get selector
-    selector = toolbox.selection->get_selector(this->config.npopulation);
+    selector = toolbox.selection->get_selector(ceil(this->config.npopulation * config.survival_rate));
 
     // Get mutator
     mutator = toolbox.mutation->get_mutator(this->config);

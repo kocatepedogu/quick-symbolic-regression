@@ -17,7 +17,9 @@ namespace qsr {
         /**
          * @brief All arguments constructor
          */
-        Config(int nvars, int nweights, int max_depth, int npopulation, float elite_rate, float migration_rate, std::shared_ptr<FunctionSet> function_set);
+        Config(int nvars, int nweights, int max_depth, int npopulation,
+               float elite_rate, float survival_rate, float migration_rate,
+               std::shared_ptr<FunctionSet> function_set);
 
         /**
          * @brief Number of variables (features) in the training data
@@ -46,6 +48,11 @@ namespace qsr {
          * @brief Proportion of elite individuals that will be copied directly to the next generation
          */
         float elite_rate;
+
+        /**
+         * @brief Proportion of individuals that survive in between generations
+         */
+        float survival_rate;
 
         /**
          * @brief Proportion of individuals that migrate between islands at the end of every supergeneration
