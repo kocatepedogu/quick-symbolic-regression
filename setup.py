@@ -61,7 +61,7 @@ class InSourceCMakeBuild(build_ext):
         # 3️⃣  Build the target
         # -----------------------------------------------------------------
         subprocess.check_call(
-            ["cmake", "--build", str(src_dir), "--config", cfg, "--target", ext.name],
+            ["cmake", "--build", str(src_dir), "--config", cfg, "--target", ext.name, "--parallel", str(os.cpu_count())],
             cwd=src_dir,
         )
 
