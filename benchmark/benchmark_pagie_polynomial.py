@@ -10,7 +10,7 @@ from quicksr import *
 NVARS=2
 NPOPULATION=11200
 NISLANDS=28
-NWEIGHTS=1
+NWEIGHTS=0
 
 # Generate dataset
 X = []
