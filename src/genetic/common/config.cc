@@ -8,14 +8,15 @@ namespace qsr {
         nweights(0),
         max_depth(0),
         npopulation(0),
+        elite_rate(0.0f),
         function_set(nullptr) {}
 
-    Config::Config(int nvars, int nweights, int max_depth, int npopulation, int noffspring, std::shared_ptr<FunctionSet> function_set) :
+    Config::Config(int nvars, int nweights, int max_depth, int npopulation, float elite_rate, std::shared_ptr<FunctionSet> function_set) :
         nvars(nvars),
         nweights(nweights),
         max_depth(max_depth),
         npopulation(npopulation),
-        noffspring(noffspring),
+        elite_rate(elite_rate),
         function_set(function_set)
     {
         if (max_depth <= 0) {

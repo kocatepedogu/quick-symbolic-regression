@@ -18,9 +18,6 @@ GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &tool
     if (config.npopulation % 2 != 0) {
         this->config.npopulation++;
     }
-    if (config.noffspring % 2 != 0) {
-        this->config.noffspring++;
-    }
 
     // Get selector
     selector = toolbox.selection->get_selector(this->config.npopulation);
@@ -105,38 +102,49 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
         initialized = true;
     }
 
+    int elitism_count = ceil(config.elite_rate * (float)config.npopulation);
+
     // Iterate for ngenerations
     for (int generation = 0; generation < ngenerations; ++generation)
     {
+        // Sort population by fitness in descending order
+        std::sort(population.begin(), population.end(), std::greater<Expression>());
+
         // Update selection probabilities
         selector->update(&population[0]);
 
         /* Offspring Generation */
         std::vector<Expression> offspring;
-        for (int i = 0; i < config.noffspring / 2; ++i) {
+        offspring.reserve(config.npopulation);
+
+        /* Copy the elite directly to offspring */
+        for (int i = 0; i < elitism_count; ++i) {
+            offspring.push_back(population[i]);
+        }
+
+        /* Generate the rest from parents */
+        while (offspring.size() < config.npopulation) {
             const auto &parent1 = selector->select(&population[0]);
             const auto &parent2 = selector->select(&population[0]);
+
             const auto &children = recombiner->recombine(parent1, parent2);
             const auto &child1 = get<0>(children);
             const auto &child2 = get<1>(children);
+
             offspring.push_back(mutator->mutate(child1));
-            offspring.push_back(mutator->mutate(child2));
+            if (offspring.size() < config.npopulation) {
+                offspring.push_back(mutator->mutate(child2));
+            }
         }
 
         // Compute losses
         runner->run(offspring, dataset, nepochs, learning_rate);
 
-        // Insert offspring into population
-        population.insert(population.end(), offspring.begin(), offspring.end());
-
         // Calculate fitnesses
-        calculate_fitnesses(population);
+        calculate_fitnesses(offspring);
 
-        // Sort population by fitness in descending order
-        std::sort(population.begin(), population.end(), std::greater<Expression>());
-
-        // Remove the worst half of the population
-        population.resize(config.npopulation);
+        // Let new population be the offspring
+        population = offspring;
 
         // Find new best
         const Expression best = *get_best_solution();

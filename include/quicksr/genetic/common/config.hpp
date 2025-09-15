@@ -17,7 +17,7 @@ namespace qsr {
         /**
          * @brief All arguments constructor
          */
-        Config(int nvars, int nweights, int max_depth, int npopulation, int noffspring, std::shared_ptr<FunctionSet> function_set);
+        Config(int nvars, int nweights, int max_depth, int npopulation, float elite_rate, std::shared_ptr<FunctionSet> function_set);
 
         /**
          * @brief Number of variables (features) in the training data
@@ -43,12 +43,9 @@ namespace qsr {
         int npopulation;
 
         /**
-         * @brief The number of expressions generated in a single generation
-         * @details
-         * This is the offspring size commonly denoted by the Greek letter
-         * lambda in the literature.
+         * @brief Proportion of elite individuals that will be copied directly to the next generation
          */
-        int noffspring;
+        float elite_rate;
 
         /**
          * @brief The function_set stores the set of unary and binary functions that can be present in the evolving functions.

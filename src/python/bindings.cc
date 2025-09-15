@@ -129,12 +129,12 @@ PYBIND11_MODULE(libquicksr, m) {
     /* Config Class */
 
     py::class_<Config>(m, "Config")
-        .def(py::init<int, int, int, int, int, std::shared_ptr<FunctionSet>>(),
+        .def(py::init<int, int, int, int, float, std::shared_ptr<FunctionSet>>(),
             py::arg("nvars"),
             py::arg("nweights"),
             py::arg("max_depth"),
             py::arg("npopulation"),
-            py::arg("noffspring"),
+            py::arg("elite_rate"),
             py::arg("function_set"));
 
     /* Toolbox Class */

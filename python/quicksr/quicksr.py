@@ -12,7 +12,7 @@ class SymbolicRegressionModel:
         nweights, 
         npopulation,
         nislands,
-        noffspring=None,
+        elite_rate=0.0,
         max_depth=16,
         initialization=GrowInitialization(), 
         mutation=DistributionMutation([SubtreeMutation(), HoistMutation(), PointMutation()], [0.5, 0.25, 0.25]), 
@@ -35,14 +35,10 @@ class SymbolicRegressionModel:
         :param functions: List of allowed functions in the candidate expressions.
         """
 
-        # Let offspring size equal to population size if not specified
-        if noffspring is None:
-            noffspring = npopulation
-
         # Create model
         self.model = GeneticProgrammingIslands(
             nislands=nislands, 
-            config=Config(nvars, nweights, max_depth, npopulation, noffspring, FunctionSet(functions)),
+            config=Config(nvars, nweights, max_depth, npopulation, elite_rate, FunctionSet(functions)),
             toolbox=Toolbox(initialization, mutation, recombination, selection),
             runner_generator=runner_generator
         )

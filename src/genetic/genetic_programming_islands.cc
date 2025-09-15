@@ -24,8 +24,8 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         config.nvars,
         config.nweights, 
         config.max_depth, 
-        config.npopulation / nislands, 
-        config.noffspring / nislands, 
+        config.npopulation / nislands,
+        config.elite_rate,
         config.function_set);
 
     // Initialize islands
