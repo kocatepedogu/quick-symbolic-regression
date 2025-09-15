@@ -32,15 +32,16 @@ namespace qsr {
         if (num_operands == 0) {
             // Replace with a parameter or variable
 
-            int operation = thread_local_rng() % 2;
-            switch (operation) {
+            switch (int operation = thread_local_rng() % 2) {
                 case 0:
+                    if (config.nweights != 0) {
+                        subtree.operation = PARAMETER;
+                        subtree.argindex = thread_local_rng() % config.nweights;
+                        break;
+                    }
+                case 1:
                     subtree.operation = IDENTITY;
                     subtree.argindex = thread_local_rng() % config.nvars;
-                    break;
-                case 1:
-                    subtree.operation = PARAMETER;
-                    subtree.argindex = thread_local_rng() % config.nweights;
                     break;
             }
         }
