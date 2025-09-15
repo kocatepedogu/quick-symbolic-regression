@@ -14,7 +14,8 @@ namespace qsr {
 GeneticProgrammingIslands::GeneticProgrammingIslands (
     int nislands, const Config &config, const Toolbox &toolbox,
     std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
-        toolbox(toolbox), 
+        toolbox(toolbox),
+        config(config),
         runner_generator(runner_generator), 
         nislands(nislands) {
 
@@ -26,6 +27,7 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         config.max_depth, 
         config.npopulation / nislands,
         config.elite_rate,
+        config.migration_rate,
         config.function_set);
 
     // Initialize islands
@@ -95,13 +97,17 @@ std::tuple<Expression, std::vector<float>, std::vector<long>> GeneticProgramming
 }
 
 void GeneticProgrammingIslands::migrate_solutions() noexcept {
-    // Forward best solution of island i to island i+1
+    // Forward best solutions of island i to island i+1
     if (nislands > 1) {
         for (int i = nislands - 1; i >= 0; --i) {
-            const Expression new_best = *islands[i]->get_best_solution();
+            auto& source = islands[i]->get_population();
+            auto& destination = islands[(i + 1) % nislands]->get_population();
+            assert(source.size() == destination.size());
 
-            // Replace worst solution of island i+1 with best solution of island i
-            *(islands[(i + 1) % nislands]->get_worst_solution()) = new_best;
+            int migration_count = (int)(config.migration_rate * source.size());
+            for (int j = 0; j < migration_count; ++j) {
+                destination[destination.size() - j - 1] = source[j];
+            }
         }
     }
 }

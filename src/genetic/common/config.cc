@@ -9,14 +9,16 @@ namespace qsr {
         max_depth(0),
         npopulation(0),
         elite_rate(0.0f),
+        migration_rate(0.0f),
         function_set(nullptr) {}
 
-    Config::Config(int nvars, int nweights, int max_depth, int npopulation, float elite_rate, std::shared_ptr<FunctionSet> function_set) :
+    Config::Config(int nvars, int nweights, int max_depth, int npopulation, float elite_rate, float migration_rate, std::shared_ptr<FunctionSet> function_set) :
         nvars(nvars),
         nweights(nweights),
         max_depth(max_depth),
         npopulation(npopulation),
         elite_rate(elite_rate),
+        migration_rate(migration_rate),
         function_set(function_set)
     {
         if (max_depth <= 0) {

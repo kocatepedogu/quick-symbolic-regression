@@ -38,6 +38,11 @@ private:
       */
     const Toolbox toolbox;
 
+    /**
+     * @brief Global configuration
+     */
+    Config config;
+
     /** 
       * @brief Number of islands
       */

@@ -27,6 +27,8 @@ public:
     Expression *get_best_solution();
     Expression *get_worst_solution();
 
+    inline auto& get_population() { return population; }
+
 private:
     std::vector<Expression> population;
 
