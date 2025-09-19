@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "genetic/selection/selector/fitness_proportional_selector.hpp"
+#include "util/rng.hpp"
 
 #include <random>
 
@@ -25,14 +26,11 @@ void FitnessProportionalSelector::update(const Expression population[]) {
 
 const Expression& FitnessProportionalSelector::select(const Expression population[]) {
     // Create a random number generator
-    static thread_local std::random_device rd;
-    static thread_local std::mt19937 gen(rd());
-    
     std::discrete_distribution<> distribution(
         probabilities.begin(), probabilities.end());
 
     // Select an expression based on the probabilities
-    size_t selectedIndex = distribution(gen);
+    size_t selectedIndex = distribution(thread_local_rng);
     return population[selectedIndex];
 }
 
