@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "compiler/compiler.hpp"
+#include "compiler/optimizer.hpp"
 #include "compiler/ir.hpp"
 
 namespace qsr {
@@ -166,7 +167,7 @@ static void compile(const Expression& e, IntermediateRepresentation* p) noexcept
 
 IntermediateRepresentation compile(const Expression& e) noexcept {
     IntermediateRepresentation p(2*e.num_of_nodes + 1);
-    compile(e, &p);
+    compile(optimize(e), &p);
     return p;
 }
 
