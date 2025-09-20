@@ -97,8 +97,16 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
 
     // Compute initial fitnesses if not initialized
     if (!initialized) {
+        // Compute losses
         runner->run(population, dataset, nepochs, learning_rate);
+
+        // Calculate fitnesses
         calculate_fitnesses(population);
+
+        // Save initial best loss to learning history
+        history.add_to_history(*get_best_solution());
+
+        // Set initialization flag to true
         initialized = true;
     }
 
