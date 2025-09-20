@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from libquicksr import GrowInitialization
 
 from quicksr import *
 
@@ -41,7 +42,8 @@ def fit_model(dataset_size, runner_generator):
         nweights=NWEIGHTS, 
         npopulation=NPOPULATION, 
         nislands=NISLANDS, 
-        runner_generator=runner_generator
+        runner_generator=runner_generator,
+        initialization=GrowInitialization(init_depth=3)
     )
 
     # Fit model
