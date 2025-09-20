@@ -24,7 +24,8 @@ using namespace qsr::intra_individual;
 
 constexpr int reduction_threads_per_block = 1024;
 
-Runner::Runner(const int nweights) : GPUBaseRunner(nweights) {
+Runner::Runner(const int nweights, const bool use_cache) :
+    GPUBaseRunner(nweights), use_cache(use_cache) {
     weights_d.resize(nweights);
 }
 
@@ -184,6 +185,10 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     // Sequential loop over programs
     for (auto p : program_pop)
     {
+        if (use_cache && population_cache.load(population[p.index])) {
+            continue;
+        }
+
         // Resize VM memory
         resize_arrays(p.stack_req, p.intermediate_req, dataset->m, dataset->m);
 
@@ -195,5 +200,9 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
 
         // Save weights and losses to the original expression
         save_weights_and_losses(population[p.index]);
+
+        if (use_cache) {
+            population_cache.save(population[p.index]);
+        }
     }
 }

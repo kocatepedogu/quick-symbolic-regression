@@ -23,8 +23,8 @@
 using namespace qsr;
 using namespace qsr::hybrid;
 
-Runner::Runner(int nweights) : 
-    GPUBaseRunner(nweights) {}
+Runner::Runner(int nweights, const bool use_cache) :
+    GPUBaseRunner(nweights), use_cache(use_cache) {}
 
 static inline __device__ void 
 reset_gradients_and_losses(int program_idx, Ptr2D<float> &weights_grad_d, Ptr1D<float> &loss_d) 
@@ -104,8 +104,8 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d,
         }
 
         // At the end of each epoch, update weights
-        if (datapoint_block_idx == 0 && epoch < nepochs) { 
-            update_weights(program_idx, learning_rate, weights_d, weights_grad_d); 
+        if (datapoint_block_idx == 0 && epoch < nepochs) {
+            update_weights(program_idx, learning_rate, weights_d, weights_grad_d);
         }
     }
 }
@@ -149,18 +149,24 @@ void Runner::save_weights_and_losses(std::vector<Expression>& population) {
 }
 
 void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int nepochs, float learning_rate) {
+    std::vector<Expression>& population_to_run = use_cache ? population_cache.uncached_population : population;
+
+    if (use_cache) {
+        population_cache.read_from_population(population);
+    }
+
     // Convert symbolic expressions to bytecode program
-    inter_individual::Program program(population);
+    inter_individual::Program program(population_to_run);
 
     // Every warp/wave executes a single expression, which takes 32 threads per expression
     calculate_kernel_dims(program.num_of_individuals * 32);
 
     // Resize arrays
-    weights_d.resize(nweights, population.size());
-    resize_arrays(program.stack_req, program.intermediate_req, population.size(), nthreads);
+    weights_d.resize(nweights, population_to_run.size());
+    resize_arrays(program.stack_req, program.intermediate_req, population_to_run.size(), nthreads);
 
     // Initialize weights and losses
-    initialize_weights_and_losses(population);
+    initialize_weights_and_losses(population_to_run);
 
     // Run virtual machine
     launch_kernel(
@@ -176,6 +182,16 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     // Wait for the kernel to finish
     synchronize();
 
-    // Save weights and losses to the original expressions
-    save_weights_and_losses(population);
+    // Save weights and losses to the uncached population
+    save_weights_and_losses(population_to_run);
+
+    // Save to cache
+    if (use_cache) {
+        population_cache.save();
+    }
+
+    // Save weights and losses to the original expressions if using cache
+    if (use_cache) {
+        population_cache.write_to_population(population);
+    }
 }

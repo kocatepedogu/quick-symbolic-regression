@@ -32,8 +32,8 @@
 using namespace qsr;
 using namespace qsr::inter_individual;
 
-Runner::Runner(int nweights) :
-    GPUBaseRunner(nweights) {}
+Runner::Runner(int nweights, const bool use_cache) :
+    GPUBaseRunner(nweights), use_cache(use_cache) {}
 
 static inline __device__ void
 reset_gradients_and_losses(const int tid, Ptr2D<float> weights_grad_d, float& total_loss) 
@@ -150,19 +150,25 @@ void Runner::save_weights_and_losses(std::vector<Expression>& population) {
 }
 
 void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+    std::vector<Expression>& population_to_run = use_cache ? population_cache.uncached_population : population;
+
+    if (use_cache) {
+        population_cache.read_from_population(population);
+    }
+
     // Convert symbolic expression to bytecode program
-    Program program(population);
+    Program program(population_to_run);
 
     // Calculate kernel launch parameters
     calculate_kernel_dims(program.num_of_individuals);
 
     // Resize arrays
-    weights_d.resize(nweights, population.size());
+    weights_d.resize(nweights, population_to_run.size());
     resize_arrays(program.stack_req, program.intermediate_req, 
         program.num_of_individuals, program.num_of_individuals);
 
     // Initialize weights and losses
-    initialize_weights_and_losses(population);
+    initialize_weights_and_losses(population_to_run);
     
     // Run virtual machine
     launch_kernel(
@@ -179,5 +185,15 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     synchronize();
 
     // Save weights and losses
-    save_weights_and_losses(population);
+    save_weights_and_losses(population_to_run);
+
+    // Save to cache
+    if (use_cache) {
+        population_cache.save();
+    }
+
+    // Save weights and losses to the original expressions if using cache
+    if (use_cache) {
+        population_cache.write_to_population(population);
+    }
 }

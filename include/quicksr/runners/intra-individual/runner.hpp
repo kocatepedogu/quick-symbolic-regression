@@ -8,12 +8,10 @@
 
 #include "expressions/expression.hpp"
 #include "dataset/dataset.hpp"
+#include "runners/intra-individual/cache/cache.hpp"
 #include "runners/intra-individual/program/program.hpp"
 
-#include <omp.h>
-
 #include "util/hip.hpp"
-#include "vm/vm_types.hpp"
 
 
 namespace qsr {
@@ -26,6 +24,10 @@ namespace intra_individual {
         
         Array1D<float> weights_d;
 
+        Cache population_cache;
+
+        bool use_cache;
+
         void run(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
         
         void calculate_kernel_dims(int m);
@@ -35,7 +37,7 @@ namespace intra_individual {
         void save_weights_and_losses(Expression &expression);
 
     public:
-        Runner(const int nweights);
+        Runner(const int nweights, bool use_cache);
 
         void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
     };

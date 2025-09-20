@@ -6,6 +6,7 @@
 #include "runners/intra-individual/program/program.hpp"
 #include "expressions/expression.hpp"
 #include "dataset/dataset.hpp"
+#include "runners/intra-individual/cache/cache.hpp"
 
 #include <memory>
 
@@ -13,6 +14,10 @@ namespace qsr::cpu {
     class Runner : public BaseRunner {
     private:
         Array1D<float> weights_d;
+
+        intra_individual::Cache population_cache;
+
+        bool use_cache;
 
         void reset_gradients_and_losses();
 
@@ -25,7 +30,7 @@ namespace qsr::cpu {
         void save_weights_and_losses(Expression& expression);
 
     public:
-        Runner(int nweights);
+        Runner(int nweights, bool use_cache);
 
         void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
     };

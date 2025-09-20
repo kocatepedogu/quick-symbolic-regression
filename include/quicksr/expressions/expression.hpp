@@ -6,6 +6,7 @@
 
 #include <ostream>
 #include <vector>
+#include <functional>
 
 #define BINARY_OP_CASE(case_name, operand, operator_token) \
     case case_name: { \
@@ -148,5 +149,41 @@ static inline Expression Parameter(int argindex) {
 }
 
 }
+
+static inline void hash_combine(std::size_t& seed, std::size_t h) noexcept {
+    // magic constant from boost::hash_combine
+    seed ^= h + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+template<>
+struct std::hash<qsr::Expression> {
+    std::size_t operator()(const qsr::Expression& e) const noexcept {
+        std::size_t seed = 0;
+
+        // 1. operation_t – hash its underlying integral value
+        hash_combine(seed,
+            std::hash<std::underlying_type_t<qsr::operation_t>>{}(
+                static_cast<std::underlying_type_t<qsr::operation_t>>(e.operation)));
+
+        // 2. float value – use std::hash<float>
+        hash_combine(seed, std::hash<float>{}(e.value));
+
+        // 3. argindex
+        hash_combine(seed, std::hash<int>{}(e.argindex));
+
+        // 4. operands (recursive)
+        for (const auto& child : e.operands) {
+            hash_combine(seed, std::hash<qsr::Expression>{}(child));
+        }
+
+        // 5. num_of_nodes
+        hash_combine(seed, std::hash<int>{}(e.num_of_nodes));
+
+        // 6. depth
+        hash_combine(seed, std::hash<int>{}(e.depth));
+
+        return seed;
+    }
+};
 
 #endif

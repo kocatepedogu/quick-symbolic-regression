@@ -54,9 +54,11 @@ set(SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/cpu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/hybrid
     ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/inter-individual
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/inter-individual/cache
     ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/inter-individual/program
     ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/intra-individual
     ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/intra-individual/program
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/runners/intra-individual/cache
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/common
 )
 

@@ -9,7 +9,11 @@
 namespace qsr {
 namespace intra_individual {
     class RunnerGenerator : public BaseRunnerGenerator {
+    private:
+        bool use_cache;
     public:
+        explicit RunnerGenerator(const bool use_cache) : use_cache(use_cache) {}
+
         std::shared_ptr<BaseRunner> generate(int nweights) override;
     };
 }}

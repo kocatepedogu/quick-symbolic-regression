@@ -24,7 +24,8 @@ using namespace qsr::cpu;
 
 using ProgramIndividual = intra_individual::ProgramIndividual;
 
-Runner::Runner(int nweights) : BaseRunner(nweights) {
+Runner::Runner(int nweights, const bool use_cache) :
+    BaseRunner(nweights), use_cache(use_cache) {
     weights_d.resize(nweights);
 }
 
@@ -125,6 +126,10 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
 
     // Loop over programs
     for (const auto &p : program) {
+        if (use_cache && population_cache.load(population[p.index])) {
+            continue;
+        }
+
         // Resize VM memory
         resize_arrays(p.stack_req, p.intermediate_req, 
             dataset->m, dataset->m);
@@ -137,5 +142,9 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
 
         // Save weights and losses
         save_weights_and_losses(population[p.index]);
+
+        if (use_cache) {
+            population_cache.save(population[p.index]);
+        }
     }
 }

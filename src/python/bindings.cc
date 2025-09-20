@@ -109,16 +109,20 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<inter_individual::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<inter_individual::RunnerGenerator>>(m, "InterIndividualRunnerGenerator")
-        .def(py::init<>());
+        .def(py::init<bool>(),
+            py::arg("use_cache") = true);
         
     py::class_<intra_individual::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<intra_individual::RunnerGenerator>>(m, "IntraIndividualRunnerGenerator")
-        .def(py::init<>());
+        .def(py::init<bool>(),
+            py::arg("use_cache") = true);
 
     py::class_<cpu::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<cpu::RunnerGenerator>>(m, "CPURunnerGenerator")
-        .def(py::init<>());
+        .def(py::init<bool>(),
+            py::arg("use_cache") = true);
 
     py::class_<hybrid::RunnerGenerator, BaseRunnerGenerator, std::shared_ptr<hybrid::RunnerGenerator>>(m, "HybridRunnerGenerator")
-        .def(py::init<>());
+        .def(py::init<bool>(),
+            py::arg("use_cache") = true);
 
     /* Function Set Class */
 
