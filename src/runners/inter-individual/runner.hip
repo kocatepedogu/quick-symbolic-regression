@@ -154,6 +154,9 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
 
     if (use_cache) {
         population_cache.read_from_population(population);
+        if (population_cache.uncached_population.empty()) {
+            return;
+        }
     }
 
     // Convert symbolic expression to bytecode program
