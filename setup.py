@@ -53,7 +53,7 @@ class InSourceCMakeBuild(build_ext):
 
         # -S <src> -B <src> tells CMake that the build dir is the same as the source dir
         subprocess.check_call(
-            ["cmake", "-S", str(src_dir), "-B", str(src_dir)] + cmake_args,
+            ["cmake", "-S", str(src_dir), "-B", str(src_dir), "-G", "Ninja"] + cmake_args,
             cwd=src_dir,
             )
 
