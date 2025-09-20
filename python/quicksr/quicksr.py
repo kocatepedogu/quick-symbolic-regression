@@ -46,6 +46,8 @@ class SymbolicRegressionModel:
         )
 
         # Initialize history, solution and compiled solution to None
+        self.history_wrt_generation = None
+        self.history_wrt_time = None
         self.time_history = None
         self.history = None
         self.solution = None
@@ -63,19 +65,21 @@ class SymbolicRegressionModel:
         :param learning_rate: Learning rate for gradient descent.
         :param verbose: Whether to print progress.
         """
-        # Create a dataset that is availabe to both the CPU and the GPU
+        # Create a dataset that is available to both the CPU and the GPU
         dataset = Dataset(X, y)
 
         # Fit the model
-        solution, history, time_history = self.model.fit(dataset, ngenerations, nsupergenerations, nepochs, learning_rate, verbose)
+        solution, history_wrt_generation, history_wrt_time, time_history = (
+            self.model.fit(dataset, ngenerations, nsupergenerations, nepochs, learning_rate, verbose))
 
         # Save the solution and history
         self.solution = solution
-        self.history = history
+        self.history_wrt_generation = history_wrt_generation
+        self.history_wrt_time = history_wrt_time
         self.time_history = time_history
 
         # Return the solution and history
-        return solution, history, time_history
+        return solution, history_wrt_generation, history_wrt_time, time_history
 
 
     def predict(self, X):
