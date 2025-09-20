@@ -151,7 +151,7 @@ public:
 
     /// Resizes array. Contents are discarded.
     void resize(int new_dim1, int new_dim2) {
-        if (new_dim1 * new_dim2 > ptr.dim1 * ptr.dim2) {
+        if (new_dim1 > ptr.dim1 || new_dim2 > ptr.dim2) {
             if (ptr.ptr != nullptr) {
                 HIP_CALL(DEALLOC(ptr.ptr));
             }
