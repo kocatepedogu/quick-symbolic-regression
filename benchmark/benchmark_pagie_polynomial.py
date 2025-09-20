@@ -25,7 +25,7 @@ y = [1/(1 + x0**(-4)) + 1/(1 + x1**(-4))
 model = SymbolicRegressionModel(NVARS, NWEIGHTS, NPOPULATION, NISLANDS, functions=["+", "/", 'cos', 'relu'])
 
 # Fit model
-solution, history, time_history = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=0)
+solution, loss_wrt_gen, loss_wrt_time, time_hist = model.fit(X, y, ngenerations=15, nsupergenerations=4, nepochs=0)
 
 # Print best solution
 print("Best solution: {}".format(solution))
@@ -35,7 +35,7 @@ print("Best loss: {}".format(solution.loss))
 
 # Plot learning history
 plt.figure(figsize=(10, 6))
-plt.plot(time_history, history)
+plt.plot(time_hist, loss_wrt_time)
 plt.xlabel('Time (milliseconds)')
 plt.ylabel('Loss (MSE)')
 plt.title('Learning History')

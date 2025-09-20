@@ -42,13 +42,13 @@ def fit_model(npopulation, runner_generator):
     )
 
     # Fit model
-    solution, history, time_history = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=250)
+    solution, loss_wrt_gen, loss_wrt_time, time_hist = model.fit(X, y, ngenerations=2, nsupergenerations=2, nepochs=250)
 
     # Find elapsed time
     elapsed_time = time.time() - start_time
 
     # Return MSE and elapsed time
-    return history[-1], elapsed_time
+    return loss_wrt_time[-1], elapsed_time
 
 
 mse_values_cpu = []

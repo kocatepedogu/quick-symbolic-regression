@@ -20,7 +20,7 @@ y = 2.5382 * np.cos(X)*X + X*X - 0.5
 model = SymbolicRegressionModel(NVARS, NWEIGHTS, NPOPULATION, NISLANDS, initialization=GrowInitialization(init_depth=1))
 
 # Fit model
-solution, history, time_history = model.fit(X, y, ngenerations=5, nsupergenerations=4, nepochs=500)
+solution, loss_wrt_gen, loss_wrt_time, time_hist = model.fit(X, y, ngenerations=5, nsupergenerations=4, nepochs=500)
 
 # Print best solution
 print("Best solution: {}".format(solution))
@@ -30,7 +30,7 @@ print("Best loss: {}".format(solution.loss))
 
 # Plot learning history
 plt.figure(figsize=(10, 6))
-plt.plot(time_history, history)
+plt.plot(time_hist, loss_wrt_time)
 plt.xlabel('Time (milliseconds)')
 plt.ylabel('Loss (MSE)')
 plt.title('Learning History')
