@@ -25,6 +25,7 @@ public:
     /**
      * @brief Combines two LearningHistory objects
      * @param other The other LearningHistory object to combine with
+     * @param previous_best_loss Best loss observed prior to the current supergeneration
      *
      * @details
      * For every iteration, takes the best fitness value from either of the histories.
@@ -38,18 +39,18 @@ public:
      * @details
      * Appends the other's history to the end of this one.
      */
-    LearningHistory concatenate_with(LearningHistory other) const;
+    [[nodiscard]] LearningHistory concatenate_with(LearningHistory other) const;
 
     /**
      * @brief Returns the learning history
      *
      * @return A constant reference to the vector of fitness values
      */
-    constexpr const std::vector<float>& get_learning_history() const {
+    [[nodiscard]] constexpr const std::vector<float>& get_learning_history() const {
         return history;
     }
 
-    constexpr const std::vector<long>& get_time_history() const {
+    [[nodiscard]] constexpr const std::vector<long>& get_time_history() const {
         return time;
     }
 
