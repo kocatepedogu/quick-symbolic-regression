@@ -14,6 +14,11 @@ namespace qsr {
 
 struct Dataset {
     /**
+     * @brief Constructs an empty dataset on GPU
+     **/
+    Dataset(int m, int n) noexcept;
+
+    /**
       * @brief Constructs a dataset on GPU from given X matrix and y vector
       */
     Dataset(const float *const *X, const float *y, int m, int n) noexcept;

@@ -9,7 +9,13 @@
 
 namespace qsr {
 
-Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept : 
+Dataset::Dataset(int m, int n) noexcept :
+    m(m), n(n) {
+    X_d = Array2D<float>(n, m);
+    y_d = Array1D<float>(m);
+}
+
+Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept :
     m(m), n(n) {
     /*
     * The argument X is in array of structures form. 
