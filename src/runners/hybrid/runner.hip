@@ -58,7 +58,7 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d,
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     
     // Find program index and datapoint index
-    const int datapoint_block_dim = 32;
+    const int datapoint_block_dim = 16;
     const int program_idx = tid / datapoint_block_dim;
     const int datapoint_block_idx = tid % datapoint_block_dim;
 
@@ -161,8 +161,8 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     // Convert symbolic expressions to bytecode program
     inter_individual::Program program(population_to_run);
 
-    // Every warp/wave executes a single expression, which takes 32 threads per expression
-    calculate_kernel_dims(program.num_of_individuals * 32);
+    // Every warp/wave executes two expressions, which takes 16 threads per expression
+    calculate_kernel_dims(program.num_of_individuals * 16);
 
     // Resize arrays
     weights_d.resize(nweights, population_to_run.size());
