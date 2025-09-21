@@ -36,7 +36,6 @@ private:
     std::shared_ptr<BaseRecombiner> recombiner;
     std::shared_ptr<BaseSelector> selector;
     std::shared_ptr<BaseRunner> runner;
-    std::shared_ptr<FunctionSet> function_set;
 
     Config config;
 

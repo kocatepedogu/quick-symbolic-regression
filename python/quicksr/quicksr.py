@@ -16,6 +16,7 @@ class SymbolicRegressionModel:
         survival_rate=0.1,
         migration_rate=0.1,
         max_depth=16,
+        enable_parsimony_pressure=False,
         initialization=GrowInitialization(), 
         mutation=DistributionMutation([SubtreeMutation(), HoistMutation(), PointMutation()], [0.5, 0.25, 0.25]), 
         recombination=DefaultRecombination(), 
@@ -40,7 +41,8 @@ class SymbolicRegressionModel:
         # Create model
         self.model = GeneticProgrammingIslands(
             nislands=nislands, 
-            config=Config(nvars, nweights, max_depth, npopulation, elite_rate, survival_rate, migration_rate, FunctionSet(functions)),
+            config=Config(nvars, nweights, max_depth, npopulation, elite_rate, survival_rate, migration_rate,
+                          FunctionSet(functions), enable_parsimony_pressure),
             toolbox=Toolbox(initialization, mutation, recombination, selection),
             runner_generator=runner_generator
         )

@@ -133,7 +133,7 @@ PYBIND11_MODULE(libquicksr, m) {
     /* Config Class */
 
     py::class_<Config>(m, "Config")
-        .def(py::init<int, int, int, int, float, float, float, std::shared_ptr<FunctionSet>>(),
+        .def(py::init<int, int, int, int, float, float, float, std::shared_ptr<FunctionSet>, bool>(),
             py::arg("nvars"),
             py::arg("nweights"),
             py::arg("max_depth"),
@@ -141,7 +141,8 @@ PYBIND11_MODULE(libquicksr, m) {
             py::arg("elite_rate"),
             py::arg("survival_rate"),
             py::arg("migration_rate"),
-            py::arg("function_set"));
+            py::arg("function_set"),
+            py::arg("enable_parsimony_pressure"));
 
     /* Toolbox Class */
 

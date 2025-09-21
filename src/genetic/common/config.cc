@@ -15,7 +15,7 @@ namespace qsr {
 
     Config::Config(int nvars, int nweights, int max_depth, int npopulation,
                    float elite_rate, float survival_rate, float migration_rate,
-                   std::shared_ptr<FunctionSet> function_set) :
+                   std::shared_ptr<FunctionSet> function_set, bool enable_parsimony_pressure) :
         nvars(nvars),
         nweights(nweights),
         max_depth(max_depth),
@@ -23,6 +23,7 @@ namespace qsr {
         elite_rate(elite_rate),
         survival_rate(survival_rate),
         migration_rate(migration_rate),
+        enable_parsimony_pressure(enable_parsimony_pressure),
         function_set(function_set)
     {
         if (max_depth <= 0) {

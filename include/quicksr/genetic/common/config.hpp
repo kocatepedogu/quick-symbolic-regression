@@ -19,7 +19,7 @@ namespace qsr {
          */
         Config(int nvars, int nweights, int max_depth, int npopulation,
                float elite_rate, float survival_rate, float migration_rate,
-               std::shared_ptr<FunctionSet> function_set);
+               std::shared_ptr<FunctionSet> function_set, bool enable_parsimony_pressure);
 
         /**
          * @brief Number of variables (features) in the training data
@@ -58,6 +58,11 @@ namespace qsr {
          * @brief Proportion of individuals that migrate between islands at the end of every supergeneration
          */
         float migration_rate;
+
+        /**
+         * @brief Whether to enable covariant parsimony method or not
+         **/
+        bool enable_parsimony_pressure;
 
         /**
          * @brief The function_set stores the set of unary and binary functions that can be present in the evolving functions.

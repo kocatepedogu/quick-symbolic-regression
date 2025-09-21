@@ -46,7 +46,7 @@ Expression *GeneticProgramming::get_worst_solution() {
     return std::max_element(population.begin(), population.end(), std::greater<Expression>()).base();
 }
 
-static void calculate_fitnesses(std::vector<Expression> &pop) {
+static void calculate_fitnesses(std::vector<Expression> &pop, bool enable_parsimony_pressure) {
     // Compute fitnesses from losses
     for (int i = 0; i < pop.size(); ++i) {
         const float loss = pop[i].loss;
@@ -62,32 +62,34 @@ static void calculate_fitnesses(std::vector<Expression> &pop) {
         }
     }
 
-    // Find the mean fitness and the mean number of nodes
-    float mean_fitness = 0.0;
-    float mean_length = 0.0;
-    for (const auto &expr : pop) {
-        mean_fitness += expr.fitness / (float)pop.size();
-        mean_length += expr.num_of_nodes / (float)pop.size();
-    }
+    if (enable_parsimony_pressure) {
+        // Find the mean fitness and the mean number of nodes
+        float mean_fitness = 0.0;
+        float mean_length = 0.0;
+        for (const auto &expr : pop) {
+            mean_fitness += expr.fitness / (float)pop.size();
+            mean_length += expr.num_of_nodes / (float)pop.size();
+        }
 
-    // Find the covariance of fitness and number of nodes
-    float covariance = 0.0;
-    for (const auto &expr : pop) {
-        covariance += (expr.fitness - mean_fitness) * (expr.num_of_nodes - mean_length) / (float)pop.size();
-    }
+        // Find the covariance of fitness and number of nodes
+        float covariance = 0.0;
+        for (const auto &expr : pop) {
+            covariance += (expr.fitness - mean_fitness) * (expr.num_of_nodes - mean_length) / (float)pop.size();
+        }
 
-    // Find the variance of number of nodes
-    double variance_length = 0.0;
-    for (const auto &expr : pop) {
-        variance_length += (expr.num_of_nodes - mean_length) * (expr.num_of_nodes - mean_length) / (float)pop.size();
-    }
+        // Find the variance of number of nodes
+        double variance_length = 0.0;
+        for (const auto &expr : pop) {
+            variance_length += (expr.num_of_nodes - mean_length) * (expr.num_of_nodes - mean_length) / (float)pop.size();
+        }
 
-    // Find the parsimony pressure coefficient
-    double ct = covariance / variance_length;
+        // Find the parsimony pressure coefficient
+        double ct = covariance / variance_length;
 
-    // Subtract from the fitness of each function the parsimony pressure term
-    for (auto &expr : pop) {
-        expr.fitness -= ct * expr.num_of_nodes;
+        // Subtract from the fitness of each function the parsimony pressure term
+        for (auto &expr : pop) {
+            expr.fitness -= ct * expr.num_of_nodes;
+        }
     }
 }
 
@@ -101,7 +103,7 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
         runner->run(population, dataset, nepochs, learning_rate);
 
         // Calculate fitnesses
-        calculate_fitnesses(population);
+        calculate_fitnesses(population, config.enable_parsimony_pressure);
 
         // Save initial best loss to learning history
         history.add_to_history(*get_best_solution());
@@ -149,7 +151,7 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
         runner->run(offspring, dataset, nepochs, learning_rate);
 
         // Calculate fitnesses
-        calculate_fitnesses(offspring);
+        calculate_fitnesses(offspring, config.enable_parsimony_pressure);
 
         // Let new population be the offspring
         population = offspring;

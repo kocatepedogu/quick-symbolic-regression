@@ -29,7 +29,8 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         config.elite_rate,
         config.survival_rate,
         config.migration_rate,
-        config.function_set);
+        config.function_set,
+        config.enable_parsimony_pressure);
 
     // Initialize islands
     islands = new GeneticProgramming*[nislands];
