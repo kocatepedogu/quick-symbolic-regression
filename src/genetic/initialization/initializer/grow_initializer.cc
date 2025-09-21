@@ -6,7 +6,7 @@
 namespace qsr {
 
 GrowInitializer::GrowInitializer(const Config &config) :
-        config(config), generator(config) {}
+        config(config), generator(config, false) {}
 
 void GrowInitializer::initialize(std::vector<Expression>& population) {
     population.clear();

@@ -7,7 +7,6 @@
 #include "base.hpp"
 
 #include "genetic/common/expression_generator.hpp"
-#include "genetic/common/expression_generator_full.hpp"
 
 namespace qsr {
 
@@ -21,7 +20,7 @@ private:
     const Config config;
 
     ExpressionGenerator grow_generator;
-    FullExpressionGenerator full_generator;
+    ExpressionGenerator full_generator;
 };
 
 }

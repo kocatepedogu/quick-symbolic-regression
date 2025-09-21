@@ -5,8 +5,7 @@
 #define FULL_INITIALIZER_HPP
 
 #include "base.hpp"
-
-#include "genetic/common/expression_generator_full.hpp"
+#include "genetic/common/expression_generator.hpp"
 
 namespace qsr {
     class FullInitializer : public BaseInitializer {
@@ -18,7 +17,7 @@ namespace qsr {
     private:
         const Config config;
 
-        FullExpressionGenerator generator;
+        ExpressionGenerator generator;
     };
 }
 

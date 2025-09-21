@@ -14,7 +14,7 @@ SubtreeMutator::SubtreeMutator(const Config &config, float mutation_probability,
 {
     Config expression_generator_config(config);
     expression_generator_config.max_depth = max_depth_increment;
-    expression_generator = ExpressionGenerator(expression_generator_config);
+    expression_generator = ExpressionGenerator(expression_generator_config, false);
 }
 
     

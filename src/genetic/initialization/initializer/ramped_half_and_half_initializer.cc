@@ -6,7 +6,7 @@
 namespace qsr {
 
 RampedHalfAndHalfInitializer::RampedHalfAndHalfInitializer(const Config &config) :
-    config(config), grow_generator(config), full_generator(config) {}
+    config(config), grow_generator(config, false), full_generator(config, true) {}
 
     
 void RampedHalfAndHalfInitializer::initialize(std::vector<Expression>& population) {

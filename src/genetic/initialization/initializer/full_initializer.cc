@@ -5,7 +5,7 @@
 
 namespace qsr {
     FullInitializer::FullInitializer(const Config &config) 
-            : config(config), generator(config) {}
+            : config(config), generator(config, true) {}
 
     void FullInitializer::initialize(std::vector<Expression> &population) {
         population.clear();

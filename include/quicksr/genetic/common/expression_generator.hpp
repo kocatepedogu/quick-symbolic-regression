@@ -17,7 +17,7 @@ namespace qsr {
 class ExpressionGenerator {
 public:
     ExpressionGenerator();
-    ExpressionGenerator(const Config &config);
+    ExpressionGenerator(const Config &config, bool generate_full_trees);
 
     /**
      * @brief Generates a random expression whose parse tree depth is limited by config.max_depth
@@ -39,24 +39,17 @@ private:
      *
      * If `max_depth` == 1, it only generates terminals (constants, variables or trainable parameters)
      */
-    Expression generate(int max_depth) noexcept;
+    Expression generate(int max_depth, int current_depth) noexcept;
 
     /**
-     * @brief Generates a random ordinal corresponding to an enum value in operation_t
+     * Configuration specifying maximum depth and function set of trees
      */
-    int random_operation(int max_depth) noexcept;
-
-    /**
-     * @brief Probability distribution of functions to be selected when `max_depth == 1` in generate method
-     */
-    std::discrete_distribution<> depth_one_distribution;
-
-    /**
-     * @brief Probability distribution of functions to be selected when `max_depth >= 2` in generate method
-     */
-    std::discrete_distribution<> depth_two_distribution;
-
     Config config;
+
+    /**
+     * Works as a full tree generator (every generated branch reaches max. depth) if this is true
+     */
+    bool generate_full_trees;
 };
 }
 

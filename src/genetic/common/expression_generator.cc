@@ -12,78 +12,85 @@
 #include <random>
 
 namespace qsr {
+ExpressionGenerator::ExpressionGenerator()
+    : generate_full_trees(false) {}
 
-ExpressionGenerator::ExpressionGenerator() {}
+ExpressionGenerator::ExpressionGenerator(const Config &config, bool generate_full_trees) :
+    config(config), generate_full_trees(generate_full_trees) {}
 
-ExpressionGenerator::ExpressionGenerator(const Config &config) : config(config)
-{
-    depth_one_distribution = std::discrete_distribution<>({
-        1.0,                                   /*CONSTANT*/
-        static_cast<double>(config.nweights),  /*PARAMETER*/
-        static_cast<double>(config.nvars),     /*IDENTITY*/
-    });
-
-    depth_two_distribution = std::discrete_distribution<>({
-        1.0,                                   /*CONSTANT*/
-        static_cast<double>(config.nweights),  /*PARAMETER*/
-        static_cast<double>(config.nvars),     /*IDENTITY*/
-        config.function_set->addition ? 1.0 : 0.0,
-        config.function_set->subtraction ? 1.0 : 0.0,
-        config.function_set->multiplication ? 1.0 : 0.0,
-        config.function_set->division ? 1.0 : 0.0,
-        config.function_set->sine ? 1.0 : 0.0,
-        config.function_set->cosine ? 1.0 : 0.0,
-        config.function_set->exponential ? 1.0 : 0.0,
-        config.function_set->rectified_linear_unit ? 1.0 : 0.0,
-    });
-}
-
-int ExpressionGenerator::random_operation(int max_depth) noexcept 
-{
-    // If the requested max depth is one, the only possible operations
-    // are the ones that create leaf nodes: variables and weights.
-    if (max_depth == 1) 
-    {
-        return depth_one_distribution(thread_local_rng);
-    }
-
-    // Otherwise, it is possible to add at least two to current depth.
-    // Both binary and unary operations can be chosen.
-    else if (max_depth >= 2) 
-    {
-        return depth_two_distribution(thread_local_rng);
-    }
-
-    // It is a bug if an operation with zero or negative depth is requested.
-    else 
-    {
-        fprintf(stderr, "ExpressionGenerator::random_operation Illegal state encountered.\n");
-        abort();
-    }
-}
-
-Expression ExpressionGenerator::generate(int max_depth) noexcept {
-    int operation = random_operation(max_depth);
-
+Expression ExpressionGenerator::generate(int max_depth, int current_depth) noexcept {
     #define _RANDOM_EXPR_CALL(i) \
-        generate(max_depth - 1)
+        generate(max_depth - 1, current_depth + 1)
 
-    switch (operation) {
-        case CONSTANT:
+    auto terminal_or_function_distribution = std::discrete_distribution<>({
+        // Terminal
+        1.0,
+        // Function
+        2.0
+    });
+
+    int terminal_or_function = terminal_or_function_distribution(thread_local_rng);
+    if (terminal_or_function == 0 && !generate_full_trees || max_depth == 1) {
+        // Choose a terminal operation
+        auto distribution = std::discrete_distribution<>({
+            1.0,
+            1.0,
+            config.nweights > 0 ? 1.0 : 0.0,
+       });
+
+        switch (distribution(thread_local_rng)) {
+        case 0:
             return 2 * (thread_local_rng() % RAND_MAX) / (double)RAND_MAX - 1;
-        case IDENTITY:
+        case 1:
             return Var(thread_local_rng() % config.nvars);
-        case PARAMETER:
+        case 2:
             return Parameter(thread_local_rng() % config.nweights);
+        default:break;
+        }
+    }
+    else {
+        auto binary_or_unary_distribution = std::discrete_distribution<>({
+            // Binary
+            0.5,
+            // Unary
+            0.5
+        });
 
-        BINARY_OP_CASE(ADDITION, _RANDOM_EXPR_CALL, +);
-        BINARY_OP_CASE(SUBTRACTION, _RANDOM_EXPR_CALL, -);
-        BINARY_OP_CASE(MULTIPLICATION, _RANDOM_EXPR_CALL, *);
-        BINARY_OP_CASE(DIVISION, _RANDOM_EXPR_CALL, /);
-        UNARY_OP_CASE(SINE, _RANDOM_EXPR_CALL, Sin);
-        UNARY_OP_CASE(COSINE, _RANDOM_EXPR_CALL, Cos);
-        UNARY_OP_CASE(EXPONENTIAL, _RANDOM_EXPR_CALL, Exp);
-        UNARY_OP_CASE(RECTIFIED_LINEAR_UNIT, _RANDOM_EXPR_CALL, ReLU);
+        int binary_or_unary = binary_or_unary_distribution(thread_local_rng);
+        if (binary_or_unary == 0) {
+            // Choose a binary operation
+            auto distribution = std::discrete_distribution<>({
+               config.function_set->addition ? 1.0 : 0.0,
+               config.function_set->subtraction ? 1.0 : 0.0,
+               config.function_set->multiplication ? 1.0 : 0.0,
+               config.function_set->division ? 1.0 : 0.0,
+           });
+
+            switch (distribution(thread_local_rng)) {
+                BINARY_OP_CASE(0, _RANDOM_EXPR_CALL, +);
+                BINARY_OP_CASE(1, _RANDOM_EXPR_CALL, -);
+                BINARY_OP_CASE(2, _RANDOM_EXPR_CALL, *);
+                BINARY_OP_CASE(3, _RANDOM_EXPR_CALL, /);
+            default:break;
+            }
+        }
+        else {
+            // Choose a unary operation
+            auto distribution = std::discrete_distribution<>({
+               config.function_set->sine ? 1.0 : 0.0,
+               config.function_set->cosine ? 1.0 : 0.0,
+               config.function_set->exponential ? 1.0 : 0.0,
+               config.function_set->rectified_linear_unit ? 1.0 : 0.0,
+           });
+
+            switch (distribution(thread_local_rng)) {
+                UNARY_OP_CASE(0, _RANDOM_EXPR_CALL, Sin);
+                UNARY_OP_CASE(1, _RANDOM_EXPR_CALL, Cos);
+                UNARY_OP_CASE(2, _RANDOM_EXPR_CALL, Exp);
+                UNARY_OP_CASE(3, _RANDOM_EXPR_CALL, ReLU);
+            default:break;
+            }
+        }
     }
 
     // Control must never reach here.
@@ -92,7 +99,7 @@ Expression ExpressionGenerator::generate(int max_depth) noexcept {
 }
 
 Expression ExpressionGenerator::generate() noexcept {
-    return generate(config.max_depth);
+    return generate(config.max_depth, 1);
 }
 
 }
