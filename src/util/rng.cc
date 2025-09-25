@@ -6,6 +6,8 @@
 
 namespace qsr {
 
-thread_local std::mt19937 thread_local_rng(42);
+using namespace std::chrono;
+
+thread_local std::mt19937 thread_local_rng(duration_cast<nanoseconds>(utc_clock::now().time_since_epoch()).count());
 
 }
