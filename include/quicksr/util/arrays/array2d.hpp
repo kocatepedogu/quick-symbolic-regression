@@ -15,7 +15,7 @@ struct Ptr2D {
     int dim1;
     int dim2;
 
-    T *ptr;
+    T *__restrict__ ptr;
 
     __host__ __device__ T &operator[](int i1, int i2) const {
         #ifdef SANITIZE_MEMORY
@@ -48,7 +48,7 @@ struct Ptr2D {
         return ptr[i1 * dim2 + i2];
     }
 
-    __host__ __device__ T *operator[](int i1) const {
+    __host__ __device__ T *__restrict__ operator[](int i1) const {
         #ifdef SANITIZE_MEMORY
         if (dim1 <= 0) {
             printf("Error [%s:%d]: Array2D dimension 1 is not positive (dim1=%d)\n", __FILE__, __LINE__, dim1);
@@ -98,7 +98,9 @@ public:
         ptr.ptr = nullptr;
 
         if (dim1 > 0 && dim2 > 0) {
-            HIP_CALL(ALLOC(&ptr.ptr, sizeof *ptr.ptr * dim1 * dim2));
+            void *newptr;
+            HIP_CALL(ALLOC(&newptr, sizeof *ptr.ptr * dim1 * dim2));
+            ptr.ptr = (T *)(newptr);
         }
     }
 
@@ -124,7 +126,10 @@ public:
         ptr.ptr = nullptr;
 
         if (ptr.dim1 > 0 && ptr.dim2 > 0) {
-            HIP_CALL(ALLOC(&ptr.ptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2));
+            void *newptr;
+            HIP_CALL(ALLOC(&newptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2));
+            ptr.ptr = (T *)(newptr);
+
             HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2, hipMemcpyDefault));
         }
     }
@@ -141,7 +146,10 @@ public:
             ptr.ptr = nullptr;
 
             if (ptr.dim1 > 0 && ptr.dim2 > 0) {
-                HIP_CALL(ALLOC(&ptr.ptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2));
+                void *newptr;
+                HIP_CALL(ALLOC(&newptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2));
+                ptr.ptr = (T *)(newptr);
+
                 HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2, hipMemcpyDefault));
             }
         }
@@ -162,7 +170,9 @@ public:
             ptr.ptr = nullptr;
 
             if (ptr.dim1 > 0 && ptr.dim2 > 0) {
-                HIP_CALL(ALLOC(&ptr.ptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2));
+                void *newptr;
+                HIP_CALL(ALLOC(&newptr, sizeof *ptr.ptr * ptr.dim1 * ptr.dim2));
+                ptr.ptr = (T *)(newptr);
             }
         }
     }
