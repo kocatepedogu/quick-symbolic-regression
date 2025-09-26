@@ -20,14 +20,14 @@ class RecordedPipeline(StandardPipeline):
     Overrides run method to record loss history with respect to time in evoGP model training.
     """
     def __init__(
-        self,
-        algorithm: GeneticProgramming,
-        problem: BaseProblem,
-        fitness_target: float = None,
-        generation_limit: int = 100,
-        time_limit: int = None,
-        is_show_details: bool = True,
-        valid_fitness_boundry: float = 1e8,
+            self,
+            algorithm: GeneticProgramming,
+            problem: BaseProblem,
+            fitness_target: float = None,
+            generation_limit: int = 100,
+            time_limit: int = None,
+            is_show_details: bool = True,
+            valid_fitness_boundry: float = 1e8,
     ):
         super().__init__(
             algorithm,
@@ -63,8 +63,8 @@ class RecordedPipeline(StandardPipeline):
                 print(self.best_tree)
 
             if (
-                self.fitness_target is not None
-                and self.best_fitness >= self.fitness_target
+                    self.fitness_target is not None
+                    and self.best_fitness >= self.fitness_target
             ):
                 print("Fitness target reached!")
                 break
@@ -140,9 +140,9 @@ def solve_with_evogp(config, X, y):
 
     loss_wrt_gen = np.abs(pipeline.fitness_history)
     loss_wrt_time = np.abs(pipeline.fitness_history)
-    time_hist = pipeline.time_history
+    time_hist = np.array(pipeline.time_history)
 
-    return loss_wrt_gen, loss_wrt_time, time_hist
+    return loss_wrt_gen, loss_wrt_time, time_hist - np.min(time_hist)
 
 
 if __name__ == '__main__':

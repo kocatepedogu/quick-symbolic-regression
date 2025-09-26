@@ -9,7 +9,7 @@ if __name__ == '__main__':
         # Main Parameters
         'POPULATION_SIZE': 11200,
         'MAX_DEPTH': 8,
-        'GENERATION_LIMIT': 100,
+        'GENERATION_LIMIT': 60,
 
         # Common Genetic Programming Parameters
         'MUTATION_RATE': 0.2,
@@ -18,7 +18,7 @@ if __name__ == '__main__':
         'ELITE_RATE': 0.01,
 
         # QuickSR-specific Parameters
-        'NUMBER_OF_ISLANDS': 28,
+        'NUMBER_OF_ISLANDS': 10,
         'MIGRATION_RATE': 0.1,
         'USE_CACHE': True
     }
@@ -46,7 +46,8 @@ if __name__ == '__main__':
     # Plot evolution with respect to time
 
     plt.figure(figsize=(15, 15))
-    plt.ylim(0, 0.3)
+    plt.ylim(0, 0.2)
+    plt.xlim(0, 7)
     for queue_element, result in zip(run_queue, run_results):
         label, color, script_name, config = queue_element
         loss_wrt_gen, loss_wrt_time, time_hist = result
@@ -58,7 +59,8 @@ if __name__ == '__main__':
     # Plot evolution with respect to generation
 
     plt.figure(figsize=(15, 15))
-    plt.ylim(0, 0.3)
+    plt.xlim(0, 7)
+    plt.ylim(0, 0.2)
     for queue_element, result in zip(run_queue, run_results):
         label, color, script_name, config = queue_element
         loss_wrt_gen, loss_wrt_time, time_hist = result
