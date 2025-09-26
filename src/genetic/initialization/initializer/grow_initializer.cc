@@ -6,12 +6,12 @@
 namespace qsr {
 
 GrowInitializer::GrowInitializer(const Config &config) :
-        config(config), generator(config, false) {}
+        config(config), generator(config) {}
 
 void GrowInitializer::initialize(std::vector<Expression>& population) {
     population.clear();
     for (int i = 0; i < config.npopulation; ++i) {
-        population.push_back(generator.generate());
+        population.push_back(generator.generate(config.max_depth, false));
     }
 }
 

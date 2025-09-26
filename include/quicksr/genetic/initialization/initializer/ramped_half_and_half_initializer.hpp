@@ -5,7 +5,6 @@
 #define RAMPED_HALF_AND_HALF_INITIALIZER_HPP
 
 #include "base.hpp"
-
 #include "genetic/common/expression_generator.hpp"
 
 namespace qsr {
@@ -13,14 +12,11 @@ namespace qsr {
 class RampedHalfAndHalfInitializer : public BaseInitializer {
 public:
     RampedHalfAndHalfInitializer(const Config &config);
-
     void initialize(std::vector<Expression>& population) override;
 
 private:
     const Config config;
-
-    ExpressionGenerator grow_generator;
-    ExpressionGenerator full_generator;
+    ExpressionGenerator generator;
 };
 
 }

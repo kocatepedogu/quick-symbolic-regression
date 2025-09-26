@@ -15,10 +15,10 @@ int main(void) {
         false
     );
 
-    ExpressionGenerator expression_generator(config, false);
+    ExpressionGenerator expression_generator(config);
 
     for (int i = 0; i < 1000; i++) {
-        std::cout << expression_generator.generate() << std::endl;
+        std::cout << expression_generator.generate(10, false) << std::endl;
     }
 
     return 0;
