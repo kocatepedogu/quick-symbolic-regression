@@ -31,10 +31,11 @@ def solve_with_quicksr(config, X, y):
         functions=["+", "*", "cos"],
         mutation=qsr.SubtreeMutation(mutation_probability=config['MUTATION_RATE'], max_depth_increment=config['MUTATION_DEPTH_INCREMENT']),
         recombination=qsr.DefaultRecombination(crossover_probability=1.0),
-        initialization=qsr.GrowInitialization(init_depth=config['MAX_DEPTH']),
+        initialization=qsr.RampedHalfAndHalfInitialization(init_depth=config['MAX_DEPTH']),
         selection=qsr.RankSelection(sp=0.0),
         max_depth=config['MAX_DEPTH'],
-        runner_generator=HybridRunnerGenerator(use_cache=config['USE_CACHE']))
+        runner_generator=HybridRunnerGenerator(use_cache=config['USE_CACHE']),
+        enable_parsimony_pressure=True)
 
     # Fit model
     super_generations = config['GENERATION_LIMIT']
