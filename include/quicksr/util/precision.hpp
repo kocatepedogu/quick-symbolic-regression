@@ -25,7 +25,7 @@ concept Integral =
 
 /* Definition of real number used in runners */
 
-typedef float real;
+typedef __half real;
 static_assert(Real<real>);
 
 /* Literal operators to define constants of type "real" */
