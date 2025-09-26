@@ -48,6 +48,17 @@ private:
       */
     const int nislands;
 
+    /**
+     * @brief Number of HIP streams/states
+     */
+    const int nstreams;
+
+    /**
+     *  @brief HIP streams for islands
+     *  Number of hip streams can be fewer than number of islands
+     */
+    HIPState **hipStreams;
+
     /** 
       * @brief Array of islands
       */

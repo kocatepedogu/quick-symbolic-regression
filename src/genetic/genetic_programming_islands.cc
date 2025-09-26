@@ -17,7 +17,8 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         toolbox(toolbox),
         config(config),
         runner_generator(runner_generator), 
-        nislands(nislands) {
+        nislands(nislands),
+        nstreams(8) {
 
     // Create local configuration from global configuration
     // Let population size and offspring size be the size per island instead of the total size
@@ -32,11 +33,19 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         config.function_set,
         config.enable_parsimony_pressure);
 
+    // Initialize HIP states
+    hipStreams = new HIPState*[nstreams];
+    for (int i = 0; i < nstreams; ++i) {
+        hipStreams[i] = new HIPState();
+    }
+
+    int stream_per_island = ceil((double)nislands / (double)nstreams);
+
     // Initialize islands
     islands = new GeneticProgramming*[nislands];
     for (int i = 0; i < nislands; ++i) {
         islands[i] = new GeneticProgramming(local_config, toolbox, 
-            runner_generator->generate(local_config.nweights));
+            runner_generator->generate(local_config.nweights, hipStreams[i / stream_per_island]));
     }
 
     // Initialize local learning histories
@@ -52,6 +61,12 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept {
         delete islands[i];
     }
     delete[] islands;
+
+    // Delete streams
+    for (int i = 0; i < nstreams; ++i) {
+        delete hipStreams[i];
+    }
+    delete[] hipStreams;
 
     // Delete local learning histories
     delete[] local_learning_history;

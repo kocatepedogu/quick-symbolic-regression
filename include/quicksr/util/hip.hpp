@@ -28,7 +28,7 @@ namespace qsr {
         hipDeviceProp_t props;
         hipStream_t stream;
 
-        constexpr HIPState() {
+        HIPState() {
             // Create stream
             HIP_CALL(hipStreamCreate(&stream));
 
@@ -37,7 +37,7 @@ namespace qsr {
             HIP_CALL(hipGetDeviceProperties(&props, device_id));
         }
 
-        constexpr ~HIPState() {
+         ~HIPState() {
             HIP_CALL(hipStreamDestroy(stream));
         }
     };

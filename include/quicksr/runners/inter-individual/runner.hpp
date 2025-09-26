@@ -27,7 +27,7 @@ namespace inter_individual {
         void save_weights_and_losses(std::vector<Expression>& population);
 
     public:
-        Runner(int nweights, bool use_cache);
+        Runner(int nweights, bool use_cache, const HIPState *hipState);
 
         void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) override;
     };

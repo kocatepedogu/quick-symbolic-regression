@@ -23,8 +23,8 @@
 using namespace qsr;
 using namespace qsr::hybrid;
 
-Runner::Runner(int nweights, const bool use_cache) :
-    GPUBaseRunner(nweights), use_cache(use_cache) {}
+Runner::Runner(int nweights, const bool use_cache, const HIPState *hipState) :
+    GPUBaseRunner(nweights, hipState), use_cache(use_cache) {}
 
 static inline __device__ void 
 reset_gradients_and_losses(int program_idx, Ptr2D<real> &weights_grad_d, Ptr1D<float> &loss_d)

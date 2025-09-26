@@ -37,7 +37,7 @@ namespace intra_individual {
         void save_weights_and_losses(Expression &expression);
 
     public:
-        Runner(const int nweights, bool use_cache);
+        Runner(const int nweights, bool use_cache, const HIPState *hipState);
 
         void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) override;
     };

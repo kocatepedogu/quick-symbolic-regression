@@ -25,8 +25,8 @@ using namespace qsr::intra_individual;
 
 constexpr int reduction_threads_per_block = 1024;
 
-Runner::Runner(const int nweights, const bool use_cache) :
-    GPUBaseRunner(nweights), use_cache(use_cache) {
+Runner::Runner(const int nweights, const bool use_cache, const HIPState *hipState) :
+    GPUBaseRunner(nweights, hipState), use_cache(use_cache) {
     weights_d.resize(nweights);
 }
 

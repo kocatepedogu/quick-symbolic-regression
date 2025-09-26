@@ -12,7 +12,7 @@
 
 namespace qsr {
 
-GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &toolbox, std::shared_ptr<BaseRunner> runner) 
+GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &toolbox, std::shared_ptr<BaseRunner> runner)
     noexcept : config(config), runner(runner)
 {
     // Ensure population size and offspring size are even

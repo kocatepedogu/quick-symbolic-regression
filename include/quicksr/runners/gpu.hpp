@@ -11,7 +11,7 @@
 namespace qsr {
     class GPUBaseRunner : public BaseRunner {
     protected:
-        HIPState hipState;
+        const HIPState *hipState;
 
         dim3 gridDim;
 
@@ -19,15 +19,15 @@ namespace qsr {
 
         int nthreads;
 
-        GPUBaseRunner(int nweights);
+        GPUBaseRunner(int nweights, const HIPState *hipState);
 
         template <typename K, typename ...T>
         inline void launch_kernel(K kernel, T... args) {
-            hipLaunchKernelGGL(kernel, gridDim, blockDim, 0, hipState.stream, args...);
+            hipLaunchKernelGGL(kernel, gridDim, blockDim, 0, hipState->stream, args...);
         }
 
         inline void synchronize() {
-            HIP_CALL(hipStreamSynchronize(hipState.stream));
+            HIP_CALL(hipStreamSynchronize(hipState->stream));
         }
 
         void calculate_kernel_dims(int nthreads);

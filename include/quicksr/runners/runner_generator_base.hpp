@@ -12,7 +12,7 @@ namespace qsr {
 
 class BaseRunnerGenerator {
 public:
-    virtual std::shared_ptr<BaseRunner> generate(int nweights);
+    virtual std::shared_ptr<BaseRunner> generate(int nweights, const HIPState *hipState);
 };
 
 }
