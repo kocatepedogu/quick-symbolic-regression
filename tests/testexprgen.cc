@@ -9,12 +9,13 @@ using namespace qsr;
 
 int main(void) {
     Config config(
-        2, 3, 4, 11200, 11200,
-        std::make_shared<FunctionSet>(
-            std::vector<std::string>{"+", "-", "*", "/", "sin", "cos", "exp", "relu"})
+    2, 3, 10, 11200, 0.01, 0.3, 0.1,
+    std::make_shared<FunctionSet>(
+        std::vector<std::string>{"+", "-", "*", "/", "sin", "cos", "exp", "relu"}),
+        false
     );
 
-    ExpressionGenerator expression_generator(config);
+    ExpressionGenerator expression_generator(config, false);
 
     for (int i = 0; i < 1000; i++) {
         std::cout << expression_generator.generate() << std::endl;

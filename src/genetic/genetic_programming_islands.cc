@@ -57,10 +57,10 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept {
     delete[] local_learning_history;
 }
 
-std::tuple<Expression, std::vector<float>, std::vector<float>, std::vector<long>> GeneticProgrammingIslands::fit(
+std::tuple<Expression, std::vector<double>, std::vector<double>, std::vector<long>> GeneticProgrammingIslands::fit(
     std::shared_ptr<Dataset> dataset, 
     int ngenerations, int nsupergenerations, 
-    int nepochs, float learning_rate, bool verbose) noexcept 
+    int nepochs, double learning_rate, bool verbose) noexcept
 {
     for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
         // Evolve each island separately on a different CPU core
@@ -85,8 +85,8 @@ std::tuple<Expression, std::vector<float>, std::vector<float>, std::vector<long>
         migrate_solutions();
     }
 
-    std::vector<float> final_learning_history_wrt_generation = global_learning_history.get_learning_history_wrt_generation();
-    std::vector<float> final_learning_history_wrt_time = global_learning_history.get_learning_history_wrt_time();
+    std::vector<double> final_learning_history_wrt_generation = global_learning_history.get_learning_history_wrt_generation();
+    std::vector<double> final_learning_history_wrt_time = global_learning_history.get_learning_history_wrt_time();
     std::vector<long> final_time_history = global_learning_history.get_time_history();
 
     // Remove start offset from timestamps
@@ -132,7 +132,7 @@ void GeneticProgrammingIslands::update_learning_history() noexcept {
     LearningHistory history_per_supergeneration;
     for (int i = 0; i < nislands; ++i) {
         history_per_supergeneration = history_per_supergeneration.combine_with(
-            local_learning_history[i], global_best ? global_best->loss : std::numeric_limits<float>::max());
+            local_learning_history[i], global_best ? global_best->loss : std::numeric_limits<double>::max());
     }
 
     // Append to global learning history

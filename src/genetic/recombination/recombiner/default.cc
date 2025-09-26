@@ -5,6 +5,7 @@
 
 #include "util/rng.hpp"
 #include "genetic/common/expression_picker.hpp"
+#include "util/precision.hpp"
 
 #include <tuple>
 #include <cassert>
@@ -12,7 +13,7 @@
 namespace qsr {
 
 std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, Expression e2) noexcept {
-    if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > crossover_probability) {
+    if (((thread_local_rng() % RAND_MAX) / RAND_MAX) > (double)crossover_probability) {
         return std::make_tuple(e1, e2);
     }
 
@@ -22,8 +23,8 @@ std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, E
 
     // Get original weights from both expressions
 
-    const std::vector<float> weights1 = e1.weights;
-    const std::vector<float> weights2 = e2.weights;
+    const std::vector<double> weights1 = e1.weights;
+    const std::vector<double> weights2 = e2.weights;
 
     // Exchange subtrees
 
@@ -58,10 +59,10 @@ std::tuple<Expression, Expression> DefaultRecombiner::recombine(Expression e1, E
         e2_reorg.weights.resize(weights2.size());
 
         for (int i = 0; i < weights1.size(); i++) {
-            float alpha = (thread_local_rng() % RAND_MAX) / (float)RAND_MAX;
+            double alpha = (thread_local_rng() % RAND_MAX) / RAND_MAX;
 
-            float w1 = alpha * weights1[i] + (1 - alpha) * weights2[i];
-            float w2 = alpha * weights2[i] + (1 - alpha) * weights1[i];
+            double w1 = alpha * weights1[i] + (1.0 - alpha) * weights2[i];
+            double w2 = alpha * weights2[i] + (1.0 - alpha) * weights1[i];
 
             e1_reorg.weights[i] = w1;
             e2_reorg.weights[i] = w2;

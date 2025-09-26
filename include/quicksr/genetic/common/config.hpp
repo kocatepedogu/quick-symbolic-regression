@@ -18,7 +18,7 @@ namespace qsr {
          * @brief All arguments constructor
          */
         Config(int nvars, int nweights, int max_depth, int npopulation,
-               float elite_rate, float survival_rate, float migration_rate,
+               double elite_rate, double survival_rate, double migration_rate,
                std::shared_ptr<FunctionSet> function_set, bool enable_parsimony_pressure);
 
         /**
@@ -47,17 +47,17 @@ namespace qsr {
         /**
          * @brief Proportion of elite individuals that will be copied directly to the next generation
          */
-        float elite_rate;
+        double elite_rate;
 
         /**
          * @brief Proportion of individuals that survive in between generations
          */
-        float survival_rate;
+        double survival_rate;
 
         /**
          * @brief Proportion of individuals that migrate between islands at the end of every supergeneration
          */
-        float migration_rate;
+        double migration_rate;
 
         /**
          * @brief Whether to enable covariant parsimony method or not

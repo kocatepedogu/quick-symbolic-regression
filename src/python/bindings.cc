@@ -28,6 +28,8 @@
 #include "runners/cpu/runner_generator.hpp"
 #include "runners/hybrid/runner_generator.hpp"
 
+#include "util/precision.hpp"
+
 namespace py = pybind11;
 
 namespace qsr {
@@ -41,20 +43,20 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<SubtreeMutation, BaseMutation, std::shared_ptr<SubtreeMutation>>(m, "SubtreeMutation")
-        .def(py::init<int, float>(),
+        .def(py::init<int, double>(),
             py::arg("max_depth_increment") = 3, 
             py::arg("mutation_probability") = 0.7);
 
     py::class_<HoistMutation, BaseMutation, std::shared_ptr<HoistMutation>>(m, "HoistMutation")
-        .def(py::init<float>(),
+        .def(py::init<double>(),
             py::arg("mutation_probability") = 0.7);
 
     py::class_<PointMutation, BaseMutation, std::shared_ptr<PointMutation>>(m, "PointMutation")
-        .def(py::init<float>(),
+        .def(py::init<double>(),
             py::arg("mutation_probability") = 0.7);
 
     py::class_<DistributionMutation, BaseMutation, std::shared_ptr<DistributionMutation>>(m, "DistributionMutation")
-        .def(py::init<std::vector<std::shared_ptr<BaseMutation>>, std::vector<float>>(),
+        .def(py::init<std::vector<std::shared_ptr<BaseMutation>>, std::vector<double>>(),
             py::arg("mutations"),
             py::arg("probabilities"));
 
@@ -64,7 +66,7 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<DefaultRecombination, BaseRecombination, std::shared_ptr<DefaultRecombination>>(m, "DefaultRecombination")
-        .def(py::init<float>(), 
+        .def(py::init<double>(),
              py::arg("crossover_probability") = 0.8);
 
     /* Selection Classes */
@@ -76,7 +78,7 @@ PYBIND11_MODULE(libquicksr, m) {
         .def(py::init<>());
 
     py::class_<RankSelection, BaseSelection, std::shared_ptr<RankSelection>>(m, "RankSelection")
-        .def(py::init<float>(), 
+        .def(py::init<double>(),
              py::arg("sp") = 1.0f);
 
     /* Initialization Classes */
@@ -99,7 +101,7 @@ PYBIND11_MODULE(libquicksr, m) {
     /* Dataset Class */
 
     py::class_<Dataset, std::shared_ptr<Dataset>>(m, "Dataset")
-        .def(py::init<py::array_t<float>, py::array_t<float>>(),
+        .def(py::init<py::array_t<double>, py::array_t<double>>(),
             py::arg("X"),
             py::arg("y"));
 
@@ -133,7 +135,7 @@ PYBIND11_MODULE(libquicksr, m) {
     /* Config Class */
 
     py::class_<Config>(m, "Config")
-        .def(py::init<int, int, int, int, float, float, float, std::shared_ptr<FunctionSet>, bool>(),
+        .def(py::init<int, int, int, int, double, double, double, std::shared_ptr<FunctionSet>, bool>(),
             py::arg("nvars"),
             py::arg("nweights"),
             py::arg("max_depth"),

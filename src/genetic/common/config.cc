@@ -1,4 +1,5 @@
 #include "genetic/common/config.hpp"
+#include "util/precision.hpp"
 
 #include <iostream>
 
@@ -14,7 +15,7 @@ namespace qsr {
         function_set(nullptr) {}
 
     Config::Config(int nvars, int nweights, int max_depth, int npopulation,
-                   float elite_rate, float survival_rate, float migration_rate,
+                   double elite_rate, double survival_rate, double migration_rate,
                    std::shared_ptr<FunctionSet> function_set, bool enable_parsimony_pressure) :
         nvars(nvars),
         nweights(nweights),

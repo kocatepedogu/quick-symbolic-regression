@@ -4,6 +4,8 @@
 #ifndef BYTECODE_HPP
 #define BYTECODE_HPP
 
+#include "util/precision.hpp"
+
 #include <ostream>
 #include <vector>
 
@@ -30,7 +32,7 @@ struct Instruction {
 
     union {
         /// For instructions with immediate operand
-        float value;
+        real value;
 
         /// For instructions with index operand
         int argindex;
@@ -45,11 +47,11 @@ struct Instruction {
         opcode(NOP), intermediate_index(-1) {}
 
     /** @brief Instructions with immediate operand */
-    constexpr Instruction(Opcode opcode, float value) :
+    constexpr Instruction(Opcode opcode, real value) :
         opcode(opcode), value(value), intermediate_index(-1) {}
 
     /** @brief Instructions with index operand */
-    constexpr Instruction(Opcode opcode, int argindex) :
+    constexpr Instruction(Opcode opcode, int argindex, int dummy) :
         opcode(opcode), argindex(argindex), intermediate_index(-1) {}
 
     /** @brief Instructions whose operands are entirely stored on the stack */

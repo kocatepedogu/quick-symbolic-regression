@@ -40,7 +40,7 @@ Expression ExpressionGenerator::generate(int max_depth, int current_depth) noexc
 
         switch (distribution(thread_local_rng)) {
         case 0:
-            return 2 * (thread_local_rng() % RAND_MAX) / (double)RAND_MAX - 1;
+            return {2.0 * (thread_local_rng() % RAND_MAX) / (double)RAND_MAX - 1.0};
         case 1:
             return Var(thread_local_rng() % config.nvars);
         case 2:

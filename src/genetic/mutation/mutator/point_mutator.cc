@@ -7,14 +7,15 @@
 #include <iostream>
 
 #include "util/rng.hpp"
+#include "util/precision.hpp"
 
 namespace qsr {
-    PointMutator::PointMutator(const Config &config, float mutation_probability)  :
+    PointMutator::PointMutator(const Config &config, double mutation_probability)  :
         config(config), mutation_probability(mutation_probability) {}
 
 
     Expression PointMutator::mutate(const Expression &expr) noexcept {
-        if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > mutation_probability) {
+        if (((thread_local_rng() % RAND_MAX) / (double)RAND_MAX) > mutation_probability) {
             return expr;
         }
 

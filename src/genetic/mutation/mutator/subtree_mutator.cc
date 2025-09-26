@@ -3,11 +3,12 @@
 
 #include "genetic/mutation/mutator/subtree_mutator.hpp"
 
+#include "util/precision.hpp"
 #include "util/rng.hpp"
 
 namespace qsr {
 
-SubtreeMutator::SubtreeMutator(const Config &config, float mutation_probability, int max_depth_increment)  :
+SubtreeMutator::SubtreeMutator(const Config &config, double mutation_probability, int max_depth_increment)  :
     config(config),
     mutation_probability(mutation_probability),
     max_depth_increment(max_depth_increment)
@@ -19,7 +20,7 @@ SubtreeMutator::SubtreeMutator(const Config &config, float mutation_probability,
 
     
 Expression SubtreeMutator::mutate(const Expression &expr) noexcept {
-    if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > mutation_probability) {
+    if (((thread_local_rng() % RAND_MAX) / (double)(RAND_MAX)) > mutation_probability) {
         return expr;
     }
 

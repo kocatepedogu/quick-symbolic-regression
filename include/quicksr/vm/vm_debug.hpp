@@ -33,7 +33,7 @@ static inline void vm_debug_print_stack(const int& tid, const StackState& s) {
 
             printf("  stack: ");
             for (int i = 0; i < s.stack_pointer; ++i) {
-                printf("%f ", s.stack_d[i,tid]);
+                printf("%f ", (double)s.stack_d[i,tid]);
             }
             printf("\n");
 
@@ -41,7 +41,7 @@ static inline void vm_debug_print_stack(const int& tid, const StackState& s) {
 
             printf("  intermediate: ");
             for (int i = 0; i < s.intermediate_pointer; ++i) {
-                printf("%f ", s.intermediate_d[i,tid]);
+                printf("%f ", (double)s.intermediate_d[i,tid]);
             }
             printf("\n");
         }

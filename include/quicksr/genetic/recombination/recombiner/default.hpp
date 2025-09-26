@@ -17,7 +17,7 @@ namespace qsr {
 
 class DefaultRecombiner : public BaseRecombiner {
 public:
-    constexpr DefaultRecombiner(int max_depth, float crossover_probability) :
+    constexpr DefaultRecombiner(int max_depth, double crossover_probability) :
         max_depth(max_depth),
         crossover_probability(crossover_probability), 
         expression_reorganizer(),
@@ -32,7 +32,7 @@ private:
 
     const int max_depth;
 
-    float crossover_probability;
+    double crossover_probability;
 };
 
 }

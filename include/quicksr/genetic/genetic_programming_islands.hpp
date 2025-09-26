@@ -19,10 +19,10 @@ public:
         int nislands, const Config &config, const Toolbox &toolbox,
         std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept;
 
-    std::tuple<Expression,std::vector<float>,std::vector<float>,std::vector<long>> fit(
+    std::tuple<Expression,std::vector<double>,std::vector<double>,std::vector<long>> fit(
         std::shared_ptr<Dataset> dataset, 
         int ngenerations, int nsupergenerations, 
-        int nepochs, float learning_rate, 
+        int nepochs, double learning_rate,
         bool verbose = false) noexcept;
 
     ~GeneticProgrammingIslands() noexcept;

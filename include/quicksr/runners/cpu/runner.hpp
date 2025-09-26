@@ -13,7 +13,7 @@
 namespace qsr::cpu {
     class Runner : public BaseRunner {
     private:
-        Array1D<float> weights_d;
+        Array1D<real> weights_d;
 
         intra_individual::Cache population_cache;
 
@@ -21,9 +21,9 @@ namespace qsr::cpu {
 
         void reset_gradients_and_losses();
 
-        void update_weights(float learning_rate);
+        void update_weights(real learning_rate);
 
-        void train(const intra_individual::ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
+        void train(const intra_individual::ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, real learning_rate);
 
         void initialize_weights(Expression& expression);
 
@@ -32,6 +32,6 @@ namespace qsr::cpu {
     public:
         Runner(int nweights, bool use_cache);
 
-        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
+        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) override;
     };
 }

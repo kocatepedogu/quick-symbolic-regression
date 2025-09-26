@@ -6,6 +6,7 @@
 #include "vm/vm_control.hpp"
 #include "vm/vm_types.hpp"
 
+#include "util/precision.hpp"
 #include "util/rng.hpp"
 
 // Uncomment to enable buffer overflow checks
@@ -43,11 +44,11 @@ void Runner::reset_gradients_and_losses() {
     loss_d.ptr[0] = 0;
 }
 
-void Runner::update_weights(float learning_rate) {
+void Runner::update_weights(real learning_rate) {
     // For every weight
     for (int weight_idx = 0; weight_idx < nweights; ++weight_idx) {
         // Reduce weight gradients from all datapoints to a single gradient
-        float total_grad = 0;
+        real total_grad = 0;
         #pragma omp simd reduction(+:total_grad)
         for (int tid = 0; tid < weights_grad_d.ptr.dim2; ++tid) {
             total_grad += weights_grad_d.ptr[weight_idx,tid];
@@ -58,7 +59,7 @@ void Runner::update_weights(float learning_rate) {
     }
 }
 
-void Runner::train(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void Runner::train(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, real learning_rate) {
     for (int epoch = 0; epoch < epochs + 1; ++epoch) {
         // Reset gradients and losses
         reset_gradients_and_losses();
@@ -76,17 +77,18 @@ void Runner::train(const ProgramIndividual &p, std::shared_ptr<const Dataset> da
 
             // Forward propagate and evaluate loss
             vm_debug_print(tid, "Forward propagation");
-            vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
+            vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<real>>(c, d, s, w DEBUGARGS);
 
             // Print an empty line in between forward propagation output and backpropagation output
             vm_debug_print(tid, "");
 
             // Save squared difference divided by m [ (l/m)^2 * m = l^2/m ] as the loss
-            loss_d.ptr[0] += powf(stack_d.ptr[0,tid], 2) * (float)dataset->m;
+            const float squared_loss = (float)stack_d.ptr[0,tid] * (float)stack_d.ptr[0,tid];
+            loss_d.ptr[0] += squared_loss * (float)dataset->m;
 
             if (epochs > 0) {
                 vm_debug_print(tid, "Backpropagation");
-                vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
+                vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<real>>(c, d, s, w DEBUGARGS);
             }
         }
 
@@ -101,7 +103,7 @@ void Runner::initialize_weights(Expression& expression) {
     // If the expression has no weights yet, initialize them randomly
     if (expression.weights.empty()) {
         for (int j = 0; j < nweights; ++j) {
-            weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+            weights_d.ptr[j] = 2.0_r * (real)(thread_local_rng() % RAND_MAX) / (real)RAND_MAX - 1_r;
         }
     } 
     // If the expression already has weights, use them
@@ -117,10 +119,10 @@ void Runner::save_weights_and_losses(Expression& expression) {
     expression.loss = loss_d.ptr[0];
 
     // Write final weights back to the original expression
-    expression.weights = std::vector<float>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
+    expression.weights = std::vector<double>(weights_d.ptr.ptr, weights_d.ptr.ptr + nweights);
 }
 
-void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) {
     // Convert symbolic expressions to bytecode program
     intra_individual::Program program(population);
 

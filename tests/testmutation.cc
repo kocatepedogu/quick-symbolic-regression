@@ -20,9 +20,10 @@ int main(void) {
     Expression f = w0 + w1*Cos(x) + w2*Sin(y);
 
     Config config(
-        2, 3, 10, 11200, 11200,
+        2, 3, 10, 11200, 0.01, 0.3, 0.1,
         std::make_shared<FunctionSet>(
-            std::vector<std::string>{"+", "-", "*", "/", "sin", "cos", "exp", "relu"})
+            std::vector<std::string>{"+", "-", "*", "/", "sin", "cos", "exp", "relu"}),
+            false
     );
 
     SubtreeMutator mutation(config, 0.7, 3);

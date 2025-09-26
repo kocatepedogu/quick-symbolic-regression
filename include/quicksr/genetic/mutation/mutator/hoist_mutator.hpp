@@ -15,13 +15,13 @@ namespace qsr {
 
 class HoistMutator : public BaseMutator {
 public:
-    constexpr HoistMutator(float mutation_probability)  :
+    constexpr HoistMutator(double mutation_probability)  :
         mutation_probability(mutation_probability) {}
 
     Expression mutate(const Expression &expr) noexcept override;
 
 private:
-    const float mutation_probability;
+    const double mutation_probability;
 
     ExpressionPicker expression_picker;
 

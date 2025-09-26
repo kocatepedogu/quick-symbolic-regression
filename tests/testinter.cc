@@ -9,6 +9,7 @@
 
 #include "dataset/dataset.hpp"
 #include "runners/inter-individual/runner.hpp"
+#include "util/precision.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -16,11 +17,11 @@
 using namespace qsr;
 
 int main(void) {
-    float **X, *y;
+    double **X, *y;
 
     // Generate ground truth data
-    generate_test_data(X, y, [](float x) { 
-        return 2.5382 * cos(x)*x + x*x - 0.5; 
+    generate_test_data(X, y, [](double x) {
+        return 2.5382 * cos(x)*x + x*x - 0.5;
     });
 
     // Create dataset
@@ -43,7 +44,7 @@ int main(void) {
     std::vector<Expression> expression_pop = {f1, f2, f3,};
 
     // Fit expressions
-    inter_individual::Runner runner(3);
+    inter_individual::Runner runner(3, false);
     for (int i = 0; i < 60; ++i) {
         runner.run(expression_pop, dataset, 10, 1e-3);
     }

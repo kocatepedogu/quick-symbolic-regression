@@ -16,7 +16,7 @@ namespace qsr {
 
 class DistributionMutator : public BaseMutator {
 public:
-    constexpr DistributionMutator(std::vector<std::shared_ptr<BaseMutator>> mutators, std::vector<float> probabilities) :
+    constexpr DistributionMutator(std::vector<std::shared_ptr<BaseMutator>> mutators, std::vector<double> probabilities) :
         mutators(mutators), probabilities(probabilities) {
             assert(mutators.size() == probabilities.size());
         }
@@ -26,7 +26,7 @@ public:
 private:
     const std::vector<std::shared_ptr<BaseMutator>> mutators;
 
-    const std::vector<float> probabilities;
+    const std::vector<double> probabilities;
 };
 
 }

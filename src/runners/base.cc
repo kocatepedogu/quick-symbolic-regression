@@ -3,6 +3,8 @@
 
 #include "runners/base.hpp"
 
+#include "util/precision.hpp"
+
 #include <cstdio>
 #include <memory>
 
@@ -18,7 +20,7 @@ void BaseRunner::resize_arrays(int stack_length, int intermediate_length, int np
     intermediate_d.resize(intermediate_length, nthreads);
 }
 
-void BaseRunner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void BaseRunner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) {
     fprintf(stderr, "Unimplemented base method called.");
     abort();
 }

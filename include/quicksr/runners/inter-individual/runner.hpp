@@ -16,7 +16,7 @@ namespace qsr {
 namespace inter_individual {
     class Runner : public GPUBaseRunner {
     private:
-        Array2D<float> weights_d;
+        Array2D<real> weights_d;
 
         Cache population_cache;
 
@@ -29,7 +29,7 @@ namespace inter_individual {
     public:
         Runner(int nweights, bool use_cache);
 
-        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
+        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) override;
     };
 }
 }

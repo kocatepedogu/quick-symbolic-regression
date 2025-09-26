@@ -3,6 +3,7 @@
 
 #include "genetic/selection/selector/fitness_proportional_selector.hpp"
 #include "util/rng.hpp"
+#include "util/precision.hpp"
 
 #include <random>
 
@@ -10,7 +11,7 @@ namespace qsr {
 
 void FitnessProportionalSelector::update(const Expression population[]) {
     // Step 1: Calculate the total fitness
-    float total_fitness = 0.0f;
+    double total_fitness = 0.0f;
     #pragma omp simd reduction(+:total_fitness)
     for (size_t i = 0; i < npopulation; ++i) {
         total_fitness += population[i].fitness;

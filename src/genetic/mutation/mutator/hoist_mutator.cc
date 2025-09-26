@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "genetic/mutation/mutator/hoist_mutator.hpp"
-
+#include "util/precision.hpp"
 #include "util/rng.hpp"
 
 namespace qsr {
     Expression HoistMutator::mutate(const Expression &expr) noexcept {
-        if (((thread_local_rng() % RAND_MAX) / (float)RAND_MAX) > mutation_probability) {
+        if (((thread_local_rng() % RAND_MAX) / (double)RAND_MAX) > mutation_probability) {
             return expr;
         }
 

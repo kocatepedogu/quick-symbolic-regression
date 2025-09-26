@@ -22,7 +22,7 @@ public:
 private:
     const int npopulation;
 
-    std::vector<float> probabilities;
+    std::vector<double> probabilities;
 };
 
 }

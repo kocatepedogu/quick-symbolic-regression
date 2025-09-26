@@ -28,7 +28,7 @@ namespace qsr {
  */
 class SubtreeMutation : public BaseMutation {
 public:
-    constexpr SubtreeMutation(int max_depth_increment, float mutation_probability) :
+    constexpr SubtreeMutation(int max_depth_increment, double mutation_probability) :
         max_depth_increment(max_depth_increment),
         mutation_probability(mutation_probability) {}
 
@@ -37,7 +37,7 @@ public:
 private:
     int max_depth_increment;
 
-    float mutation_probability;
+    double mutation_probability;
 };
 
 }
