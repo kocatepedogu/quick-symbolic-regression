@@ -9,6 +9,11 @@
 
 namespace qsr {
     void RankSelector::update(const Expression population[]) {
+        // Return immediately if there is no selection pressure
+        if (sp == 0) {
+            return;
+        }
+
         // Fill the vector of indices
         for (int i = 0; i < npopulation; i++) {
             indices[i] = i;
@@ -27,6 +32,11 @@ namespace qsr {
     }
 
     const Expression& RankSelector::select(const Expression population[]) {
+        // Return randomly if there is no selection pressure
+        if (sp == 0) {
+            return population[thread_local_rng() % npopulation];
+        }
+
         std::discrete_distribution<> distribution(
             probabilities.begin(), probabilities.end());
 
