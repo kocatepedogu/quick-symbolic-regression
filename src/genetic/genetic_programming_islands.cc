@@ -11,6 +11,8 @@
 
 namespace qsr {
 
+int nislands;
+
 GeneticProgrammingIslands::GeneticProgrammingIslands (
     int nislands, const Config &config, const Toolbox &toolbox,
     std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
@@ -18,7 +20,9 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         config(config),
         runner_generator(runner_generator), 
         nislands(nislands),
-        nstreams(8) {
+        nstreams(nislands) {
+
+    qsr::nislands = nislands;
 
     // Create local configuration from global configuration
     // Let population size and offspring size be the size per island instead of the total size
@@ -43,6 +47,7 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
 
     // Initialize islands
     islands = new GeneticProgramming*[nislands];
+    #pragma omp parallel for num_threads(nislands) schedule(dynamic)
     for (int i = 0; i < nislands; ++i) {
         islands[i] = new GeneticProgramming(local_config, toolbox, 
             runner_generator->generate(local_config.nweights, hipStreams[i / stream_per_island]));
@@ -79,7 +84,7 @@ std::tuple<Expression, std::vector<double>, std::vector<double>, std::vector<lon
 {
     for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
         // Evolve each island separately on a different CPU core
-        #pragma omp parallel for 
+        #pragma omp parallel for num_threads(nislands) schedule(dynamic)
         for (int island_idx = 0; island_idx < nislands; ++island_idx) {
             local_learning_history[island_idx] = islands[island_idx]->fit(dataset, ngenerations, nepochs, learning_rate);
 
@@ -103,12 +108,6 @@ std::tuple<Expression, std::vector<double>, std::vector<double>, std::vector<lon
     std::vector<double> final_learning_history_wrt_generation = global_learning_history.get_learning_history_wrt_generation();
     std::vector<double> final_learning_history_wrt_time = global_learning_history.get_learning_history_wrt_time();
     std::vector<long> final_time_history = global_learning_history.get_time_history();
-
-    // Remove start offset from timestamps
-    const long min_time = *std::ranges::min_element(final_time_history);
-    for (long & i : final_time_history) {
-        i -= min_time;
-    }
 
     // Return tuple of the best solution and learning history
     return std::make_tuple(*global_best, final_learning_history_wrt_generation, final_learning_history_wrt_time, final_time_history);

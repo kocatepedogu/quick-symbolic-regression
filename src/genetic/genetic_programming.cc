@@ -11,6 +11,7 @@
 #include <cmath>
 
 namespace qsr {
+extern int nislands;
 
 GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &toolbox, std::shared_ptr<BaseRunner> runner)
     noexcept : config(config), runner(runner)
@@ -115,6 +116,16 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
 
     int elitism_count = ceil(config.elite_rate * config.npopulation);
 
+    std::vector<const Expression *> parents1;
+    std::vector<const Expression *> parents2;
+    parents1.resize(config.npopulation);
+    parents2.resize(config.npopulation);
+
+    std::vector<Expression> children1;
+    std::vector<Expression> children2;
+    children1.resize(config.npopulation);
+    children2.resize(config.npopulation);
+
     // Iterate for ngenerations
     for (int generation = 0; generation < ngenerations; ++generation)
     {
@@ -124,38 +135,45 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
         // Update selection probabilities
         selector->update(&population[0]);
 
-        /* Offspring Generation */
-        std::vector<Expression> offspring;
-        offspring.reserve(config.npopulation);
-
         /* Copy the elite directly to offspring */
-        for (int i = 0; i < elitism_count; ++i) {
-            offspring.push_back(population[i]);
-        }
+        int counter = elitism_count;
 
         /* Generate the rest from parents */
-        while (offspring.size() < config.npopulation) {
-            const auto &parent1 = selector->select(&population[0]);
-            const auto &parent2 = selector->select(&population[0]);
-
-            const auto &children = recombiner->recombine(parent1, parent2);
-            const auto &child1 = get<0>(children);
-            const auto &child2 = get<1>(children);
-
-            offspring.push_back(mutator->mutate(child1));
-            if (offspring.size() < config.npopulation) {
-                offspring.push_back(mutator->mutate(child2));
-            }
+        omp_set_max_active_levels(2);
+        int nested_thread_count = std::min(omp_get_num_procs() / nislands - 1, 1);
+#pragma omp parallel for num_threads(nested_thread_count) schedule(static)
+        for (int i = 0; i < config.npopulation; ++i) {
+            parents1[i] = &selector->select(&population[0]);
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(static)
+        for (int i = 0; i < config.npopulation; ++i) {
+            parents2[i] = &selector->select(&population[0]);
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(dynamic)
+        for (int i = 0; i < config.npopulation; ++i) {
+            const auto &c12 = recombiner->recombine(*parents1[i], *parents2[i]);
+            children1[i] = std::move(get<0>(c12));
+            children2[i] = std::move(get<1>(c12));
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(dynamic)
+        for (int i = 0; i < config.npopulation; ++i) {
+            children1[i] = std::move(mutator->mutate(children1[i]));
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(dynamic)
+        for (int i = 0; i < config.npopulation; ++i) {
+            children2[i] = std::move(mutator->mutate(children2[i]));
+        }
+        for (int i = 0; i < config.npopulation && counter < config.npopulation; ++i) {
+            population[counter++] = std::move(children1[i]);
+            if (counter < config.npopulation)
+                population[counter++] = std::move(children2[i]);
         }
 
         // Compute losses
-        runner->run(offspring, dataset, nepochs, learning_rate);
+        runner->run(population, dataset, nepochs, learning_rate);
 
         // Calculate fitnesses
-        calculate_fitnesses(offspring, config.enable_parsimony_pressure);
-
-        // Let new population be the offspring
-        population = offspring;
+        calculate_fitnesses(population, config.enable_parsimony_pressure);
 
         // Find new best
         const Expression best = *get_best_solution();

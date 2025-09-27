@@ -4,15 +4,19 @@
 #include "runners/inter-individual/program/program.hpp"
 
 #include <hip/hip_runtime.h>
+#include <omp.h>
 
 #include "compiler/compiler.hpp"
 
-using namespace qsr::inter_individual;
+namespace qsr {
+extern int nislands;
+
+namespace inter_individual {
 
 Program::Program(const std::vector<Expression>& exp_pop) {
     this->num_of_individuals = exp_pop.size();
 
-    // Compile all expressions to IR and find maximum size requirements
+    // Compile all expressions to IR and find maximum size requirements in parallel
     compile_expressions(exp_pop);
 
     // Copy all programs to GPU memory
@@ -20,31 +24,61 @@ Program::Program(const std::vector<Expression>& exp_pop) {
 }
 
 void Program::compile_expressions(const std::vector<Expression>& population) {
-    this->max_num_of_instructions = 0;
-    this->stack_req = 0;
-    this->intermediate_req = 0;
+    // Pre-resize the results vector to allow for thread-safe indexed access.
+    irs.resize(num_of_individuals);
 
-    // Compile each expression to IR and determine the longest IR length
-    for (int i = 0; i < num_of_individuals; ++i) {
-        const IntermediateRepresentation& ir = compile(population[i]);
+    // Initialize global maximums to zero.
+    max_num_of_instructions = 0;
+    stack_req = 0;
+    intermediate_req = 0;
 
-        // Largest number of instructions (to determine pad length)
-        if (ir.bytecode.size() > this->max_num_of_instructions) {
-            this->max_num_of_instructions = ir.bytecode.size();
+    omp_set_max_active_levels(2);
+#pragma omp parallel num_threads(std::min(omp_get_num_procs() / nislands - 1, 1))
+    {
+        // Each thread maintains its own local maximums to avoid race conditions.
+        int local_max_instr = 0;
+        int local_stack_req = 0;
+        int local_intermediate_req = 0;
+
+        // The 'dynamic' schedule creates a work queue, allowing threads to "steal"
+        // the next available expression. This is ideal for load balancing when
+        // compilation times for expressions are uneven.
+#pragma omp for schedule(dynamic)
+        for (int i = 0; i < num_of_individuals; ++i) {
+            // Compile the expression.
+            IntermediateRepresentation ir = compile(population[i]);
+
+            // Update thread-local maximums.
+            if (ir.bytecode.size() > local_max_instr) {
+                local_max_instr = ir.bytecode.size();
+            }
+            if (ir.stack_requirement > local_stack_req) {
+                local_stack_req = ir.stack_requirement;
+            }
+            if (ir.intermediate_requirement > local_intermediate_req) {
+                local_intermediate_req = ir.intermediate_requirement;
+            }
+
+            // Store the result directly into its final position. Since each
+            // thread works on a unique index 'i', this is thread-safe.
+            irs[i] = std::move(ir);
         }
 
-        // Largest number of stack elements required (to determine pad length)
-        if (ir.stack_requirement > this->stack_req) {
-            this->stack_req = ir.stack_requirement;
+        // After the loop, use a lightweight critical section to safely update
+        // the global maximums from each thread's local maximums.
+#pragma omp critical
+        {
+            if (local_max_instr > max_num_of_instructions) {
+                max_num_of_instructions = local_max_instr;
+            }
+            if (local_stack_req > stack_req) {
+                stack_req = local_stack_req;
+            }
+            if (local_intermediate_req > intermediate_req) {
+                intermediate_req = local_intermediate_req;
+            }
         }
-
-        // Largest number of intermediate elements required (to determine pad length)
-        if (ir.intermediate_requirement > this->intermediate_req) {
-            this->intermediate_req = ir.intermediate_requirement;
-        }
-
-        irs.push_back(ir);
-    }
+    } // End of parallel region
 }
 
 void Program::copy_to_gpu_memory() {
@@ -65,4 +99,7 @@ void Program::copy_to_gpu_memory() {
             }
         }
     }
+}
+
+}
 }
