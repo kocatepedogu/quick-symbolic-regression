@@ -8,6 +8,7 @@
 #include "vm/vm_debug.hpp"
 #include "vm/vm_control.hpp"
 #include "runners/inter-individual/program/program.hpp"
+#include <hip/hip_runtime.h>
 
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW
@@ -58,7 +59,7 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<real> X_d, Ptr1D<real> y_d,
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     
     // Find program index and datapoint index
-    const int datapoint_block_dim = 16;
+    const int datapoint_block_dim = 32;
     const int program_idx = tid / datapoint_block_dim;
     const int datapoint_block_idx = tid % datapoint_block_dim;
 
@@ -93,8 +94,21 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<real> X_d, Ptr1D<real> y_d,
 
             // Add squared difference divided by m [ (l/m)^2 * m = l^2/m ] to total loss
             if (epoch == nepochs) {
-                const float squared_error = (float)stack_d[0,tid] * (float)stack_d[0,tid];
-                atomicAdd(&loss_d[program_idx], squared_error * (float)y_d.dim1);
+                // 1. Each thread calculates its local squared error into a register.
+                float loss = (float)stack_d[0,tid] * (float)stack_d[0,tid];
+
+                // 2. Perform a parallel reduction across the 16-thread subgroup using warp shuffles.
+                // This is extremely fast as it uses direct register-to-register communication.
+                #pragma unroll
+                for (int offset = datapoint_block_dim / 2; offset > 0; offset /= 2) {
+                    loss += __shfl_down(loss, offset, datapoint_block_dim);
+                }
+
+                // 3. Only the first thread in the subgroup (the "lane leader") writes the final sum
+                // to global memory. This minimizes memory contention.
+                if (datapoint_block_idx == 0) {
+                    loss_d[program_idx] += loss * (float)y_d.dim1;
+                }
             }
 
             // Backpropagate
@@ -163,7 +177,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     inter_individual::Program program(population_to_run);
 
     // Every warp/wave executes two expressions, which takes 16 threads per expression
-    calculate_kernel_dims(program.num_of_individuals * 16);
+    calculate_kernel_dims(program.num_of_individuals * 32);
 
     // Resize arrays
     weights_d.resize(nweights, population_to_run.size());

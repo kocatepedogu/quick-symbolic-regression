@@ -94,7 +94,7 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
             push_stack(s, tid, w.weights_d[param_index,tid], debug...);
         }
         if constexpr (paraType == HYBRID) {
-            constexpr int datapoint_block_dim = 16;
+            constexpr int datapoint_block_dim = 32;
             push_stack(s, tid, w.weights_d[param_index,tid / datapoint_block_dim], debug...);
         }
     }
@@ -110,7 +110,7 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
         }
 
         if constexpr (paraType == HYBRID) {
-            constexpr int datapoint_block_dim = 16;
+            constexpr int datapoint_block_dim = 32;
             atomicAdd(&w.weights_grad_d[param_index,tid / datapoint_block_dim], incoming_grad);
         }
     }

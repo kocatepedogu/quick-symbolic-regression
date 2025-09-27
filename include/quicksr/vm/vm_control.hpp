@@ -29,7 +29,7 @@ void vm_control(const ControlState<Code> c, const DataState &d, const StackState
             instruction = c.bytecode[c.program_counter,c.tid];
         }
         if constexpr (paraType == HYBRID) {
-            instruction = c.bytecode[c.program_counter,c.tid / 16];
+            instruction = c.bytecode[c.program_counter,c.tid / 32];
         }
         
         switch (instruction.opcode) {
