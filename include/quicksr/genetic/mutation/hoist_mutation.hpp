@@ -22,13 +22,13 @@ namespace qsr {
  */
 class HoistMutation : public BaseMutation {
 public:
-    constexpr HoistMutation(float mutation_probability) :
+    constexpr HoistMutation(double mutation_probability) :
         mutation_probability(mutation_probability) {}
 
     virtual std::shared_ptr<BaseMutator> get_mutator(const Config &config) override;
 
 private:
-    float mutation_probability;
+    double mutation_probability;
 };
 
 }

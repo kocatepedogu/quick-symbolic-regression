@@ -19,10 +19,10 @@ public:
         int nislands, const Config &config, const Toolbox &toolbox,
         std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept;
 
-    std::tuple<Expression,std::vector<float>,std::vector<float>,std::vector<long>> fit(
+    std::tuple<Expression,std::vector<double>,std::vector<double>,std::vector<long>> fit(
         std::shared_ptr<Dataset> dataset, 
         int ngenerations, int nsupergenerations, 
-        int nepochs, float learning_rate, 
+        int nepochs, double learning_rate,
         bool verbose = false) noexcept;
 
     ~GeneticProgrammingIslands() noexcept;
@@ -47,6 +47,17 @@ private:
       * @brief Number of islands
       */
     const int nislands;
+
+    /**
+     * @brief Number of HIP streams/states
+     */
+    const int nstreams;
+
+    /**
+     *  @brief HIP streams for islands
+     *  Number of hip streams can be fewer than number of islands
+     */
+    HIPState **hipStreams;
 
     /** 
       * @brief Array of islands

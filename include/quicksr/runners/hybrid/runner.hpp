@@ -15,7 +15,7 @@
 namespace qsr::hybrid {
     class Runner : public GPUBaseRunner {
     private:
-        Array2D<float> weights_d;
+        Array2D<real> weights_d;
 
         inter_individual::Cache population_cache;
 
@@ -26,9 +26,9 @@ namespace qsr::hybrid {
         void save_weights_and_losses(std::vector<Expression>& population);
 
     public:
-        Runner(int nweights, bool use_cache);
+        Runner(int nweights, bool use_cache, const HIPState *hipState);
 
-        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int nepochs, float learning_rate) override;
+        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int nepochs, double learning_rate) override;
     };
 }
 

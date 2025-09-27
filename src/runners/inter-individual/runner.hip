@@ -10,6 +10,7 @@
 #include "vm/vm_debug.hpp"
 #include "vm/vm_types.hpp"
 #include "vm/vm_control.hpp"
+#include "util/precision.hpp"
 #include "util/rng.hpp"
 #include "util/hip.hpp"
 #include "util/arrays/array1d.hpp"
@@ -32,11 +33,11 @@
 using namespace qsr;
 using namespace qsr::inter_individual;
 
-Runner::Runner(int nweights, const bool use_cache) :
-    GPUBaseRunner(nweights), use_cache(use_cache) {}
+Runner::Runner(int nweights, const bool use_cache, const HIPState *hipState) :
+    GPUBaseRunner(nweights, hipState), use_cache(use_cache) {}
 
 static inline __device__ void
-reset_gradients_and_losses(const int tid, Ptr2D<float> weights_grad_d, float& total_loss) 
+reset_gradients_and_losses(const int tid, Ptr2D<real> weights_grad_d, real& total_loss)
 {
     // Reset weight gradients
     for (int weight_idx = 0; weight_idx < weights_grad_d.dim1; ++weight_idx) {
@@ -47,7 +48,7 @@ reset_gradients_and_losses(const int tid, Ptr2D<float> weights_grad_d, float& to
 }
 
 static inline __device__ void
-update_weights(const int tid, Ptr2D<float> weights_d, Ptr2D<float> weights_grad_d, const float learning_rate) 
+update_weights(const int tid, Ptr2D<real> weights_d, Ptr2D<real> weights_grad_d, const real learning_rate)
 {
     // For each weight
     for (int weight_idx = 0; weight_idx < weights_d.dim1; ++weight_idx) {
@@ -58,16 +59,16 @@ update_weights(const int tid, Ptr2D<float> weights_d, Ptr2D<float> weights_grad_
 
 __global__ static void 
 train(Ptr2D<Instruction> bytecode,
-      Ptr2D<float> X_d, Ptr1D<float> y_d, 
-      Ptr2D<float> stack_d, Ptr2D<float> intermediate_d,
-      Ptr2D<float> weights_d, Ptr2D<float> weights_grad_d, Ptr1D<float> loss_d,
-      const int nepochs, const float learning_rate,
+      Ptr2D<real> X_d, Ptr1D<real> y_d,
+      Ptr2D<real> stack_d, Ptr2D<real> intermediate_d,
+      Ptr2D<real> weights_d, Ptr2D<real> weights_grad_d, Ptr1D<float> loss_d,
+      const int nepochs, const real learning_rate,
       const int stack_req, const int intermediate_req)
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (tid < bytecode.dim2) {
-        float total_loss = 0;
+        real total_loss = 0;
 
         for (int epoch = 0; epoch < nepochs + 1; ++epoch) {
             // At the beginning of each epoch, reset gradients and losses
@@ -86,18 +87,19 @@ train(Ptr2D<Instruction> bytecode,
 
                 // Forward propagate and evaluate loss
                 vm_debug_print(tid, "Forward propagation");
-                vm_control<FORWARD, INTER_INDIVIDUAL, Ptr2D<float>>(c, d, s, w DEBUGARGS);
+                vm_control<FORWARD, INTER_INDIVIDUAL, Ptr2D<real>>(c, d, s, w DEBUGARGS);
 
                 // Print an empty line in between forward propagation output and backpropagation output
                 vm_debug_print(tid, "");
 
                 // Add squared difference divided by m [ (l/m)^2 * m = l^2/m ] as the loss
-                total_loss += powf(stack_d[0,tid], 2) * (float)y_d.dim1;
+                const float squared_error = (float)stack_d[0,tid] * (float)stack_d[0,tid];
+                total_loss += squared_error * (float)y_d.dim1;
 
                 // Backpropagate
                 if (epoch < nepochs) {
                     vm_debug_print(tid, "Backpropagation");
-                    vm_control<BACK, INTER_INDIVIDUAL, Ptr2D<float>>(c, d, s, w DEBUGARGS);
+                    vm_control<BACK, INTER_INDIVIDUAL, Ptr2D<real>>(c, d, s, w DEBUGARGS);
                 }
             }
 
@@ -119,7 +121,7 @@ void Runner::initialize_weights_and_losses(std::vector<Expression>& population) 
 
             // If the expression has no weights yet, initialize them randomly
             if (expression.weights.empty()) {
-                weights_d.ptr[i,j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+                weights_d.ptr[i,j] = 2.0_r * (real)(thread_local_rng() % RAND_MAX) / (real)RAND_MAX - 1.0_r;
             } 
             // If the expression already has weights, use them
             else {
@@ -149,7 +151,7 @@ void Runner::save_weights_and_losses(std::vector<Expression>& population) {
     }
 }
 
-void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) {
     std::vector<Expression>& population_to_run = use_cache ? population_cache.uncached_population : population;
 
     if (use_cache) {

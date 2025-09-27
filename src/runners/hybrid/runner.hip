@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "runners/hybrid/runner.hpp"
-
+#include "util/precision.hpp"
 #include "util/rng.hpp"
 #include "vm/vm_types.hpp"
 #include "vm/vm_debug.hpp"
 #include "vm/vm_control.hpp"
 #include "runners/inter-individual/program/program.hpp"
+#include <hip/hip_runtime.h>
 
 // Uncomment to enable buffer overflow checks
 // #define CHECK_BUFFER_OVERFLOW
@@ -23,11 +24,11 @@
 using namespace qsr;
 using namespace qsr::hybrid;
 
-Runner::Runner(int nweights, const bool use_cache) :
-    GPUBaseRunner(nweights), use_cache(use_cache) {}
+Runner::Runner(int nweights, const bool use_cache, const HIPState *hipState) :
+    GPUBaseRunner(nweights, hipState), use_cache(use_cache) {}
 
 static inline __device__ void 
-reset_gradients_and_losses(int program_idx, Ptr2D<float> &weights_grad_d, Ptr1D<float> &loss_d) 
+reset_gradients_and_losses(int program_idx, Ptr2D<real> &weights_grad_d, Ptr1D<float> &loss_d)
 {
     // Reset weight gradients
     for (int weight_idx = 0; weight_idx < weights_grad_d.dim1; ++weight_idx) {
@@ -39,7 +40,7 @@ reset_gradients_and_losses(int program_idx, Ptr2D<float> &weights_grad_d, Ptr1D<
 }
 
 static inline __device__ void 
-update_weights(int program_idx, float learning_rate, Ptr2D<float> &weights_d, Ptr2D<float> &weights_grad_d) 
+update_weights(int program_idx, real learning_rate, Ptr2D<real> &weights_d, Ptr2D<real> &weights_grad_d)
 {
     // For each weight
     for (int weight_idx = 0; weight_idx < weights_d.dim1; ++weight_idx) {
@@ -49,16 +50,16 @@ update_weights(int program_idx, float learning_rate, Ptr2D<float> &weights_d, Pt
 }
 
 __global__ static void 
-train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d, 
-      Ptr2D<float> stack_d, Ptr2D<float> intermediate_d,
-      Ptr2D<float> weights_d, Ptr2D<float> weights_grad_d, Ptr1D<float> loss_d,
-      const int nepochs, const float learning_rate,
+train(Ptr2D<Instruction> bytecode, Ptr2D<real> X_d, Ptr1D<real> y_d,
+      Ptr2D<real> stack_d, Ptr2D<real> intermediate_d,
+      Ptr2D<real> weights_d, Ptr2D<real> weights_grad_d, Ptr1D<float> loss_d,
+      const int nepochs, const real learning_rate,
       int stack_req, int intermediate_req) 
 {
     const int tid = blockDim.x * blockIdx.x + threadIdx.x;
     
     // Find program index and datapoint index
-    const int datapoint_block_dim = 16;
+    const int datapoint_block_dim = 32;
     const int program_idx = tid / datapoint_block_dim;
     const int datapoint_block_idx = tid % datapoint_block_dim;
 
@@ -86,20 +87,34 @@ train(Ptr2D<Instruction> bytecode, Ptr2D<float> X_d, Ptr1D<float> y_d,
 
             // Forward propagate and evaluate loss
             vm_debug_print(tid, "Forward propagation");
-            vm_control<FORWARD, HYBRID, Ptr2D<float>>(c, d, s,w DEBUGARGS);
+            vm_control<FORWARD, HYBRID, Ptr2D<real>>(c, d, s,w DEBUGARGS);
 
             // Print an empty line in between forward propagation output and backpropagation output
             vm_debug_print(tid, "");
 
             // Add squared difference divided by m [ (l/m)^2 * m = l^2/m ] to total loss
             if (epoch == nepochs) {
-                atomicAdd(&loss_d[program_idx], powf(stack_d[0,tid], 2) * (float)y_d.dim1);
+                // 1. Each thread calculates its local squared error into a register.
+                float loss = (float)stack_d[0,tid] * (float)stack_d[0,tid];
+
+                // 2. Perform a parallel reduction across the 16-thread subgroup using warp shuffles.
+                // This is extremely fast as it uses direct register-to-register communication.
+                #pragma unroll
+                for (int offset = datapoint_block_dim / 2; offset > 0; offset /= 2) {
+                    loss += __shfl_down(loss, offset, datapoint_block_dim);
+                }
+
+                // 3. Only the first thread in the subgroup (the "lane leader") writes the final sum
+                // to global memory. This minimizes memory contention.
+                if (datapoint_block_idx == 0) {
+                    loss_d[program_idx] += loss * (float)y_d.dim1;
+                }
             }
 
             // Backpropagate
             if (epoch < nepochs) {
                 vm_debug_print(tid, "Backpropagation");
-                vm_control<BACK, HYBRID, Ptr2D<float>>(c, d, s, w DEBUGARGS);
+                vm_control<BACK, HYBRID, Ptr2D<real>>(c, d, s, w DEBUGARGS);
             }
         }
 
@@ -118,7 +133,7 @@ void Runner::initialize_weights_and_losses(std::vector<Expression>& population) 
 
             // If the expression has no weights yet, initialize them randomly
             if (expression.weights.empty()) {
-                weights_d.ptr[i,j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+                weights_d.ptr[i,j] = 2.0_r * (real)(thread_local_rng() % RAND_MAX) / (real)RAND_MAX - 1.0_r;
             } 
             // If the expression already has weights, use them
             else {
@@ -148,7 +163,7 @@ void Runner::save_weights_and_losses(std::vector<Expression>& population) {
     }
 }
 
-void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int nepochs, float learning_rate) {
+void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int nepochs, double learning_rate) {
     std::vector<Expression>& population_to_run = use_cache ? population_cache.uncached_population : population;
 
     if (use_cache) {
@@ -162,7 +177,7 @@ void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Data
     inter_individual::Program program(population_to_run);
 
     // Every warp/wave executes two expressions, which takes 16 threads per expression
-    calculate_kernel_dims(program.num_of_individuals * 16);
+    calculate_kernel_dims(program.num_of_individuals * 32);
 
     // Resize arrays
     weights_d.resize(nweights, population_to_run.size());

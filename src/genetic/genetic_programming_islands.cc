@@ -11,13 +11,18 @@
 
 namespace qsr {
 
+int nislands;
+
 GeneticProgrammingIslands::GeneticProgrammingIslands (
     int nislands, const Config &config, const Toolbox &toolbox,
     std::shared_ptr<BaseRunnerGenerator> runner_generator) noexcept :
         toolbox(toolbox),
         config(config),
         runner_generator(runner_generator), 
-        nislands(nislands) {
+        nislands(nislands),
+        nstreams(nislands) {
+
+    qsr::nislands = nislands;
 
     // Create local configuration from global configuration
     // Let population size and offspring size be the size per island instead of the total size
@@ -32,11 +37,20 @@ GeneticProgrammingIslands::GeneticProgrammingIslands (
         config.function_set,
         config.enable_parsimony_pressure);
 
+    // Initialize HIP states
+    hipStreams = new HIPState*[nstreams];
+    for (int i = 0; i < nstreams; ++i) {
+        hipStreams[i] = new HIPState();
+    }
+
+    int stream_per_island = ceil((double)nislands / (double)nstreams);
+
     // Initialize islands
     islands = new GeneticProgramming*[nislands];
+    #pragma omp parallel for num_threads(nislands) schedule(dynamic)
     for (int i = 0; i < nislands; ++i) {
         islands[i] = new GeneticProgramming(local_config, toolbox, 
-            runner_generator->generate(local_config.nweights));
+            runner_generator->generate(local_config.nweights, hipStreams[i / stream_per_island]));
     }
 
     // Initialize local learning histories
@@ -53,18 +67,24 @@ GeneticProgrammingIslands::~GeneticProgrammingIslands() noexcept {
     }
     delete[] islands;
 
+    // Delete streams
+    for (int i = 0; i < nstreams; ++i) {
+        delete hipStreams[i];
+    }
+    delete[] hipStreams;
+
     // Delete local learning histories
     delete[] local_learning_history;
 }
 
-std::tuple<Expression, std::vector<float>, std::vector<float>, std::vector<long>> GeneticProgrammingIslands::fit(
+std::tuple<Expression, std::vector<double>, std::vector<double>, std::vector<long>> GeneticProgrammingIslands::fit(
     std::shared_ptr<Dataset> dataset, 
     int ngenerations, int nsupergenerations, 
-    int nepochs, float learning_rate, bool verbose) noexcept 
+    int nepochs, double learning_rate, bool verbose) noexcept
 {
     for (int supergeneration = 0; supergeneration < nsupergenerations; ++supergeneration) {
         // Evolve each island separately on a different CPU core
-        #pragma omp parallel for 
+        #pragma omp parallel for num_threads(nislands) schedule(dynamic)
         for (int island_idx = 0; island_idx < nislands; ++island_idx) {
             local_learning_history[island_idx] = islands[island_idx]->fit(dataset, ngenerations, nepochs, learning_rate);
 
@@ -85,15 +105,9 @@ std::tuple<Expression, std::vector<float>, std::vector<float>, std::vector<long>
         migrate_solutions();
     }
 
-    std::vector<float> final_learning_history_wrt_generation = global_learning_history.get_learning_history_wrt_generation();
-    std::vector<float> final_learning_history_wrt_time = global_learning_history.get_learning_history_wrt_time();
+    std::vector<double> final_learning_history_wrt_generation = global_learning_history.get_learning_history_wrt_generation();
+    std::vector<double> final_learning_history_wrt_time = global_learning_history.get_learning_history_wrt_time();
     std::vector<long> final_time_history = global_learning_history.get_time_history();
-
-    // Remove start offset from timestamps
-    const long min_time = *std::ranges::min_element(final_time_history);
-    for (long & i : final_time_history) {
-        i -= min_time;
-    }
 
     // Return tuple of the best solution and learning history
     return std::make_tuple(*global_best, final_learning_history_wrt_generation, final_learning_history_wrt_time, final_time_history);
@@ -132,7 +146,7 @@ void GeneticProgrammingIslands::update_learning_history() noexcept {
     LearningHistory history_per_supergeneration;
     for (int i = 0; i < nislands; ++i) {
         history_per_supergeneration = history_per_supergeneration.combine_with(
-            local_learning_history[i], global_best ? global_best->loss : std::numeric_limits<float>::max());
+            local_learning_history[i], global_best ? global_best->loss : std::numeric_limits<double>::max());
     }
 
     // Append to global learning history

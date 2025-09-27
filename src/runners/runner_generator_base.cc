@@ -7,7 +7,7 @@
 
 namespace qsr {
 
-std::shared_ptr<BaseRunner> BaseRunnerGenerator::generate(int nweights) {
+std::shared_ptr<BaseRunner> BaseRunnerGenerator::generate(int nweights, const HIPState *hipState) {
     fprintf(stderr, "Unimplemented base method called.");
     abort();
 }

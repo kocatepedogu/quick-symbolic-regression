@@ -6,16 +6,17 @@
 #include <pybind11/numpy.h>
 
 #include "dataset/dataset.hpp"
+#include "util/precision.hpp"
 
 namespace qsr {
 
 Dataset::Dataset(int m, int n) noexcept :
     m(m), n(n) {
-    X_d = Array2D<float>(n, m);
-    y_d = Array1D<float>(m);
+    X_d = Array2D<real>(n, m);
+    y_d = Array1D<real>(m);
 }
 
-Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept :
+Dataset::Dataset(const double *const *X, const double *y, int m, int n) noexcept :
     m(m), n(n) {
     /*
     * The argument X is in array of structures form. 
@@ -24,7 +25,7 @@ Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept :
     * The goal is to convert X to X_d on device, which is in structure of array form.
     * The dimensions should be X_d[n][m]
     */
-    X_d = Array2D<float>(n, m);
+    X_d = Array2D<real>(n, m);
 
     // Copy X to X_d on device
     for (int i = 0; i < n; ++i) {
@@ -34,7 +35,7 @@ Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept :
     }
 
     // Allocate y_d on device
-    y_d = Array1D<float>(m);
+    y_d = Array1D<real>(m);
 
     // Copy y to y_d on device
     for (int j = 0; j < m; ++j) {
@@ -43,7 +44,7 @@ Dataset::Dataset(const float *const *X, const float *y, int m, int n) noexcept :
 }
 
 
-Dataset::Dataset(pybind11::array_t<float> numpy_X, pybind11::array_t<float> numpy_y) {
+Dataset::Dataset(pybind11::array_t<double> numpy_X, pybind11::array_t<double> numpy_y) {
     auto numpy_X_buffer_info = numpy_X.request();
     auto numpy_y_buffer_info = numpy_y.request();
 
@@ -72,21 +73,21 @@ Dataset::Dataset(pybind11::array_t<float> numpy_X, pybind11::array_t<float> nump
     * The goal is to convert X to X_d on device, which is in structure of array form.
     * The dimensions should be X_d[n * m + m]
     */
-    X_d = Array2D<float>(n, m);
+    X_d = Array2D<real>(n, m);
 
     // Allocate y_d on device
-    y_d = Array1D<float>(m);
+    y_d = Array1D<real>(m);
 
     // Allocate and fill X
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
-            X_d.ptr[i,j] = (static_cast<float*>(numpy_X_buffer_info.ptr))[j * n + i];
+            X_d.ptr[i,j] = (static_cast<double*>(numpy_X_buffer_info.ptr))[j * n + i];
         }
     }
 
     // Allocate and fill y
     for (int j = 0; j < m; ++j) {
-        y_d.ptr[j] = (static_cast<float*>(numpy_y_buffer_info.ptr))[j];
+        y_d.ptr[j] = (static_cast<double*>(numpy_y_buffer_info.ptr))[j];
     }
 }
 

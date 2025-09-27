@@ -2,36 +2,37 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "testdata.hpp"
+#include "util/precision.hpp"
 
 namespace qsr {
 
-void generate_test_data(float **&X, float *&y, std::function<float(float&)> ground_truth) {
+void generate_test_data(double **&X, double *&y, std::function<double(double&)> ground_truth) {
     // Allocate two dimensional feature matrix
-    X = new float*[test_data_length];
+    X = new double*[test_data_length];
     for (int i = 0; i < test_data_length; ++i) {
         // Number of input features is one
-        X[i] = new float[1];
+        X[i] = new double[1];
     }
 
     // Allocate one dimensional target array
-    y = new float[test_data_length];
+    y = new double[test_data_length];
 
     // Fill feature matrix with scalar values ranging from 0 to 10
-    float x_low = 0;
-    float x_high = 10;
-    float x_step = (x_high - x_low) / test_data_length;
+    double x_low = 0;
+    double x_high = 10;
+    double x_step = (x_high - x_low) / (double)test_data_length;
     for (int i = 0; i < test_data_length; ++i) {
-        X[i][0] = x_low + i * x_step;
+        X[i][0] = x_low + (double)i * x_step;
     }
 
     // Fill target array with ground truth values
     for (int i = 0; i < test_data_length; ++i) {
-        float x = X[i][0];
+        double x = X[i][0];
         y[i] = ground_truth(x);
     }
 }
 
-void delete_test_data(float **&X, float *&y) {
+void delete_test_data(double **&X, double *&y) {
     // Deallocate target array
     delete[] y;
 

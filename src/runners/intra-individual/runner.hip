@@ -4,6 +4,7 @@
 #include "runners/intra-individual/runner.hpp"
 #include "runners/intra-individual/program/program.hpp"
 
+#include "util/precision.hpp"
 #include "vm/vm_debug.hpp"
 #include "vm/vm_control.hpp"
 #include "util/rng.hpp"
@@ -24,16 +25,16 @@ using namespace qsr::intra_individual;
 
 constexpr int reduction_threads_per_block = 1024;
 
-Runner::Runner(const int nweights, const bool use_cache) :
-    GPUBaseRunner(nweights), use_cache(use_cache) {
+Runner::Runner(const int nweights, const bool use_cache, const HIPState *hipState) :
+    GPUBaseRunner(nweights, hipState), use_cache(use_cache) {
     weights_d.resize(nweights);
 }
 
 __global__ static void
-update_weights(Ptr1D<float> weight_grads, float *weight, float learning_rate) 
+update_weights(Ptr1D<real> weight_grads, real *weight, real learning_rate)
 {
     // Shared memory for block-level reduction
-    __shared__ float sharedMem[reduction_threads_per_block];
+    __shared__ real sharedMem[reduction_threads_per_block];
     
     // Thread and block indices
     int tid = threadIdx.x;
@@ -41,7 +42,7 @@ update_weights(Ptr1D<float> weight_grads, float *weight, float learning_rate)
     int globalIdx = blockIdx.x * blockDim.x + threadIdx.x;
     
     // Load data into shared memory
-    sharedMem[tid] = (globalIdx < weight_grads.dim1) ? weight_grads[globalIdx] : 0.0f;
+    sharedMem[tid] = (globalIdx < weight_grads.dim1) ? weight_grads[globalIdx] : (real)0.0f;
     __syncthreads();
     
     // Parallel reduction within the block
@@ -60,12 +61,12 @@ update_weights(Ptr1D<float> weight_grads, float *weight, float learning_rate)
 
 __global__ static void 
 train(Ptr1D<Instruction> bytecode, 
-      Ptr2D<float> X_d, 
-      Ptr1D<float> y_d, 
-      Ptr2D<float> stack_d, 
-      Ptr2D<float> intermediate_d,
-      Ptr1D<float> weights_d,
-      Ptr2D<float> weights_grad_d,
+      Ptr2D<real> X_d,
+      Ptr1D<real> y_d,
+      Ptr2D<real> stack_d,
+      Ptr2D<real> intermediate_d,
+      Ptr1D<real> weights_d,
+      Ptr2D<real> weights_grad_d,
       Ptr1D<float> loss_d,
       bool enable_backpropagation,
       int stack_length, 
@@ -94,22 +95,23 @@ train(Ptr1D<Instruction> bytecode,
 
     // Forward propagate and evaluate loss
     vm_debug_print(tid, "Forward propagation");
-    vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
+    vm_control<FORWARD, INTRA_INDIVIDUAL, Ptr1D<real>>(c, d, s, w DEBUGARGS);
 
     // Print an empty line in between forward propagation output and backpropagation output
     vm_debug_print(tid, "");
 
     // Save squared difference divided by m [ (l/m)^2 * m = l^2/m ] as the loss
-    loss_d[tid] = powf(stack_d[0,tid], 2) * (float)loss_d.dim1;
+    const float squared_error = (float)stack_d[0,tid] * (float)stack_d[0,tid];
+    loss_d[tid] = squared_error * (float)loss_d.dim1;
 
     // Backpropagate
     if (enable_backpropagation) {
         vm_debug_print(tid, "Backpropagation");
-        vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<float>>(c, d, s, w DEBUGARGS);
+        vm_control<BACK, INTRA_INDIVIDUAL, Ptr1D<real>>(c, d, s, w DEBUGARGS);
     }
 }
 
-void Runner::run(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void Runner::run(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, real learning_rate) {
     for (int epoch = 0; epoch < epochs + 1; ++epoch) {
         bool enable_backpropagation = (epoch < epochs);
 
@@ -146,7 +148,7 @@ void Runner::calculate_kernel_dims(int m) {
 void Runner::initialize_weights_and_losses(Expression &expression) {
     if (expression.weights.empty()) {
         for (int j = 0; j < nweights; ++j) {
-            weights_d.ptr[j] = 2 * (thread_local_rng() % RAND_MAX) / (float)RAND_MAX - 1;
+            weights_d.ptr[j] = 2.0_r * (real)(thread_local_rng() % RAND_MAX) / (real)RAND_MAX - 1.0_r;
         }
     } 
     // If the expression already has weights, use them
@@ -159,7 +161,7 @@ void Runner::initialize_weights_and_losses(Expression &expression) {
 
 void Runner::save_weights_and_losses(Expression &expression) {
     // Compute total loss
-    float total_loss = 0;
+    real total_loss = 0;
     #pragma omp simd reduction(+:total_loss)
     for (int i = 0; i < loss_d.ptr.dim1; ++i) {
         total_loss += loss_d.ptr[i];
@@ -175,7 +177,7 @@ void Runner::save_weights_and_losses(Expression &expression) {
     }
 }
 
-void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) {
+void Runner::run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) {
     // Configure as many threads as data points
     calculate_kernel_dims(dataset->m);
 

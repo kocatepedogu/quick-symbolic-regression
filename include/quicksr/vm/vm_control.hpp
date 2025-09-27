@@ -29,7 +29,7 @@ void vm_control(const ControlState<Code> c, const DataState &d, const StackState
             instruction = c.bytecode[c.program_counter,c.tid];
         }
         if constexpr (paraType == HYBRID) {
-            instruction = c.bytecode[c.program_counter,c.tid / 16];
+            instruction = c.bytecode[c.program_counter,c.tid / 32];
         }
         
         switch (instruction.opcode) {
@@ -96,12 +96,12 @@ void vm_control(const ControlState<Code> c, const DataState &d, const StackState
 
                 // Calculate loss and replace the value on the stack with the loss
 
-                float& stack_value = s.stack_d[0,c.tid];
+                real& stack_value = s.stack_d[0,c.tid];
 
-                const float y_predicted = stack_value;
-                const float y_target = d.y_d[c.datapoint_idx];
+                const real y_predicted = stack_value;
+                const real y_target = d.y_d[c.datapoint_idx];
 
-                stack_value = (y_predicted - y_target) / d.y_d.dim1;
+                stack_value = (y_predicted - y_target) / (real)d.y_d.dim1;
 
                 // Forward propagation has finished.
 

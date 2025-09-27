@@ -6,14 +6,14 @@
 
 using namespace qsr;
 
-GPUBaseRunner::GPUBaseRunner(int nweights) : 
-    BaseRunner(nweights) {}
+GPUBaseRunner::GPUBaseRunner(int nweights, const HIPState *hipState) :
+    BaseRunner(nweights), hipState(hipState) {}
 
 void GPUBaseRunner::calculate_kernel_dims(int nthreads) {
     this->nthreads = nthreads;
 
     // Use the maximum possible number of threads per block, unless fewer is required in total
-    const int threads_per_block = std::min(nthreads, hipState.props.maxThreadsPerBlock);
+    const int threads_per_block = std::min(nthreads, hipState->props.maxThreadsPerBlock);
     blockDim = dim3(threads_per_block);
 
     // Calculate number of blocks needed

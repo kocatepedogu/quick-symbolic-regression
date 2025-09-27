@@ -21,7 +21,7 @@ std::ostream& operator << (std::ostream& os, const Instruction& instruction) noe
 
     switch (instruction.opcode) {
         case PUSH_IMMEDIATE:
-            os << "imm " << instruction.value;
+            os << "imm " << (double)instruction.value;
             break;
         case PUSH_VARIABLE:
             os << "var " << instruction.argindex;

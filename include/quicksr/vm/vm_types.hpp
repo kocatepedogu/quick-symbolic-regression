@@ -6,11 +6,12 @@
 
 #include "util/arrays/array1d.hpp"
 #include "util/arrays/array2d.hpp"
+#include "util/precision.hpp"
 
 namespace qsr {
 
-typedef float *const __restrict__ real_1d;
-typedef const float *const __restrict__ c_real_1d;
+typedef real *const __restrict__ real_1d;
+typedef const real *const __restrict__ c_real_1d;
 
 enum ParallelismType {
     INTRA_INDIVIDUAL,
@@ -27,14 +28,14 @@ enum PropagationType {
  * @brief Represents the stack and intermediate array state of the virtual machine.
  */
 struct StackState {
-    Ptr2D<float> &stack_d;
-    Ptr2D<float> &intermediate_d;
+    Ptr2D<real> &stack_d;
+    Ptr2D<real> &intermediate_d;
     int& stack_pointer;
     int& intermediate_pointer;
 
     constexpr StackState(
-        Ptr2D<float> &stack_d, 
-        Ptr2D<float> &intermediate_d,
+        Ptr2D<real> &stack_d,
+        Ptr2D<real> &intermediate_d,
         int& stack_pointer, 
         int& intermediate_pointer) :
         stack_d(stack_d), 
@@ -90,17 +91,17 @@ struct DataState {
     /**
       * @brief Input feature matrix
      */
-    const Ptr2D<float> &X_d;
+    const Ptr2D<real> &X_d;
 
     /**
       * @brief Target vector
      */
-    const Ptr1D<float> &y_d;
+    const Ptr1D<real> &y_d;
 
     /**
       * @brief All arguments constructor
      */
-    constexpr DataState(const Ptr2D<float> &X_d, const Ptr1D<float> &y_d) :
+    constexpr DataState(const Ptr2D<real> &X_d, const Ptr1D<real> &y_d) :
         X_d(X_d), y_d(y_d) {}
 };
 
@@ -117,13 +118,13 @@ struct WeightState {
     /**
       * @brief The gradients array.
      */
-    Ptr2D<float> &weights_grad_d;
+    Ptr2D<real> &weights_grad_d;
 
     /**
       * @brief All arguments constructor
      */
     constexpr WeightState(
-        Weights &weights_d, Ptr2D<float> &weights_grad_d) :
+        Weights &weights_d, Ptr2D<real> &weights_grad_d) :
         weights_d(weights_d), weights_grad_d(weights_grad_d) {}
 };
 

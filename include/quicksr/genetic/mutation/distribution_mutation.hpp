@@ -22,7 +22,7 @@ namespace qsr {
  */
 class DistributionMutation : public BaseMutation {
 public:
-    constexpr DistributionMutation(std::vector<std::shared_ptr<BaseMutation>> mutations, std::vector<float> probabilities) :
+    constexpr DistributionMutation(std::vector<std::shared_ptr<BaseMutation>> mutations, std::vector<double> probabilities) :
         mutations(mutations), probabilities(probabilities) {
             if (mutations.size() != probabilities.size()) {
                 throw std::invalid_argument("Mutations and probabilities must have the same size.");
@@ -34,7 +34,7 @@ public:
 private:
     std::vector<std::shared_ptr<BaseMutation>> mutations;
 
-    std::vector<float> probabilities;
+    std::vector<double> probabilities;
 };
 
 }

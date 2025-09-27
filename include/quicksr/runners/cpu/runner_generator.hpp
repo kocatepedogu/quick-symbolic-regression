@@ -13,7 +13,7 @@ namespace qsr::cpu {
     public:
         explicit RunnerGenerator(const bool use_cache) : use_cache(use_cache) {}
 
-        std::shared_ptr<BaseRunner> generate(int nweights) override;
+        std::shared_ptr<BaseRunner> generate(int nweights, const HIPState *hipState) override;
     };
 }
 

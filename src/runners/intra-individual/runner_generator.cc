@@ -6,8 +6,8 @@
 
 namespace qsr {
 namespace intra_individual {
-    std::shared_ptr<BaseRunner> RunnerGenerator::generate(int nweights) {
-        return std::make_shared<Runner>(nweights, use_cache);
+    std::shared_ptr<BaseRunner> RunnerGenerator::generate(int nweights, const HIPState *hipState) {
+        return std::make_shared<Runner>(nweights, use_cache, hipState);
     }
 }
 }

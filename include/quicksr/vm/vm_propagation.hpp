@@ -15,7 +15,7 @@ namespace qsr {
 
 template <typename... Debug>
 __device__ __host__
-static inline void push_stack(const StackState &s, int tid, float value, Debug ...debug) {
+static inline void push_stack(const StackState &s, int tid, real value, Debug ...debug) {
     if constexpr (sizeof...(debug) == 2) {
         auto stack_length = std::get<0>(std::forward_as_tuple(debug...));
         if (s.stack_pointer >= stack_length) {
@@ -29,7 +29,7 @@ static inline void push_stack(const StackState &s, int tid, float value, Debug .
 
 template <typename... Debug>
 __device__ __host__
-static inline float pop_stack(const StackState &s, int tid, Debug ...debug) {
+static inline real pop_stack(const StackState &s, int tid, Debug ...debug) {
     --s.stack_pointer;
 
     if constexpr (sizeof...(debug) == 2) {
@@ -45,7 +45,7 @@ static inline float pop_stack(const StackState &s, int tid, Debug ...debug) {
 
 template <typename... Debug>
 __device__ __host__
-static inline void push_intermediate(const StackState &s, int tid, float value, Debug ...debug) {
+static inline void push_intermediate(const StackState &s, int tid, real value, Debug ...debug) {
     if constexpr (sizeof...(debug) == 2) {
         auto intermediate_length = std::get<1>(std::forward_as_tuple(debug...));
         if (s.intermediate_pointer >= intermediate_length) {
@@ -59,7 +59,7 @@ static inline void push_intermediate(const StackState &s, int tid, float value, 
 
 template <typename... Debug>
 __device__ __host__
-static inline float read_intermediate(const StackState &s, int tid, int index, Debug ...debug) {
+static inline real read_intermediate(const StackState &s, int tid, int index, Debug ...debug) {
     if constexpr (sizeof...(debug) == 2) {
         auto intermediate_length = std::get<1>(std::forward_as_tuple(debug...));
         if (index >= intermediate_length) {
@@ -72,7 +72,7 @@ static inline float read_intermediate(const StackState &s, int tid, int index, D
 }
 
 template <PropagationType proptype, typename... Debug> __device__ __host__
-static inline void propagate_immediate(int tid, const float& immediate, const StackState& s, Debug ...debug) {
+static inline void propagate_immediate(int tid, const real& immediate, const StackState& s, Debug ...debug) {
     if constexpr (proptype == FORWARD) {
         push_stack(s, tid, immediate, debug...);
     }
@@ -94,14 +94,14 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
             push_stack(s, tid, w.weights_d[param_index,tid], debug...);
         }
         if constexpr (paraType == HYBRID) {
-            constexpr int datapoint_block_dim = 16;
+            constexpr int datapoint_block_dim = 32;
             push_stack(s, tid, w.weights_d[param_index,tid / datapoint_block_dim], debug...);
         }
     }
 
     if constexpr (proptype == BACK) {
         // Pop gradient from stack
-        const float incoming_grad = pop_stack(s, tid, debug...);
+        const real incoming_grad = pop_stack(s, tid, debug...);
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
         // Add gradient to the total gradient of the associated trainable parameter
@@ -110,7 +110,7 @@ static inline void propagate_parameter(int tid, const int& param_index, const St
         }
 
         if constexpr (paraType == HYBRID) {
-            constexpr int datapoint_block_dim = 16;
+            constexpr int datapoint_block_dim = 32;
             atomicAdd(&w.weights_grad_d[param_index,tid / datapoint_block_dim], incoming_grad);
         }
     }
@@ -120,7 +120,7 @@ template <PropagationType proptype, int opcount, typename F, typename G, typenam
 static inline void propagate(int tid, F operation, G gradient, const StackState& s, const Instruction& inst, Debug ...debug) {
     if constexpr (proptype == FORWARD) {
         // Pop operands from the stack
-        float operands[opcount];
+        real operands[opcount];
         #pragma unroll
         for (int k = opcount - 1; k >= 0; k--) {
             operands[k] = pop_stack(s, tid, debug...);
@@ -138,21 +138,21 @@ static inline void propagate(int tid, F operation, G gradient, const StackState&
 
     if constexpr (proptype == BACK) {
         // Pop incoming gradient from the stack
-        const float incoming_grad = pop_stack(s, tid, debug...);
+        const real incoming_grad = pop_stack(s, tid, debug...);
         vm_debug_print(tid, "  incoming_grad=%f", incoming_grad);
 
         // Pop intermediate calculation results from forward propagation from intermediate_d
-        float intermediates[opcount];
+        real intermediates[opcount];
         #pragma unroll
         for (int k = opcount - 1; k >= 0; k--) {
             vm_debug_print(tid, "k=%d: intermediate_index+k=%d\n", k, inst.intermediate_index + k);
-            const float intermediate = read_intermediate(s, tid, inst.intermediate_index + k, debug...);
+            const real intermediate = read_intermediate(s, tid, inst.intermediate_index + k, debug...);
             intermediates[k] = intermediate;
             vm_debug_print(tid, "  intermediates[%d]=%f", k, intermediate);
         }
 
         // Calculate local gradients
-        float local_grad[opcount];
+        real local_grad[opcount];
         gradient(intermediates, local_grad);
         #pragma unroll
         for (int k = opcount - 1; k >= 0; k--) {

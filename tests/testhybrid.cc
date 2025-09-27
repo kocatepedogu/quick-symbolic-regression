@@ -9,17 +9,18 @@
 
 #include "dataset/dataset.hpp"
 #include "runners/hybrid/runner.hpp"
+#include "util/precision.hpp"
 
 #include <iostream>
 
 using namespace qsr;
 
 int main(void) {
-    float **X, *y;
+    double **X, *y;
 
     // Generate ground truth data
-    generate_test_data(X, y, [](float x) { 
-        return 2.5382 * cos(x)*x + x*x - 0.5; 
+    generate_test_data(X, y, [](double x) {
+        return 2.5382 * cos(x)*x + x*x - 0.5;
     });
 
     // Create dataset
@@ -42,7 +43,8 @@ int main(void) {
     std::vector<Expression> expression_pop = {f1, f2, f3};
 
     // Fit expressions
-    hybrid::Runner runner(3);
+    HIPState hipState;
+    hybrid::Runner runner(3, false, &hipState);
 
     for (int i = 0; i < 60; ++i) {
         runner.run(expression_pop, dataset, 10, 1e-3);

@@ -5,12 +5,12 @@
 
 namespace qsr {
     FullInitializer::FullInitializer(const Config &config) 
-            : config(config), generator(config, true) {}
+            : config(config), generator(config) {}
 
     void FullInitializer::initialize(std::vector<Expression> &population) {
         population.clear();
         for (int i = 0; i < config.npopulation; ++i) {
-            population.push_back(generator.generate());
+            population.push_back(generator.generate(config.max_depth, false));
         }
     }
 }

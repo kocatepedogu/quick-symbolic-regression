@@ -11,7 +11,7 @@ namespace qsr {
     template <typename T>
     struct Ptr1D {
         int dim1;
-        T *ptr;
+        T *__restrict__ ptr;
 
         __host__ __device__ T &operator[](int i) const {
             #ifdef SANITIZE_MEMORY
@@ -46,7 +46,10 @@ namespace qsr {
 
         Array1D(int dim1) {
             ptr.dim1 = dim1;
-            HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
+
+            void *newptr;
+            HIP_CALL(ALLOC(&newptr, sizeof(T) * ptr.dim1));
+            ptr.ptr = (T *)newptr;
         }
 
         ~Array1D() {
@@ -63,7 +66,10 @@ namespace qsr {
 
             this->ptr.dim1 = other.ptr.dim1;
 
-            HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
+            void *newptr;
+            HIP_CALL(ALLOC(&newptr, sizeof(T) * ptr.dim1));
+            ptr.ptr = (T *)newptr;
+
             HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof(T) * ptr.dim1, hipMemcpyDefault));
         }
 
@@ -76,7 +82,10 @@ namespace qsr {
 
                 this->ptr.dim1 = other.ptr.dim1;
 
-                HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
+                void *newptr;
+                HIP_CALL(ALLOC(&newptr, sizeof(T) * ptr.dim1));
+                ptr.ptr = (T *)newptr;
+
                 HIP_CALL(hipMemcpy(ptr.ptr, other.ptr.ptr, sizeof(T) * ptr.dim1, hipMemcpyDefault));    
             }
 
@@ -94,7 +103,9 @@ namespace qsr {
                 ptr.dim1 = new_dim1;
                 ptr.ptr = nullptr;
 
-                HIP_CALL(ALLOC(&ptr.ptr, sizeof(T) * ptr.dim1));
+                void *newptr;
+                HIP_CALL(ALLOC(&newptr, sizeof(T) * ptr.dim1));
+                ptr.ptr = (T *)newptr;
             }
         }
     };

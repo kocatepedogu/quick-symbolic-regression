@@ -30,7 +30,7 @@ public:
      * @details
      * For every iteration, takes the best fitness value from either of the histories.
      */
-    [[nodiscard]] LearningHistory combine_with(const LearningHistory& other, float previous_best_loss) const;
+    [[nodiscard]] LearningHistory combine_with(const LearningHistory& other, double previous_best_loss) const;
 
     /**
      * @brief Concatenates two LearningHistory objects
@@ -45,7 +45,7 @@ public:
      * @brief Returns the evolution of loss with respect to time
      * @return A constant reference to the vector of loss values
      */
-    [[nodiscard]] const std::vector<float>& get_learning_history_wrt_time() const {
+    [[nodiscard]] const std::vector<double>& get_learning_history_wrt_time() const {
         return history_wrt_time;
     }
 
@@ -53,7 +53,7 @@ public:
      * @brief Returns the evolution of loss with respect to generation
      * @return A constant reference to the vector of loss values
      */
-    [[nodiscard]] const std::vector<float>& get_learning_history_wrt_generation() const {
+    [[nodiscard]] const std::vector<double>& get_learning_history_wrt_generation() const {
         return history_wrt_generation;
     }
 
@@ -66,17 +66,17 @@ public:
     }
 
 private:
-    void combine_with_wrt_time(LearningHistory& result, const LearningHistory& other, float previous_best_loss) const;
+    void combine_with_wrt_time(LearningHistory& result, const LearningHistory& other, double previous_best_loss) const;
 
-    void combine_with_wrt_generation(LearningHistory& result, const LearningHistory& other, float previous_best_loss) const;
+    void combine_with_wrt_generation(LearningHistory& result, const LearningHistory& other, double previous_best_loss) const;
 
     void concatenate_with_wrt_time(LearningHistory& result, const LearningHistory& other) const;
 
     void concatenate_with_wrt_generation(LearningHistory& result, const LearningHistory& other) const;
 
-    std::vector<float> history_wrt_time;
+    std::vector<double> history_wrt_time;
 
-    std::vector<float> history_wrt_generation;
+    std::vector<double> history_wrt_generation;
 
     std::vector<long> time;
 };

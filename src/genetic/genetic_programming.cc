@@ -6,12 +6,14 @@
 #include "expressions/expression.hpp"
 #include "genetic/common/toolbox.hpp"
 #include "genetic/learning_history.hpp"
+#include "util/precision.hpp"
 
 #include <cmath>
 
 namespace qsr {
+extern int nislands;
 
-GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &toolbox, std::shared_ptr<BaseRunner> runner) 
+GeneticProgramming::GeneticProgramming(const Config &config, const Toolbox &toolbox, std::shared_ptr<BaseRunner> runner)
     noexcept : config(config), runner(runner)
 {
     // Ensure population size and offspring size are even
@@ -49,13 +51,13 @@ Expression *GeneticProgramming::get_worst_solution() {
 static void calculate_fitnesses(std::vector<Expression> &pop, bool enable_parsimony_pressure) {
     // Compute fitnesses from losses
     for (int i = 0; i < pop.size(); ++i) {
-        const float loss = pop[i].loss;
+        const double loss = pop[i].loss;
         
-        if (std::isnan(loss) && !std::isfinite(loss)) {
-            pop[i].fitness = 0.0f;
+        if (std::isnan(loss) && std::isnan(loss)) {
+            pop[i].fitness = 0.0;
         }
-        else if (loss == 0.0f) {
-            pop[i].fitness = std::numeric_limits<float>::max();
+        else if (loss == 0.0) {
+            pop[i].fitness = std::numeric_limits<double>::max();
         }
         else {
             pop[i].fitness = 1 / loss;
@@ -64,23 +66,23 @@ static void calculate_fitnesses(std::vector<Expression> &pop, bool enable_parsim
 
     if (enable_parsimony_pressure) {
         // Find the mean fitness and the mean number of nodes
-        float mean_fitness = 0.0;
-        float mean_length = 0.0;
+        double mean_fitness = 0.0;
+        double mean_length = 0.0;
         for (const auto &expr : pop) {
-            mean_fitness += expr.fitness / (float)pop.size();
-            mean_length += expr.num_of_nodes / (float)pop.size();
+            mean_fitness += expr.fitness / (double)pop.size();
+            mean_length += expr.num_of_nodes / (double)pop.size();
         }
 
         // Find the covariance of fitness and number of nodes
-        float covariance = 0.0;
+        double covariance = 0.0;
         for (const auto &expr : pop) {
-            covariance += (expr.fitness - mean_fitness) * (expr.num_of_nodes - mean_length) / (float)pop.size();
+            covariance += (expr.fitness - mean_fitness) * (expr.num_of_nodes - mean_length) / (double)pop.size();
         }
 
         // Find the variance of number of nodes
         double variance_length = 0.0;
         for (const auto &expr : pop) {
-            variance_length += (expr.num_of_nodes - mean_length) * (expr.num_of_nodes - mean_length) / (float)pop.size();
+            variance_length += (expr.num_of_nodes - mean_length) * (expr.num_of_nodes - mean_length) / (double)pop.size();
         }
 
         // Find the parsimony pressure coefficient
@@ -93,7 +95,7 @@ static void calculate_fitnesses(std::vector<Expression> &pop, bool enable_parsim
     }
 }
 
-LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, int ngenerations, int nepochs, float learning_rate) noexcept {
+LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, int ngenerations, int nepochs, double learning_rate) noexcept {
     // Create empty learning history
     LearningHistory history;
 
@@ -112,7 +114,17 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
         initialized = true;
     }
 
-    int elitism_count = ceil(config.elite_rate * (float)config.npopulation);
+    int elitism_count = ceil(config.elite_rate * config.npopulation);
+
+    std::vector<const Expression *> parents1;
+    std::vector<const Expression *> parents2;
+    parents1.resize(config.npopulation);
+    parents2.resize(config.npopulation);
+
+    std::vector<Expression> children1;
+    std::vector<Expression> children2;
+    children1.resize(config.npopulation);
+    children2.resize(config.npopulation);
 
     // Iterate for ngenerations
     for (int generation = 0; generation < ngenerations; ++generation)
@@ -123,38 +135,45 @@ LearningHistory GeneticProgramming::fit(std::shared_ptr<const Dataset> dataset, 
         // Update selection probabilities
         selector->update(&population[0]);
 
-        /* Offspring Generation */
-        std::vector<Expression> offspring;
-        offspring.reserve(config.npopulation);
-
         /* Copy the elite directly to offspring */
-        for (int i = 0; i < elitism_count; ++i) {
-            offspring.push_back(population[i]);
-        }
+        int counter = elitism_count;
 
         /* Generate the rest from parents */
-        while (offspring.size() < config.npopulation) {
-            const auto &parent1 = selector->select(&population[0]);
-            const auto &parent2 = selector->select(&population[0]);
-
-            const auto &children = recombiner->recombine(parent1, parent2);
-            const auto &child1 = get<0>(children);
-            const auto &child2 = get<1>(children);
-
-            offspring.push_back(mutator->mutate(child1));
-            if (offspring.size() < config.npopulation) {
-                offspring.push_back(mutator->mutate(child2));
-            }
+        omp_set_max_active_levels(2);
+        int nested_thread_count = std::min(omp_get_num_procs() / nislands - 1, 1);
+#pragma omp parallel for num_threads(nested_thread_count) schedule(static)
+        for (int i = 0; i < config.npopulation; ++i) {
+            parents1[i] = &selector->select(&population[0]);
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(static)
+        for (int i = 0; i < config.npopulation; ++i) {
+            parents2[i] = &selector->select(&population[0]);
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(dynamic)
+        for (int i = 0; i < config.npopulation; ++i) {
+            const auto &c12 = recombiner->recombine(*parents1[i], *parents2[i]);
+            children1[i] = std::move(get<0>(c12));
+            children2[i] = std::move(get<1>(c12));
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(dynamic)
+        for (int i = 0; i < config.npopulation; ++i) {
+            children1[i] = std::move(mutator->mutate(children1[i]));
+        }
+#pragma omp parallel for num_threads(nested_thread_count) schedule(dynamic)
+        for (int i = 0; i < config.npopulation; ++i) {
+            children2[i] = std::move(mutator->mutate(children2[i]));
+        }
+        for (int i = 0; i < config.npopulation && counter < config.npopulation; ++i) {
+            population[counter++] = std::move(children1[i]);
+            if (counter < config.npopulation)
+                population[counter++] = std::move(children2[i]);
         }
 
         // Compute losses
-        runner->run(offspring, dataset, nepochs, learning_rate);
+        runner->run(population, dataset, nepochs, learning_rate);
 
         // Calculate fitnesses
-        calculate_fitnesses(offspring, config.enable_parsimony_pressure);
-
-        // Let new population be the offspring
-        population = offspring;
+        calculate_fitnesses(population, config.enable_parsimony_pressure);
 
         // Find new best
         const Expression best = *get_best_solution();

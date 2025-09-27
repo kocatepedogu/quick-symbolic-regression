@@ -8,6 +8,8 @@
 #include <iostream>
 #include <bits/chrono.h>
 
+#include "util/precision.hpp"
+
 namespace qsr {
 
 /* Helper Functions */
@@ -38,21 +40,21 @@ static float minimum_with_nan_check(const float a, const float b)
     }
 }
 
-static float loss_of_history_vector(const std::vector<float>& history) {
+static double loss_of_history_vector(const std::vector<double>& history) {
     if (history.empty()) {
-        return std::numeric_limits<float>::max();
+        return std::numeric_limits<double>::max();
     } else {
         return history.back();
     }
 }
 
-static void add_to_history_vector(std::vector<float> &history, const Expression &expression) {
-    float loss;
+static void add_to_history_vector(std::vector<double> &history, const Expression &expression) {
+    double loss;
 
     if (history.empty()) {
         loss = expression.loss;
     } else {
-        const float last_loss = history.back();
+        const double last_loss = history.back();
         loss = expression.loss < last_loss ? expression.loss : last_loss;
     }
 
@@ -68,7 +70,7 @@ void LearningHistory::add_to_history(const Expression& expression) {
 
 /* Member Functions */
 
-LearningHistory LearningHistory::combine_with(const LearningHistory& other, const float previous_best_loss) const {
+LearningHistory LearningHistory::combine_with(const LearningHistory& other, const double previous_best_loss) const {
     LearningHistory combined;
     combine_with_wrt_time(combined, other, previous_best_loss);
     combine_with_wrt_generation(combined, other, previous_best_loss);
@@ -82,7 +84,7 @@ LearningHistory LearningHistory::concatenate_with(const LearningHistory& other) 
     return concatenated;
 }
 
-void LearningHistory::combine_with_wrt_time(LearningHistory& result, const LearningHistory& other, const float previous_best_loss) const {
+void LearningHistory::combine_with_wrt_time(LearningHistory& result, const LearningHistory& other, const double previous_best_loss) const {
     // If self is empty, use the other's history wrt time
     if (this->history_wrt_time.empty()) {
         result.time = other.time;
@@ -95,7 +97,7 @@ void LearningHistory::combine_with_wrt_time(LearningHistory& result, const Learn
         // Combine histories with respect to time
         int self_index = 0;
         int other_index = 0;
-        float current_loss = previous_best_loss;
+        double current_loss = previous_best_loss;
         while (self_index < this->time.size() || other_index < other.time.size())
         {
             bool take_self = self_index < this->time.size();
@@ -120,7 +122,7 @@ void LearningHistory::combine_with_wrt_time(LearningHistory& result, const Learn
     }
 }
 
-void LearningHistory::combine_with_wrt_generation(LearningHistory &result, const LearningHistory &other, const float previous_best_loss) const {
+void LearningHistory::combine_with_wrt_generation(LearningHistory &result, const LearningHistory &other, const double previous_best_loss) const {
     // If self is empty use the other's history with respect to generation
     if (this->history_wrt_generation.empty()) {
         result.history_wrt_generation = other.history_wrt_generation;
@@ -129,8 +131,8 @@ void LearningHistory::combine_with_wrt_generation(LearningHistory &result, const
         assert(this->history_wrt_generation.size() == other.history_wrt_generation.size());
 
         // Combine histories with respect to generation
-        float current_loss = previous_best_loss;
-        for (const float self_loss : this->history_wrt_generation) {
+        double current_loss = previous_best_loss;
+        for (const double self_loss : this->history_wrt_generation) {
             current_loss = minimum_with_nan_check(self_loss, current_loss);
             result.history_wrt_generation.emplace_back(current_loss);
         }
@@ -146,9 +148,9 @@ void LearningHistory::concatenate_with_wrt_time(LearningHistory &result, const L
     result.time = this->time;
 
     // Concatenate histories with respect to time
-    float current_loss = loss_of_history_vector(this->history_wrt_time);
+    double current_loss = loss_of_history_vector(this->history_wrt_time);
     for (int i = 0; i < other.time.size(); ++i) {
-        const float other_loss = other.history_wrt_time[i];
+        const double other_loss = other.history_wrt_time[i];
         current_loss = minimum_with_nan_check(other_loss, current_loss);
         result.history_wrt_time.push_back(current_loss);
         result.time.push_back(other.time[i]);
@@ -159,8 +161,8 @@ void LearningHistory::concatenate_with_wrt_generation(LearningHistory &result, c
     result.history_wrt_generation = this->history_wrt_generation;
 
     // Concatenate histories with respect to generation
-    float current_loss = loss_of_history_vector(this->history_wrt_generation);
-    for (const float other_loss : other.history_wrt_generation) {
+    double current_loss = loss_of_history_vector(this->history_wrt_generation);
+    for (const double other_loss : other.history_wrt_generation) {
         current_loss = minimum_with_nan_check(other_loss, current_loss);
         result.history_wrt_generation.push_back(current_loss);
     }

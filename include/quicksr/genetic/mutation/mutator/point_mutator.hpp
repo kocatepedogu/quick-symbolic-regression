@@ -16,14 +16,14 @@ namespace qsr {
 
 class PointMutator : public BaseMutator {
 public:
-    PointMutator(const Config &config, float mutation_probability);
+    PointMutator(const Config &config, double mutation_probability);
 
     Expression mutate(const Expression &expr) noexcept override;
 
 private:
     const Config config;
 
-    const float mutation_probability;
+    const double mutation_probability;
 
     ExpressionPicker expression_picker;
 

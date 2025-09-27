@@ -22,13 +22,13 @@ namespace intra_individual {
         
         dim3 reduction_block_dim;
         
-        Array1D<float> weights_d;
+        Array1D<real> weights_d;
 
         Cache population_cache;
 
         bool use_cache;
 
-        void run(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate);
+        void run(const ProgramIndividual &p, std::shared_ptr<const Dataset> dataset, int epochs, real learning_rate);
         
         void calculate_kernel_dims(int m);
 
@@ -37,9 +37,9 @@ namespace intra_individual {
         void save_weights_and_losses(Expression &expression);
 
     public:
-        Runner(const int nweights, bool use_cache);
+        Runner(const int nweights, bool use_cache, const HIPState *hipState);
 
-        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, float learning_rate) override;
+        void run(std::vector<Expression>& population, std::shared_ptr<const Dataset> dataset, int epochs, double learning_rate) override;
     };
 }
 }

@@ -16,14 +16,14 @@ namespace qsr {
 
 class SubtreeMutator : public BaseMutator {
 public:
-    SubtreeMutator(const Config &config, float mutation_probability, int max_depth_increment);
+    SubtreeMutator(const Config &config, double mutation_probability, int max_depth_increment);
 
     Expression mutate(const Expression &expr) noexcept override;
 
 private:
     const Config config;
 
-    const float mutation_probability;
+    const double mutation_probability;
 
     const int max_depth_increment;
 

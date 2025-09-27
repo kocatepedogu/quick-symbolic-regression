@@ -11,14 +11,14 @@ namespace qsr {
 
 __device__ __host__
 static inline void grad_add(c_real_1d &i, real_1d &o) {
-    o[0] = 1;
-    o[1] = 1;
+    o[0] = 1_r;
+    o[1] = 1_r;
 }
 
 __device__ __host__
 static inline void grad_sub(c_real_1d &i, real_1d &o) {
-    o[0] = 1;
-    o[1] = -1;
+    o[0] = 1_r;
+    o[1] = -1_r;
 }
 
 __device__ __host__
@@ -29,7 +29,7 @@ static inline void grad_mul(c_real_1d &i, real_1d &o) {
 
 __device__ __host__
 static inline void grad_div(c_real_1d &i, real_1d &o) {
-    o[0] = 1/i[1];
+    o[0] = 1_r/i[1];
     o[1] = -i[0]/(i[1]*i[1]);
 }
 
@@ -50,7 +50,7 @@ static inline void grad_exp(c_real_1d &i, real_1d &o) {
 
 __device__ __host__
 static inline void grad_relu(c_real_1d &i, real_1d &o) {
-    o[0] = i[0] > 0 ? 1 : 0;
+    o[0] = i[0] > 0.0_r ? 1_r : 0_r;
 }
 
 }

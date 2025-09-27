@@ -28,7 +28,7 @@ static std::string to_string(const Expression& node, const Expression& root) {
 
     switch (node.operation) {
         case CONSTANT:
-            result = std::to_string(node.value);
+            result = std::to_string(static_cast<double>(node.value));
             break;
         case IDENTITY:
             result = "x" + std::to_string(node.argindex);
@@ -36,7 +36,7 @@ static std::string to_string(const Expression& node, const Expression& root) {
         case PARAMETER:
             result = "w" + std::to_string(node.argindex);
             if (!root.weights.empty())
-                result += "=" + std::to_string(root.weights[node.argindex]);
+                result += "=" + std::to_string(static_cast<double>(root.weights[node.argindex]));
             break;
         case ADDITION:
             result = "(" + to_string(node.operands[0], root) + ") + (" + to_string(node.operands[1], root) + ")";

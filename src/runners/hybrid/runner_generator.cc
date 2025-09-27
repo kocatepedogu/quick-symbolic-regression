@@ -5,7 +5,7 @@
 #include "runners/hybrid/runner.hpp"
 
 namespace qsr::hybrid {
-    std::shared_ptr<BaseRunner> RunnerGenerator::generate(int nweights) {
-        return std::make_shared<Runner>(nweights, use_cache);
+    std::shared_ptr<BaseRunner> RunnerGenerator::generate(int nweights, const HIPState *hipState) {
+        return std::make_shared<Runner>(nweights, use_cache, hipState);
     }
 }

@@ -10,7 +10,7 @@ namespace qsr {
 
 class RankSelector : public BaseSelector {
 public:
-    constexpr RankSelector(int npopulation, float sp) : 
+    constexpr RankSelector(int npopulation, double sp) :
         npopulation(npopulation), sp(sp), indices(npopulation), probabilities(npopulation) {}
 
     void update(const Expression population[]) override;
@@ -19,10 +19,10 @@ public:
 
 private:
     const int npopulation;
-    const float sp; // Selection pressure parameter
+    const double sp; // Selection pressure parameter
 
     std::vector<int> indices;
-    std::vector<float> probabilities;
+    std::vector<double> probabilities;
 };
 
 }

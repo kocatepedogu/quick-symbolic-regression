@@ -100,10 +100,10 @@ static void compile(const Expression& e, IntermediateRepresentation* p, Compiler
             compile<0>(e, p, s, PUSH_IMMEDIATE, e.value);
             break;
         case IDENTITY:
-            compile<0>(e, p, s, PUSH_VARIABLE, e.argindex);
+            compile<0>(e, p, s, PUSH_VARIABLE, e.argindex, e.argindex);
             break;
         case PARAMETER:
-            compile<0>(e, p, s, PUSH_PARAMETER, e.argindex);
+            compile<0>(e, p, s, PUSH_PARAMETER, e.argindex, e.argindex);
             break;
         case ADDITION:
             compile<2>(e, p, s, ADD);

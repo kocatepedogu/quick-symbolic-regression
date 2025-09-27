@@ -20,7 +20,7 @@ class GeneticProgramming {
 public:
     GeneticProgramming(const Config &config, const Toolbox &toolbox, std::shared_ptr<BaseRunner> runner) noexcept;
 
-    LearningHistory fit(std::shared_ptr<const Dataset> dataset, int ngenerations, int nepochs, float learning_rate) noexcept;
+    LearningHistory fit(std::shared_ptr<const Dataset> dataset, int ngenerations, int nepochs, double learning_rate) noexcept;
 
     void insert_solution(Expression e);
 

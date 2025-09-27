@@ -18,13 +18,13 @@ namespace qsr {
      */
     class DefaultRecombination : public BaseRecombination {
     public:
-        constexpr DefaultRecombination(float crossover_probability) : 
+        constexpr DefaultRecombination(double crossover_probability) :
             crossover_probability(crossover_probability) {}
 
         std::shared_ptr<BaseRecombiner> get_recombiner(int max_depth) override;
 
     private:
-        const float crossover_probability;
+        const double crossover_probability;
     };
 }
 

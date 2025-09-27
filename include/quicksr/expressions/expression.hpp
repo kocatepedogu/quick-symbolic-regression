@@ -45,7 +45,7 @@ struct Expression
       * Expression f = 3;
       * @endcode
       */ 
-    constexpr Expression(float value) noexcept :
+    constexpr Expression(double value) noexcept :
         operation(CONSTANT), 
         value(value), 
         num_of_nodes(1),
@@ -85,7 +85,7 @@ struct Expression
     operation_t operation;
 
     /// For constants
-    float value;
+    double value;
 
     /// For variables and trainable parameters
     int argindex;
@@ -100,13 +100,13 @@ struct Expression
     int depth;
 
     /// Training loss (MSE on dataset)
-    float loss;
+    double loss;
 
     /// Fitness (max loss in the population - loss)
-    float fitness;
+    double fitness;
 
     /// Learned weights
-    std::vector<float> weights;
+    std::vector<double> weights;
 };
 
 /**
@@ -165,8 +165,8 @@ struct std::hash<qsr::Expression> {
             std::hash<std::underlying_type_t<qsr::operation_t>>{}(
                 static_cast<std::underlying_type_t<qsr::operation_t>>(e.operation)));
 
-        // 2. float value – use std::hash<float>
-        hash_combine(seed, std::hash<float>{}(e.value));
+        // 2. double value – use std::hash<double>
+        hash_combine(seed, std::hash<double>{}(e.value));
 
         // 3. argindex
         hash_combine(seed, std::hash<int>{}(e.argindex));
