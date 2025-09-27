@@ -55,7 +55,7 @@ class RecordedPipeline(StandardPipeline):
 
             cpu_fitness = self.step()
 
-            self.time_history.append(time.time() - tic)
+            self.time_history.append(time.time())
             self.fitness_history.append(self.best_fitness)
 
             if self.is_show_details:
@@ -89,6 +89,8 @@ def solve_with_evogp(config, X, y):
     :param y: target
     """
 
+    start_time = time.time()
+
     # Move dataset to GPU
     train_X = torch.tensor(
         X,
@@ -108,7 +110,7 @@ def solve_with_evogp(config, X, y):
         max_tree_len=2**config['MAX_DEPTH'],
         input_len=problem.problem_dim,
         output_len=problem.solution_dim,
-        using_funcs=["+", "*", "cos"],
+        using_funcs=["+", "-", "*", "cos"],
         max_layer_cnt=config['MAX_DEPTH'],
         const_samples=[-1, 0, 1],
     )
@@ -138,15 +140,14 @@ def solve_with_evogp(config, X, y):
     sympy_expression = best.to_sympy_expr()
     print("Result:", sympy_expression)
 
-    loss_wrt_gen = np.abs(pipeline.fitness_history)
-    loss_wrt_time = np.abs(pipeline.fitness_history)
-    time_hist = np.array(pipeline.time_history)
+    loss_wrt_gen = np.abs([pipeline.fitness_history[0]] + pipeline.fitness_history)
+    loss_wrt_time = np.abs([pipeline.fitness_history[0]] + pipeline.fitness_history)
 
-    return loss_wrt_gen, loss_wrt_time, time_hist - np.min(time_hist)
+    time_hist = np.array([start_time] + pipeline.time_history)
+    time_hist -= np.min(time_hist)
+
+    return loss_wrt_gen, loss_wrt_time, time_hist
 
 
 if __name__ == '__main__':
-    #torch.manual_seed(42)
-    #np.random.seed(42)
-    #random.seed(42)
     run_benchmark(solve_with_evogp)

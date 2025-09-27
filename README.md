@@ -97,6 +97,26 @@ The project's uniqueness comes from the use of backpropagation and gradient desc
 
 The library is implemented in C++/HIP, and the API is provided in Python through pybind11.
 
+## Benchmark & Comparison
+
+Comparative benchmarks were performed with QuickSR on AMD Radeon RX 9060 XT (16GB) and evoGP on NVIDIA RTX 4080.  
+
+<div style="display: inline-block;">
+  <img src="./docs/plots/comparison/evolution_vs_gen_80_mtr0.5_mtr0.5_half.png" height="270px">
+  <img src="./docs/plots/comparison/evolution_vs_time_80_mtr0.5_mtr0.5_half.png" height="270px">
+</div>
+
+The figures were obtained by compiling QuickSR (shown in red) in half-precision mode. Mutation rate and survival rate were chosen as 0.5 in both frameworks. The same set of mutation, crossover and selection operators were used (details are available in *benchmark/comparison/benchmark_evogp.py* and *benchmark/comparison/benchmark_quicksr.py*). QuickSR outperformed evoGP in terms of both loss vs. generation and loss vs. elapsed time.
+
+<div style="display: inline-block;">
+  <img src="./docs/plots/comparison/evolution_vs_gen_80_mtr0.2_srvr0.3_float.png" height="270px">
+  <img src="./docs/plots/comparison/evolution_vs_time_80_mtr0.2_srvr0.3_float.png" height="270px">
+</div>
+
+The second set of figures were obtained while QuickSR was compiled in single-precision mode. Again, QuickSR reached the same loss level in shorter time while also finishing the same 80 generations within 5-6 seconds on average, corresponding to a speedup close to 2x. Mutation rate and survival rate were chosen as 0.2 and 0.3, respectively. The genetic operators were the same as in the previous benchmark. 
+
+Gradient descent was not utilized in the benchmarks.
+
 ## Project Information
 
 AMD Open Hardware Design Competition
