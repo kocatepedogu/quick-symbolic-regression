@@ -39,6 +39,7 @@ private:
     const Config config;
 
     // --- Pre-computed distributions for performance ---
+    std::discrete_distribution<> m_node_selection_dist;
     std::discrete_distribution<> m_terminal_dist;
     std::discrete_distribution<> m_unary_dist;
     std::discrete_distribution<> m_binary_dist;
@@ -49,6 +50,8 @@ private:
 
     bool m_has_unary = false;
     bool m_has_binary = false;
+
+
 };
 }
 
