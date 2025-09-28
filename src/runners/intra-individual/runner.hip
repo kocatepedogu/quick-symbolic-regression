@@ -33,29 +33,57 @@ Runner::Runner(const int nweights, const bool use_cache, const HIPState *hipStat
 __global__ static void
 update_weights(Ptr1D<real> weight_grads, real *weight, real learning_rate)
 {
-    // Shared memory for block-level reduction
-    __shared__ real sharedMem[reduction_threads_per_block];
-    
+    // --- 1. Initialization ---
     // Thread and block indices
     int tid = threadIdx.x;
-    int bid = blockIdx.x;
     int globalIdx = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    // Load data into shared memory
-    sharedMem[tid] = (globalIdx < weight_grads.dim1) ? weight_grads[globalIdx] : (real)0.0f;
-    __syncthreads();
-    
-    // Parallel reduction within the block
-    for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
-        if (tid < stride) {
-            sharedMem[tid] += sharedMem[tid + stride];
-        }
-        __syncthreads();
+
+    // Warp and lane identifiers
+    constexpr int warpSize = 32;
+    int warpId = tid / warpSize;
+    int laneId = tid % warpSize;
+
+    // Shared memory to store the partial sum of each warp.
+    // The size is the number of warps per block.
+    __shared__ real s_warp_sums[reduction_threads_per_block / warpSize];
+
+    // Each thread loads its initial value from global memory into a register.
+    real my_sum = (globalIdx < weight_grads.dim1) ? weight_grads[globalIdx] : (real)0.0f;
+
+    // --- 2. Intra-Warp Reduction using Warp Shuffle ---
+    // This loop sums values in registers within each warp without using shared memory.
+    // The mask 0xFFFFFFFF ensures all threads in the warp participate.
+    for (int offset = warpSize / 2; offset > 0; offset /= 2) {
+        my_sum += __shfl_down(0xFFFFFFFF, my_sum, offset);
     }
-    
-    // First thread of each block writes block sum to output
-    if (tid == 0) {
-        atomicAdd(weight, -learning_rate * sharedMem[0]);
+    // At this point, the first thread of each warp (laneId == 0) holds the sum for its warp.
+
+    // --- 3. Store Warp Sums and Reduce Across Warps ---
+    // The first thread (lane 0) of each warp writes its partial sum to shared memory.
+    if (laneId == 0) {
+        s_warp_sums[warpId] = my_sum;
+    }
+
+    // Synchronize to ensure all warp sums are written to shared memory before the final reduction.
+    __syncthreads();
+
+    // The first warp (warpId == 0) is now responsible for reducing the sums from all other warps.
+    if (warpId == 0) {
+        // The first warp's threads load the partial sums from shared memory.
+        int num_warps_per_block = blockDim.x / warpSize;
+        my_sum = (laneId < num_warps_per_block) ? s_warp_sums[laneId] : (real)0.0f;
+
+        // Perform a final reduction within the first warp to get the total block sum.
+        for (int offset = warpSize / 2; offset > 0; offset /= 2) {
+            my_sum += __shfl_down(0xFFFFFFFF, my_sum, offset);
+        }
+
+        // --- 4. Final Atomic Update ---
+        // The first thread of the block (tid == 0) now holds the total sum
+        // and performs the atomic update to global memory.
+        if (laneId == 0) {
+            atomicAdd(weight, -learning_rate * my_sum);
+        }
     }
 }
 
