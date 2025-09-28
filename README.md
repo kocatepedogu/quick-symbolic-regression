@@ -115,7 +115,7 @@ The figures were obtained by compiling QuickSR (shown in red) in half-precision 
 
 The second set of figures were obtained while QuickSR was compiled in single-precision mode. Again, QuickSR reached the same loss level in shorter time while also finishing the same 80 generations within 5-6 seconds on average, corresponding to a speedup close to 2x. Mutation rate and survival rate were chosen as 0.2 and 0.3, respectively. The genetic operators were the same as in the previous benchmark. 
 
-Gradient descent was not utilized in the benchmarks.
+Gradient descent was not utilized in the benchmarks. The test function was Pagie Polynomial on range (-5, 5) in both x and y dimensions with 4096 data points in total. The population size was chosen as 11200, distributed to 9 islands in the case of QuickSR.
 
 ## Project Information
 
