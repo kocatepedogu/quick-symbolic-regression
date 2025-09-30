@@ -131,6 +131,8 @@ AMD Open Hardware Design Competition
 
 **YouTube Video**: [https://youtu.be/B5MfGlMG740?](https://youtu.be/B5MfGlMG740?)
 
+**Report**: [https://github.com/kocatepedogu/quick-symbolic-regression/blob/main/quicksr-report.pdf](https://github.com/kocatepedogu/quick-symbolic-regression/blob/main/quicksr-report.pdf)
+
 ## Acknowledgements
 
 This work was supported in part by AMD under the [Heterogeneous Accelerated Compute Clusters (HACC)](https://www.amd-haccs.io) program.
